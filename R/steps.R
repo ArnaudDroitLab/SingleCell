@@ -28,8 +28,9 @@ load_data <- function(path_to_sample, sample, from = "Cellranger", to = "Seurat"
 #' Filter out genes and cells outside the min and max limits for several parameters.
 #'
 #' @param analysis The analysis object.
-#' @param sample Sample name, will be used to save the images.
-#' @param method The analysis method. Default Seurat
+#' @param sample Sample name, will be used to name the images files.
+#' @param method The analysis method. Default "Seurat"
+#' @param assay Which assay to make the filters on. Default "RNA"
 #' @param organism An organism supported by the library for automatic mitochondrial detection. Currently supported : human and mouse.
 #' Default "" to skip automatic mitochondrial detection.
 #' @param mitochondrial_genes A vector of mitochondrial genes. If a supported organism is requested, it will be skipped. Default empty
@@ -45,8 +46,8 @@ load_data <- function(path_to_sample, sample, from = "Cellranger", to = "Seurat"
 #'
 #' @return An object of the analysis type filtered.
 #' @export
-filter_data <- function(analysis, sample, assay = "RNA", method = "Seurat", organism = "",
-                        mitochondrial_genes = c(), min_genes = 100, min_counts = 0,
+filter_data <- function(analysis, sample = "", method = "Seurat", assay = "RNA", organism = "",
+                        mitochondrial_genes = c(), min_genes = 100, min_counts = 100,
                         min_cells = 1, min_mt = 0, max_genes = Inf, max_counts=Inf,
                         max_cells = Inf, max_mt = 20, plots_dir = "") {
 
@@ -71,22 +72,25 @@ filter_data <- function(analysis, sample, assay = "RNA", method = "Seurat", orga
                           nCount_RNA = analysis@meta.data$nCount_RNA,
                           nFeature_RNA = analysis@meta.data$nFeature_RNA)
     list_plot <- list()
-    list_plot[["plot_count"]] <- plot_filter(df_plot, x_name = "samples", y_name = "nCount_RNA",
+    list_plot[["count"]] <- plot_filter(df_plot, x_name = "samples", y_name = "nCount_RNA",
                                              low = min_counts, high = max_counts)
-    list_plot[["plot_feature"]] <- plot_filter(df_plot, x_name = "samples", y_name = "nFeature_RNA",
+    list_plot[["feature"]] <- plot_filter(df_plot, x_name = "samples", y_name = "nFeature_RNA",
                                                low = min_genes, high = max_genes)
     if ("percent_mt" %in% colnames(analysis@meta.data)) {
       df_plot$percent_mitochondria <- analysis@meta.data$percent_mt
-      list_plot[["plot_mitochondria"]] <- plot_filter(df_plot, x_name = "samples", y_name = "percent_mitochondria",
+      list_plot[["mitochondria"]] <- plot_filter(df_plot, x_name = "samples", y_name = "percent_mitochondria",
                                                       low = min_mt, high = max_mt)
     }
     if (checkmate::check_directory_exists(plots_dir) == TRUE) {
       filename = file.path(plots_dir, paste0(sample, "_filter_plots.pdf"))
-      pdf(filename, onefile = TRUE)
+      # pdf(filename, onefile = TRUE)
       for (i in names(list_plot)) {
-        print(list_plot[[i]])
+        ggplot2::ggsave(paste(sample, i,  "filter_plot.png", sep = "_"), plot = list_plot[[i]],
+                        device = "png", path = plots_dir, dpi = 200, width = 500 + 300*length(unique(df_plot$samples)), # 800 px width is ok for 1 sample
+                        height = 1200, units = "px")
+        # print(list_plot[[i]])
       }
-      dev.off()
+      # dev.off()
     } else {
       print(paste0("Directory ", plots_dir, " does not exist, not saving images and showing them to screen."))
       for (i in names(list_plot)) {
@@ -104,14 +108,14 @@ filter_data <- function(analysis, sample, assay = "RNA", method = "Seurat", orga
 
 #' Perform the data normalization using normalize, variable features and scaling.
 #'
-#' @param analysis
-#' @param method
-#' @param assay
-#' @param nfeatures
-#' @param selection_method
-#' @param features
+#' @param analysis The analysis object.
+#' @param method The analysis method. Default "Seurat"
+#' @param assay Which assay to make the filters on. Default "RNA"
+#' @param nfeatures Number of variable genes to select. Default 2000
+#' @param selection_method What method to use for features selection. Default vst
+#' @param features Vector of features to scale. Keep NULL to scale only variable features. Default NULL
 #'
-#' @return
+#' @return An analysis object of type method normalized.
 #' @export
 normalize_data <- function(analysis, method = "Seurat", assay = "RNA", nfeatures = 2000,
                            selection_method = "vst", features = NULL) {
@@ -124,6 +128,39 @@ normalize_data <- function(analysis, method = "Seurat", assay = "RNA", nfeatures
     analysis <- seurat_normalize(analysis, assay)
     analysis <- seurat_features(analysis, assay, nfeatures, selection_method)
     analysis <- seurat_scale(analysis, assay, features)
+  } else {
+    stop(paste0(method, " is an unsupported method."))
+  }
+  return(analysis)
+}
+
+#' Compute the PCA
+#'
+#' @param analysis The analysis object.
+#' @param sample Sample name, will be used to name the images files.
+#' @param method The analysis method. Default "Seurat"
+#' @param assay Which assay to compute the PCA on. Default "RNA"
+#' @param npc Number of components to compute. Default 50
+#' @param plots_dir The path to save the plots. Keep empty to skip plot saving. Default ""
+#'
+#' @return An analysis object of type method with PCA.
+#' @export
+pca <- function(analysis, sample = "", method = "Seurat", assay = "RNA", npcs = 50, plots_dir = "") {
+  checkmate::assert_string(method)
+  checkmate::assert_int(npcs, lower = 2)
+  if (method == "Seurat") {
+    check_assay(analysis, assay)
+    analysis <- seurat_pca(analysis, assay = assay, npcs = npcs)
+    list_plot <- list()
+    list_plot[["Elbow"]] <- plot_seurat_elbow(analysis, reduction = "pca", npc = npcs)
+    list_plot[["PCA"]] <- plot_seurat_dim(analysis, reduction = "pca", colour_by = "orig.ident")
+    if (checkmate::check_directory_exists(plots_dir) == TRUE) {
+      for (i in names(list_plot)) {
+        ggplot2::ggsave(paste(sample, i,  "pca_plot.png", sep = "_"), plot = list_plot[[i]],
+                        device = "png", path = plots_dir, dpi = 200, width = 1500, # 800 px width is ok for 1 sample
+                        height = 1200, units = "px")
+      }
+    }
   } else {
     stop(paste0(method, " is an unsupported method."))
   }

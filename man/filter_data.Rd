@@ -6,13 +6,13 @@
 \usage{
 filter_data(
   analysis,
-  sample,
-  assay = "RNA",
+  sample = "",
   method = "Seurat",
+  assay = "RNA",
   organism = "",
   mitochondrial_genes = c(),
   min_genes = 100,
-  min_counts = 0,
+  min_counts = 100,
   min_cells = 1,
   min_mt = 0,
   max_genes = Inf,
@@ -25,9 +25,11 @@ filter_data(
 \arguments{
 \item{analysis}{The analysis object.}
 
-\item{sample}{Sample name, will be used to save the images.}
+\item{sample}{Sample name, will be used to name the images files.}
 
-\item{method}{The analysis method. Default Seurat}
+\item{method}{The analysis method. Default "Seurat"}
+
+\item{assay}{Which assay to make the filters on. Default "RNA"}
 
 \item{organism}{An organism supported by the library for automatic mitochondrial detection. Currently supported : human and mouse.
 Default "" to skip automatic mitochondrial detection.}

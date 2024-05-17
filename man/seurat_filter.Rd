@@ -7,8 +7,8 @@
 seurat_filter(
   seurat,
   assay = "RNA",
-  min_genes = 0,
-  min_counts = 10,
+  min_genes = 100,
+  min_counts = 100,
   min_cells = 1,
   min_mt = 0,
   max_genes = Inf,

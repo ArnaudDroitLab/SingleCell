@@ -1,8 +1,24 @@
+#' Check that assay is in seurat
+#'
+#' Check if object is of class seurat, check that assay is a string, and check that assay is present in seurat
+#'
+#' @param seurat an object to check
+#' @param assay an assay to chack
+#'
+#' @return nothing
 check_assay <- function(seurat, assay="RNA") {
   checkmate::assert_class(seurat, "Seurat")
   checkmate::assert_string(assay)
   if (!assay %in% names(seurat@assays)) {
     stop(paste0("Assay ", assay, " not in seurat object."))
+  }
+}
+
+check_reduction <- function(seurat, reduction = "pca") {
+  checkmate::assert_class(seurat, "Seurat")
+  checkmate::assert_string(reduction)
+  if (!reduction %in% names(seurat@reductions)) {
+    stop(paste0("Reduction ", reduction, " not in seurat object."))
   }
 }
 
@@ -71,7 +87,7 @@ seurat_compute_mt <- function(seurat, assay = "RNA", organism="", mitochondrial_
 #'
 #' @return A Seurat object with its count matrix filtered.
 #' @export
-seurat_filter <- function(seurat, assay = "RNA", min_genes = 0, min_counts=10,
+seurat_filter <- function(seurat, assay = "RNA", min_genes = 100, min_counts = 100,
                           min_cells = 1, min_mt = 0, max_genes = Inf, max_counts=Inf,
                           max_cells = Inf, max_mt = Inf) {
   check_assay(seurat, assay)
@@ -155,8 +171,47 @@ seurat_features <- function(seurat, assay = "RNA", nfeatures = 2000, method = "v
 #' @export
 seurat_scale <- function(seurat, assay = "RNA", features = NULL) {
   check_assay(seurat, assay)
+  checkmate::assert_character(features, null.ok = TRUE)
   seurat <- Seurat::ScaleData(seurat, features = features, assay = assay)
   return(seurat)
 }
+
+#' Compute the PCA using RunPCA from Seurat
+#'
+#' @param seurat The Seurat object.
+#' @param assay Assay to use. Default RNA
+#' @param npcs Number of components to compute. Default 50
+#'
+#' @return A seurat object with PCA.
+#' @export
+seurat_pca <- function(seurat, assay = "RNA", npcs = 50) {
+  check_assay(seurat, assay)
+  checkmate::assert_int(npcs, lower = 2)
+  seurat <- Seurat::RunPCA(seurat, assay = assay, npcs = npcs)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

@@ -4,7 +4,7 @@
 \alias{seurat_scale}
 \title{Run Seurat::ScaleData}
 \usage{
-seurat_scale(seurat, assay = "RNA", features = all.genes)
+seurat_scale(seurat, assay = "RNA", features = NULL)
 }
 \arguments{
 \item{seurat}{The Seurat object.}

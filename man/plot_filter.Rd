@@ -2,16 +2,9 @@
 % Please edit documentation in R/plots.R
 \name{plot_filter}
 \alias{plot_filter}
-\title{Plot qc as violin plot, adding cutoffs lines if needed.}
+\title{Plot qc as violin plot, adding cutoffs lines.}
 \usage{
-plot_filter(
-  df,
-  x_name = "x",
-  y_name = "y",
-  low = 0,
-  high = Inf,
-  force_cutoff = FALSE
-)
+plot_filter(df, x_name = "x", y_name = "y", low = 0, high = Inf)
 }
 \arguments{
 \item{df}{A data frame containing x_name and y_name.}
@@ -23,12 +16,10 @@ plot_filter(
 \item{low}{The lower cutoff to put on the plot. Defaults to 0, which will not put a lower cutoff.}
 
 \item{high}{The higher cutoff to put on the plot. Defaults to Inf, which will not put a higher cutoff.}
-
-\item{force_cutoff}{Whether to force cutoffs to be added, even if they should not (mainly used to add a lower cutoff at 0). Defaults to FALSE.}
 }
 \value{
 A ggplot object.
 }
 \description{
-Plot qc as violin plot, adding cutoffs lines if needed.
+Plot qc as violin plot, adding cutoffs lines.
 }

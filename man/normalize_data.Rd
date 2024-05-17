@@ -10,11 +10,24 @@ normalize_data(
   assay = "RNA",
   nfeatures = 2000,
   selection_method = "vst",
-  features = all.genes
+  features = NULL
 )
 }
 \arguments{
-\item{features}{}
+\item{analysis}{The analysis object.}
+
+\item{method}{The analysis method. Default "Seurat"}
+
+\item{assay}{Which assay to make the filters on. Default "RNA"}
+
+\item{nfeatures}{Number of variable genes to select. Default 2000}
+
+\item{selection_method}{What method to use for features selection. Default vst}
+
+\item{features}{Vector of features to scale. Keep NULL to scale only variable features. Default NULL}
+}
+\value{
+An analysis object of type method normalized.
 }
 \description{
 Perform the data normalization using normalize, variable features and scaling.
