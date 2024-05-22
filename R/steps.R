@@ -2,20 +2,21 @@
 #'
 #' Currently only supports from Cellranger to Seurat.
 #'
-#' @param path_to_sample Path to the sample directory from the counting tool. Path to the matrix inside the sample directory will be detected automatically for Cellranger.
+#' @param path_to_count The path to where the directories for each sample are.
+#' Path to the matrix inside the sample directory will be detected automatically for Cellranger.
 #' @param sample Name of the sample. Will be added in the metadata of the returned object.
 #' @param from Which tool does the count matrix come from. Currently only Cellranger supported.
 #' @param to To which package should the matrix be converted to. Currently only Seurat supported.
 #'
 #' @return An object from the package in the argument to. By default will return a Seurat object.
 #' @export
-load_data <- function(path_to_sample, sample, from = "Cellranger", to = "Seurat") {
-  checkmate::assert_directory_exists(path_to_sample)
+load_data <- function(path_to_count, sample, from = "Cellranger", to = "Seurat") {
+  checkmate::assert_directory_exists(path_to_count)
   checkmate::assert_string(sample)
   checkmate::assert_string(from)
   checkmate::assert_string(to)
   if (from == "Cellranger" & to == "Seurat") {
-    path_to_matrix = file.path(path_to_sample, "outs", "filtered_feature_bc_matrix")
+    path_to_matrix = file.path(path_to_count, sample, "outs", "filtered_feature_bc_matrix")
     analysis = seurat_load_10x(path_to_matrix, project=sample)
   } else {
     stop(paste0("Unsupported conversion from ", from, " to ", to, "."))
@@ -157,7 +158,7 @@ pca <- function(analysis, sample = "", method = "Seurat", assay = "RNA", npcs = 
     if (checkmate::check_directory_exists(plots_dir) == TRUE) {
       for (i in names(list_plot)) {
         ggplot2::ggsave(paste(sample, i,  "pca_plot.png", sep = "_"), plot = list_plot[[i]],
-                        device = "png", path = plots_dir, dpi = 200, width = 1500, # 800 px width is ok for 1 sample
+                        device = "png", path = plots_dir, dpi = 200, width = 1500,
                         height = 1200, units = "px")
       }
     }
@@ -166,5 +167,35 @@ pca <- function(analysis, sample = "", method = "Seurat", assay = "RNA", npcs = 
   }
   return(analysis)
 }
+
+#' Integrate several analysis together.
+#'
+#' @param analysis_list A list of several objects to integrate together. These objects must all be of the same type.
+#' @param method The analysis method. Default "Seurat"
+#' @param nfeatures The number of features to use in integration selection. Default 5000
+#' @param assay Which assay to use. Default "RNA"
+#'
+#' @return An analysis object with all the analysis from the list integrated together.
+#' @export
+integrate_data <- function(analysis_list, method = "Seurat", nfeatures = 5000, assay = "RNA") {
+  checkmate::assert_string(method)
+  checkmate::assert_int(nfeatures)
+  if (method == "Seurat") {
+    for (i in analysis_list) {
+      check_assay(i, assay)
+    }
+    analysis <- seurat_integrate(analysis_list, nfeatures = nfeatures, assay = assay)
+  } else {
+    stop(paste0(method, " is an unsupported method."))
+  }
+  return(analysis)
+}
+
+
+
+
+
+
+
 
 

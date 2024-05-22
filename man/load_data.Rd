@@ -4,10 +4,11 @@
 \alias{load_data}
 \title{Load from a tool to a R package.}
 \usage{
-load_data(path_to_sample, sample, from = "Cellranger", to = "Seurat")
+load_data(path_to_count, sample, from = "Cellranger", to = "Seurat")
 }
 \arguments{
-\item{path_to_sample}{Path to the sample directory from the counting tool. Path to the matrix inside the sample directory will be detected automatically for Cellranger.}
+\item{path_to_count}{The path to where the directories for each sample are.
+Path to the matrix inside the sample directory will be detected automatically for Cellranger.}
 
 \item{sample}{Name of the sample. Will be added in the metadata of the returned object.}
 

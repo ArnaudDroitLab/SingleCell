@@ -191,6 +191,30 @@ seurat_pca <- function(seurat, assay = "RNA", npcs = 50) {
 }
 
 
+#' Integrate a list of Seurat objects together.
+#'
+#' @param analysis_list A list of several objects to integrate together. These objects must all be of the same type.
+#' @param nfeatures The number of features to use in integration selection. Default 5000
+#' @param assay Which assay to use. Default "RNA"
+#'
+#' @return A Seurat object with all the analysis from the list integrated together.
+#' @export
+seurat_integrate <- function(seurat_list, nfeatures = 5000, assay = "RNA") {
+  checkmate::assert_int(nfeatures)
+  for (i in seurat_list) {
+    check_assay(i, assay)
+  }
+  seurat_list <- lapply(seurat_list, function(x) {
+    Seurat::RenameCells(x, new.names = paste0(x@meta.data[["orig.ident"]], "_", Seurat::Cells(x)))
+  })
+  features <- Seurat::SelectIntegrationFeatures(object.list = seurat_list, nfeatures = nfeatures)
+  anchors <- Seurat::FindIntegrationAnchors(object.list = seurat_list, anchor.features = features, assay = rep_len(assay, length(seurat_list)))
+
+  seurat_integrated <- Seurat::IntegrateData(anchorset = anchors)
+  return(seurat_integrated)
+}
+
+
 
 
 
