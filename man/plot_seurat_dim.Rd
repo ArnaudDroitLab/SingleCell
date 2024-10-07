@@ -24,7 +24,7 @@ plot_seurat_dim(
 \item{slot}{Which slot to use within the assay (if applicable). Default "data"}
 }
 \value{
-A ggplot object
+A ggplot graph
 }
 \description{
 X axis is the first component, Y axis second component. Colour_by is fetched

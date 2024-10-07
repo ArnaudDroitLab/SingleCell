@@ -73,7 +73,7 @@ plot_seurat_elbow <- function(seurat, reduction = "pca", npc = 50) {
 #' @param assay Which assay to use (if applicable). Default "RNA"
 #' @param slot Which slot to use within the assay (if applicable). Default "data"
 #'
-#' @return A ggplot object
+#' @return A ggplot graph
 #' @export
 plot_seurat_dim <- function(seurat, reduction = "pca", colour_by = "orig.ident", assay = "RNA", slot = "data") {
   check_assay(seurat, assay)
@@ -94,3 +94,37 @@ plot_seurat_dim <- function(seurat, reduction = "pca", colour_by = "orig.ident",
     theme_white_bg()
   return(p)
 }
+
+#' Plot a clustree
+#'
+#' Clustree is a graph that shows the moving of cells between the clusters in each resolution. The clustering numbering between each resolution
+#'
+#' @param seurat The Seurat object
+#' @param prefix The prefix to use to gather all the resolutions in the graph.
+#' This should be the whole prefix before the resolution number. Default "RNA_snn_res."
+#'
+#' @return a ggplot graph
+#' @export
+plot_seurat_clustree <- function(seurat, prefix = "RNA_snn_res.") {
+  checkmate::assert_class(seurat, "Seurat")
+  checkmate::assert_character(prefix, max.len = 1)
+  p <- clustree::clustree(seurat@meta.data, prefix=prefix)
+  return(p)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

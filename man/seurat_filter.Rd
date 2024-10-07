@@ -5,6 +5,7 @@
 \title{Apply filters on Cells and genes in a Seurat object}
 \usage{
 seurat_filter(
+  sample,
   seurat,
   assay = "RNA",
   min_genes = 100,
@@ -14,11 +15,14 @@ seurat_filter(
   max_genes = Inf,
   max_counts = Inf,
   max_cells = Inf,
-  max_mt = Inf
+  max_mt = Inf,
+  results_dir = ""
 )
 }
 \arguments{
-\item{seurat}{The seurat object}
+\item{sample}{Sample name, will be used to name the files.}
+
+\item{seurat}{The seurat object.}
 
 \item{assay}{Which assay int he seurat object to filter on. Default RNA}
 
@@ -37,6 +41,8 @@ seurat_filter(
 \item{max_cells}{All genes having a higher number of cells expressing it will be filtered out. Default Inf}
 
 \item{max_mt}{All cells having a higher percentage of mitochondria will be filtered out. Default Inf}
+
+\item{results_dir}{The path to save the dataframe. Keep empty to skip plot saving. Default ""}
 }
 \value{
 A Seurat object with its count matrix filtered.

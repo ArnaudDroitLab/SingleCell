@@ -22,6 +22,7 @@ load_data <- function(path_to_count, sample, from = "Cellranger", to = "Seurat")
     stop(paste0("Unsupported conversion from ", from, " to ", to, "."))
   }
 
+  checkmate::assert_class(analysis, to)
   return(analysis)
 }
 
@@ -44,16 +45,18 @@ load_data <- function(path_to_count, sample, from = "Cellranger", to = "Seurat")
 #' @param min_mt All cells having a lower percentage of mitochondria will be filtered out. Default 0
 #' @param max_mt All cells having a higher percentage of mitochondria will be filtered out. Default Inf
 #' @param plots_dir The path to save the plots. Keep empty to skip plot saving. Default ""
+#' @param results_dir The path to save the dataframe. Keep empty to skip plot saving. Default ""
 #'
 #' @return An object of the analysis type filtered.
 #' @export
 filter_data <- function(analysis, sample = "", method = "Seurat", assay = "RNA", organism = "",
                         mitochondrial_genes = c(), min_genes = 100, min_counts = 100,
                         min_cells = 1, min_mt = 0, max_genes = Inf, max_counts=Inf,
-                        max_cells = Inf, max_mt = 20, plots_dir = "") {
+                        max_cells = Inf, max_mt = 20, plots_dir = "", results_dir = "") {
 
   checkmate::assert_string(sample)
   checkmate::assert_string(method)
+  checkmate::assert_class(analysis, method)
   checkmate::assert_string(organism, na.ok = TRUE)
   checkmate::assert_vector(mitochondrial_genes, null.ok = TRUE)
   checkmate::assert_numeric(min_genes)
@@ -65,6 +68,7 @@ filter_data <- function(analysis, sample = "", method = "Seurat", assay = "RNA",
   checkmate::assert_numeric(max_cells)
   checkmate::assert_numeric(max_mt)
   checkmate::assert_string(plots_dir, na.ok = TRUE)
+  checkmate::assert_directory(results_dir)
 
   if (method == "Seurat") {
     check_assay(analysis, assay)
@@ -98,9 +102,10 @@ filter_data <- function(analysis, sample = "", method = "Seurat", assay = "RNA",
         print(list_plot[[i]])
       }
     }
-    analysis <- seurat_filter(analysis, assay, min_genes = min_genes, min_counts = min_counts,
+    # print(results_dir)
+    analysis <- seurat_filter(sample = sample, seurat = analysis, assay = assay, min_genes = min_genes, min_counts = min_counts,
                               min_cells = min_cells, min_mt = min_mt, max_genes = max_genes,
-                              max_counts = max_counts, max_cells = max_cells, max_mt = max_mt)
+                              max_counts = max_counts, max_cells = max_cells, max_mt = max_mt, results_dir = results_dir)
   } else {
     stop(paste0(method, " is an unsupported method."))
   }
@@ -121,8 +126,8 @@ filter_data <- function(analysis, sample = "", method = "Seurat", assay = "RNA",
 normalize_data <- function(analysis, method = "Seurat", assay = "RNA", nfeatures = 2000,
                            selection_method = "vst", features = NULL) {
   checkmate::assert_string(method)
+  checkmate::assert_class(analysis, method)
   checkmate::assert_int(nfeatures, lower = 0)
-  checkmate::assert_string(method)
   checkmate::assert_vector(features, null.ok = TRUE)
   if (method == "Seurat") {
     check_assay(analysis, assay)
@@ -148,6 +153,8 @@ normalize_data <- function(analysis, method = "Seurat", assay = "RNA", nfeatures
 #' @export
 pca <- function(analysis, sample = "", method = "Seurat", assay = "RNA", npcs = 50, plots_dir = "") {
   checkmate::assert_string(method)
+  checkmate::assert_string(sample)
+  checkmate::assert_class(analysis, method)
   checkmate::assert_int(npcs, lower = 2)
   if (method == "Seurat") {
     check_assay(analysis, assay)
@@ -191,8 +198,149 @@ integrate_data <- function(analysis_list, method = "Seurat", nfeatures = 5000, a
   return(analysis)
 }
 
+#' Compute neighbors
+#'
+#' @param analysis The analysis object.
+#' @param method The analysis method. Default "Seurat"
+#' @param k.param Defines k for the k-nearest neighbor algorithm. Default 20
+#'
+#' @return An analysis object of type method with neighbors.
+#' @export
+neighbors <- function(analysis, method = "Seurat", k.param = 20) {
+  checkmate::assert_string(method)
+  checkmate::assert_class(analysis, method)
+  checkmate::assert_int(k.param)
+  if (method == "Seurat") {
+    analysis <- seurat_neighbors(analysis, k.param = k.param)
+  } else {
+    stop(paste0(method, " is an unsupported method."))
+  }
+  return(analysis)
+}
+
+#' Perform the clustering step, and optionally a clustree graph
+#'
+#' @param analysis The analysis object.
+#' @param sample Sample name, will be used to name the images files.
+#' @param method The analysis method. Default "Seurat"
+#' @param res_clustree Vector of resolutions to use in the clustree.
+#' Typically resolutions range between 0.1 and 2. Keep empty to skip. Default c()
+#' @param resolution Which final resolution to keep (can be a resolution not in `res_clustree`).
+#' Typically resolutions range between 0.1 and 2. Default 1
+#' @param plots_dir The path to save the plots. Keep empty to skip plot saving. Default ""
+#'
+#' @return An analysis object of type method with clusters.
+#' @export
+clustering <- function(analysis, sample = "", method = "Seurat", res_clustree = c(), resolution = 1, plots_dir = "") {
+  checkmate::assert_string(method)
+  checkmate::assert_class(analysis, method)
+  checkmate::assert_double(res_clustree, lower = 0, null.ok = TRUE)
+  checkmate::assert_double(resolution, len = 1, lower = 0)
+
+  if (method == "Seurat") {
+    if (length(res_clustree) > 0) {
+      for (res in res_clustree) {
+        analysis <- seurat_clustering(analysis, resolution = res, prefix = "RNA_snn")
+      }
+      if (checkmate::check_directory_exists(plots_dir) == TRUE) {
+        clustree_plot <- plot_seurat_clustree(analysis, prefix = "RNA_snn_res.")
+        ggplot2::ggsave(paste(sample, "clustree.png", sep = "_"), plot = clustree_plot,
+                        device = "png", path = plots_dir, dpi = 200, width = 1500,
+                        height = 2000, units = "px")
+        }
+    }
+    analysis <- seurat_clustering(analysis, resolution = resolution)
+  } else {
+    stop(paste0(method, " is an unsupported method."))
+  }
+  return(analysis)
+}
 
 
+#' Compute and plot the umap.
+#'
+#' Will plot a first umap showing the orig.ident,
+#' a second one using the column in plot_clustering.
+#'
+#' @param analysis The analysis object.
+#' @param sample Sample name, will be used to name the images files.
+#' @param method The analysis method. Default "Seurat"
+#' @param n_neighbors number of neighbors to use when computing the UMAP. Default 30
+#' @param plot_clustering Which clustering to colour the UMAP with. Default "RNA_snn_res.1"
+#' @param plots_dir The path to save the plots. Keep empty to skip plot saving. Default ""
+#'
+#' @return an analysis object
+#' @export
+#'
+#' @examples
+umap <- function(analysis, sample = "", method = "Seurat", n_neighbors = 30, plot_clustering = "RNA_snn_res.1", plots_dir = "") {
+  checkmate::assert_string(method)
+  checkmate::assert_class(analysis, method)
+  checkmate::assert_string(sample)
+  checkmate::assert_string(plots_dir)
+  checkmate::assert_double(n_neighbors, len = 1, lower = 0)
+  if (plots_dir != "") {checkmate::assert_directory(plots_dir)}
+
+  if (method == "Seurat") {
+    analysis <- seurat_umap(analysis, n.neighbors = n_neighbors)
+    if (checkmate::check_directory_exists(plots_dir) == TRUE) {
+      list_plot <- list()
+      list_plot[["sample"]] <- plot_seurat_dim(analysis, reduction = "umap", colour_by = "orig.ident")
+      list_plot[["clusters"]] <- plot_seurat_dim(analysis, reduction = "umap", colour_by = plot_clustering)
+      for (i in names(list_plot)) {
+        ggplot2::ggsave(paste(sample, i,  "umap_plot.png", sep = "_"), plot = list_plot[[i]],
+                        device = "png", path = plots_dir, dpi = 200, width = 1500,
+                        height = 1200, units = "px")
+      }
+    }
+
+  } else {
+    stop(paste0(method, " is an unsupported method."))
+  }
+  return(analysis)
+}
+
+#' Find DE between all clusters
+#'
+#' @param analysis The analysis object.
+#' @param sample Sample name, will be used to name the table files.
+#' @param method The analysis method. Default "Seurat"
+#' @param test Which statistical tests to use for DE. To see available options, see the documentation for Seurat::FindAllMarkers. Default "wilcox"
+#' @param logfc_threshold Filter genes based on a minimum logged fold change. Default 0.25
+#' @param pvalue_threshold Filter genes based on a maximum pvalue. Default 0.05
+#' @param results_dir The path to save the tables. Keep empty to skip plot saving. Default ""
+#'
+#' @return A dataframe that contains the differentially expressed genes for each cluster against all other clusters.
+#' @export
+#'
+#' @examples
+#'
+#' @importFrom magrittr %>%
+find_all_DE <- function(analysis, sample = "", method = "Seurat",
+                    test = "wilcox", logfc_threshold = 0.25, pvalue_threshold = 0.05,
+                    results_dir = "") {
+
+  checkmate::assert_string(method)
+  checkmate::assert_class(analysis, method)
+  checkmate::assert_string(sample)
+  checkmate::assert_string(results_dir)
+  checkmate::assert_string(test)
+  checkmate::assert_number(logfc_threshold, lower = 0)
+  checkmate::assert_number(pvalue_threshold, lower = 0, upper = 1)
+  if (results_dir != "") {checkmate::assert_directory(results_dir)}
+
+  if (method == "Seurat") {
+    df_de <- seurat_all_DE(analysis, assay = "RNA", slot = "data", method = method, logfc_threshold = logfc_threshold, pvalue_threshold = pvalue_threshold, min_pct = 0.1, only.pos = FALSE)
+  }
+  if (results_dir != "") {
+    top_de <- df_de %>% group_by(cluster) %>% slice_min(p_val, n = 10)
+
+    write_csv(df_de, file.path(results_dir, paste0(sample, "_DE.csv")))
+    write_csv(top_de, file.path(results_dir, paste0(sample, "_top10_DE.csv")))
+
+  }
+  return(df_de)
+}
 
 
 

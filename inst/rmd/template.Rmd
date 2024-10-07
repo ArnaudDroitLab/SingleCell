@@ -1,0 +1,20 @@
+---
+params:
+  title:
+title: "`r params$title`"
+author: "ADlab"
+date: "2024-08-02"
+output: 
+  html_document:
+    toc: true
+    css: ".report/style.css"
+  # pdf_document:
+  #   toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+

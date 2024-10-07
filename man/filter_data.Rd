@@ -19,7 +19,8 @@ filter_data(
   max_counts = Inf,
   max_cells = Inf,
   max_mt = 20,
-  plots_dir = ""
+  plots_dir = "",
+  results_dir = ""
 )
 }
 \arguments{
@@ -53,6 +54,8 @@ Default "" to skip automatic mitochondrial detection.}
 \item{max_mt}{All cells having a higher percentage of mitochondria will be filtered out. Default Inf}
 
 \item{plots_dir}{The path to save the plots. Keep empty to skip plot saving. Default ""}
+
+\item{results_dir}{The path to save the dataframe. Keep empty to skip plot saving. Default ""}
 }
 \value{
 An object of the analysis type filtered.

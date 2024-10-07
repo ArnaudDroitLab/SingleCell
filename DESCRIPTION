@@ -1,12 +1,21 @@
 Package: SingleCell
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.1
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Title: Analysis of single cell data
+Version: 0.1.0
+Authors@R: person("Emeric", "Texeraud", email =
+                  "emeric.texeraud@crchudequebec.ulaval.ca",
+                  role = c("aut", "cre"))
+Description: Analysis of single cell data mainly using Seurat.
+License: Artistic-2.0
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
+Imports: 
+    checkmate,
+    clustree,
+    Seurat,
+    SeuratObject,
+    tools,
+    rmarkdown,
+    dplyr,
+    ggplot2,
+    magrittr

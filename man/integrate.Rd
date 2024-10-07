@@ -2,7 +2,7 @@
 % Please edit documentation in R/main.R
 \name{integrate}
 \alias{integrate}
-\title{Integrate data from a list and samples and their matrix path.}
+\title{Integrate data from several samples.}
 \usage{
 integrate(
   samples,
@@ -12,23 +12,24 @@ integrate(
   from = "Cellranger",
   method = "Seurat",
   assay = "RNA",
-  plots_dir = ".",
-  save_path = "",
-  file_name = "analysis.rds",
+  save_path = ".",
+  file_name = "integrated.rds",
+  make_report = TRUE,
   organism = "",
   mitochondrial_genes = c(),
-  min_genes = 100,
-  min_counts = 100,
+  min_genes = 0,
+  min_counts = 0,
   min_cells = 1,
   min_mt = 0,
   max_genes = Inf,
   max_counts = Inf,
   max_cells = Inf,
-  max_mt = 20,
+  max_mt = Inf,
   nfeatures_normalize = 2000,
   selection_method_normalize = "vst",
   npcs_pca = 50,
-  nfeatures_integration = 5000
+  nfeatures_integration = 5000,
+  force_report = FALSE
 )
 }
 \arguments{
@@ -52,12 +53,13 @@ Currently supports : Seurat. Default "Seurat"}
 
 \item{assay}{Which to use for all functions asking for it. Default "RNA"}
 
-\item{plots_dir}{In which directory the plots are saved. Empty to skip plots saving. Default "."}
-
-\item{save_path}{In which directory the final analysis is saved, in rds format.
-Keep empty to just return the analysis and not save it. Default ""}
+\item{save_path}{In which directory the plots, results and report are saved. Empty to not save anything. Default "."
+Keep empty to just return the analysis and not save it. Default "."}
 
 \item{file_name}{What name to give to the final file. Will be skipped if \code{save_path} is empty. Default "analysis.rds"}
+
+\item{make_report}{Whether to make a report with the plot generated or not.
+If \code{save_path} is empty, this parameter will be skipped. Default TRUE}
 
 \item{organism}{The organism is used for mitochondrial genes detection. Supports mouse and human.
 Keep empty to skip mitochondrial detection. Default ""}
@@ -88,10 +90,13 @@ if a supported organism is provided. Leave \code{organism} and \code{mitochondri
 \item{npcs_pca}{Number of principal components to compute in the PCA. Default 50}
 
 \item{nfeatures_integration}{Number of features to use in the integration process. Default 5000}
+
+\item{force_report}{Whether to overwrite the report if it already exists. If this is FALSE, and a file \code{integration.Rmd} already exists,
+report creation will be skipped. Default FALSE}
 }
 \value{
 an analysis object containing the integrated data.
 }
 \description{
-Integrate data from a list and samples and their matrix path.
+Takes a list of samples and either a path to a cellranger directory with all the samples within, or a list of Seurat object.
 }

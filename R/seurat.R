@@ -74,7 +74,8 @@ seurat_compute_mt <- function(seurat, assay = "RNA", organism="", mitochondrial_
 #'
 #' If no percent_mt is found in meta data, min_mt and max_mt will be skipped.
 #'
-#' @param seurat The seurat object
+#' @param sample Sample name, will be used to name the files.
+#' @param seurat The seurat object.
 #' @param assay Which assay int he seurat object to filter on. Default RNA
 #' @param min_genes All cells having a lower number of genes expressed will be filtered out. Default 0
 #' @param max_genes All cells having a higher number of genes expressed will be filtered out. Default Inf
@@ -84,12 +85,13 @@ seurat_compute_mt <- function(seurat, assay = "RNA", organism="", mitochondrial_
 #' @param max_counts All cells having a higher number of counts will be filtered out. Default Inf
 #' @param min_mt All cells having a lower percentage of mitochondria will be filtered out. Default 0
 #' @param max_mt All cells having a higher percentage of mitochondria will be filtered out. Default Inf
+#' @param results_dir The path to save the dataframe. Keep empty to skip plot saving. Default ""
 #'
 #' @return A Seurat object with its count matrix filtered.
 #' @export
-seurat_filter <- function(seurat, assay = "RNA", min_genes = 100, min_counts = 100,
+seurat_filter <- function(sample, seurat, assay = "RNA", min_genes = 100, min_counts = 100,
                           min_cells = 1, min_mt = 0, max_genes = Inf, max_counts=Inf,
-                          max_cells = Inf, max_mt = Inf) {
+                          max_cells = Inf, max_mt = Inf, results_dir = "") {
   check_assay(seurat, assay)
   checkmate::assert_numeric(min_genes)
   checkmate::assert_numeric(min_counts)
@@ -99,6 +101,7 @@ seurat_filter <- function(seurat, assay = "RNA", min_genes = 100, min_counts = 1
   checkmate::assert_numeric(max_counts)
   checkmate::assert_numeric(max_cells)
   checkmate::assert_numeric(max_mt)
+  checkmate::assert_directory(results_dir)
 
   n_cells = length(Seurat::Cells(seurat))
   n_genes = nrow(seurat@assays[[assay]]@counts)
@@ -126,8 +129,12 @@ seurat_filter <- function(seurat, assay = "RNA", min_genes = 100, min_counts = 1
 
   n_cells2 = length(Seurat::Cells(seurat))
   n_genes2 = nrow(seurat@assays$RNA@counts)
-  print(data.frame(Removed = c(n_cells-n_cells2, n_genes-n_genes2), Kept = c(n_cells2, n_genes2),
-                   row.names = c("Cells", "Genes")))
+  df_filtered <- data.frame(Cells = c(n_cells, n_cells2, n_cells-n_cells2), Genes = c(n_genes, n_genes2, n_genes-n_genes2),
+                   row.names = c("Before", "After", "Filtered_out"))
+  if (results_dir != "") {
+    save_csv <- file.path(results_dir, paste0(sample, "_", "filtering_stats.csv"))
+    write.csv(df_filtered, save_csv, row.names = TRUE)
+  }
   return(seurat)
 }
 
@@ -212,6 +219,65 @@ seurat_integrate <- function(seurat_list, nfeatures = 5000, assay = "RNA") {
 
   seurat_integrated <- Seurat::IntegrateData(anchorset = anchors)
   return(seurat_integrated)
+}
+
+#' Compute the KNN graph using FindNeighbors from Seurat
+#'
+#' @param seurat The Seurat object.
+#' @param k.param Defines k for the k-nearest neighbor algorithm. Default 20
+#'
+#' @return A Seurat object with KNN
+#' @export
+seurat_neighbors <- function(seurat, k.param = 20) {
+  checkmate::assert_class(seurat, "Seurat")
+  checkmate::assert_int(k.param, lower = 2)
+  seurat <- Seurat::FindNeighbors(seurat, k.param = k.param)
+  return(seurat)
+}
+
+#' Find the clusters using FindClusters from Seurat
+#'
+#' @param seurat The Seurat object.
+#' @param resolution Which final resolution to use. Typically resolutions range between 0.1 and 2. Default 1
+#' @param prefix The prefix to use. Default to "RNA_snn"
+#'
+#' @return Seurat object with clusters
+#' @export
+seurat_clustering <- function(seurat, resolution = 1, prefix = "RNA_snn") {
+  checkmate::assert_class(seurat, "Seurat")
+  checkmate::assert_double(resolution, lower = 0, len = 1)
+  checkmate::assert_string(prefix)
+  seurat <- Seurat::FindClusters(seurat, resolution = resolution, graph.name=prefix)
+  return(seurat)
+}
+
+#' Compute the UMAP using RunUMAP from Seurat
+#'
+#' @param seurat The Seurat object.
+#' @param n.neighbors Number of neighbors to use when computing the UMAP. Default 30
+#'
+#' @return Seurat object with UMAP
+#' @export
+seurat_umap <- function(seurat, n.neighbors = 30, dims = 1:20) {
+  checkmate::assert_class(seurat, "Seurat")
+  checkmate::assert_double(n.neighbors, lower = 0)
+  seurat <- Seurat::RunUMAP(seurat, n.neighbors = n.neighbors, n.components = 2, dims = dims)
+  return(seurat)
+}
+
+seurat_all_DE <- function(seurat, assay = "RNA", slot = "data", method = "wilcox", logfc_threshold = 0.25, min_pct = 0.1, pvalue_threshold = 0.05, only.pos = FALSE) {
+  check_assay(seurat, assay)
+  checkmate::assert_string(slot)
+  checkmate::assert_string(method)
+  checkmate::assert_double(logfc_threshold, len = 1)
+  checkmate::assert_double(min_pct, len = 1)
+  checkmate::assert_logical(only.pos, len = 1)
+
+  markers <- Seurat::FindAllMarkers(seurat, method = method,
+                                    verbose = T, only.pos = only.pos,
+                                    assay = assay, slot = slot,
+                                    logfc.threshold = logfc_threshold, min.pct = min_pct)
+  return(markers)
 }
 
 
