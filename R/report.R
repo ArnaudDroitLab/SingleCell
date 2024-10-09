@@ -283,7 +283,7 @@ make_analysis_report <- function(sample, report_path, report_name, plots_relativ
       if (type == "plots") {
         filepaths <- lapply(filepaths, function(x) file.path(plots_relative_path, paste0(sample, "_", x)))
         filepaths <- filepaths[file.exists(file.path(report_path, filepaths))]
-        if (step %in% c("clustering tree", "UMAP")) {
+        if (step %in% c("Clustering tree", "UMAP")) {
           add_images_knit_report(report, filepaths, ncol = 1)
         } else {
           add_images_knit_report(report, filepaths, ncol = if (length(filepaths)%%3 == 0) 3 else 2)

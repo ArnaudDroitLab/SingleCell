@@ -41,6 +41,8 @@
 #'
 #' @return an analysis object containing the integrated data.
 #' @export
+#'
+#' @importFrom magrittr %>%
 integrate <- function(samples,
                       path_to_count = "",
                       analysis_list = list(),
@@ -229,6 +231,8 @@ integrate <- function(samples,
 #' @export
 #'
 #' @examples
+#'
+#' @importFrom magrittr %>%
 analyze_integrated <- function(analysis,
                                sample = "integrated",
                                step = 6,
@@ -318,7 +322,7 @@ analyze_integrated <- function(analysis,
                             max_cells = max_cells,
                             max_mt = max_mt,
                             plots_dir = plots_dir,
-                            results_dir = save_path)
+                            results_dir = results_dir)
     checkmate::assert_class(analysis, method)
   }
 
@@ -374,14 +378,15 @@ analyze_integrated <- function(analysis,
                             method = method,
                             test = de_test,
                             logfc_threshold = de_logfc,
-                            pvalue_threshold = de_pvalue)
+                            pvalue_threshold = de_pvalue,
+                            results_dir = results_dir)
   }
 
   if (save_path != "") {
-    file_path = file.path(save_path, file_name)
+    file_path = file.path(results_dir, file_name)
     saveRDS(analysis, file = file_path)
   }
-   make_analysis_report(sample = sample, report_path = save_path, report_name = "analysis.Rmd", plots_relative_path = "plots", data_relative_path = "results", force = force_report)
+  make_analysis_report(sample = sample, report_path = save_path, report_name = "analysis.Rmd", plots_relative_path = "plots", data_relative_path = "results", force = force_report)
 
   return(analysis)
 }
