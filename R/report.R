@@ -123,6 +123,26 @@ add_df_report <- function(report, csv_relative_path) {
       "```\n\n", file = report, sep = "", append = TRUE)
 }
 
+
+#' Add a dataframe to a report.
+#'
+#' Will read a csv file and display its content on the report.
+#'
+#' @param report Path to the report.
+#' @param csv_relative_path Path to the csv, relative to the report.
+#'
+#' @return Nothing
+#' @export
+add_df_report_no_rownames <- function(report, csv_relative_path) {
+  checkmate::assert_file_exists(report)
+  checkmate::assert_file(file.path(dirname(report), csv_relative_path))
+
+  cat("```{r}\n",
+      "df <- read.csv('", csv_relative_path, "', header = TRUE, sep = ',')\n",
+      "df\n",
+      "```\n\n", file = report, sep = "", append = TRUE)
+}
+
 #' Add a chunk of code to read content of file in a report.
 #'
 #' @param report Path to the report.
@@ -292,7 +312,12 @@ make_analysis_report <- function(sample, report_path, report_name, plots_relativ
       } else if (type == "df") {
         filepaths <- lapply(filepaths, function(x) file.path(data_relative_path, paste0(sample, "_", x)))
         filepaths <- filepaths[file.exists(file.path(report_path, filepaths))]
-        for (df in filepaths) add_df_report(report, df)
+        if (step == "DE") {
+          for (df in filepaths) add_df_report_no_rownames(report, df)
+        } else {
+          for (df in filepaths) add_df_report(report, df)
+        }
+
       }
     }
   }
