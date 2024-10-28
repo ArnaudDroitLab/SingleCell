@@ -4,7 +4,7 @@
 \alias{plot_seurat_elbow}
 \title{Make the Elbow plot of a dimension reduction}
 \usage{
-plot_seurat_elbow(seurat, reduction = "pca", npc = 50)
+plot_seurat_elbow(seurat, reduction = "pca", npc = 50, k.param.neighbors = 20)
 }
 \arguments{
 \item{seurat}{A Seurat object}
@@ -12,6 +12,8 @@ plot_seurat_elbow(seurat, reduction = "pca", npc = 50)
 \item{reduction}{Which reduction to us. Must be present in the Seurat object. Default "pca"}
 
 \item{npc}{Number of components to plot. Default 50}
+
+\item{k.param.neighbors}{Number of k.param for neighbors joining. Default 20}
 }
 \value{
 The elbow plot as a ggplot object

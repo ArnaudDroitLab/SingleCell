@@ -48,6 +48,7 @@ load_data <- function(path_to_count, sample, from = "Cellranger", to = "Seurat")
 #' @param results_dir The path to save the dataframe. Keep empty to skip plot saving. Default ""
 #'
 #' @return An object of the analysis type filtered.
+#' @importFrom ggplot2 ggsave
 #' @export
 filter_data <- function(analysis, sample = "", method = "Seurat", assay = "RNA", organism = "",
                         mitochondrial_genes = c(), min_genes = 100, min_counts = 100,
@@ -76,6 +77,10 @@ filter_data <- function(analysis, sample = "", method = "Seurat", assay = "RNA",
     df_plot <- data.frame(samples = analysis@meta.data$orig.ident,
                           nCount_RNA = analysis@meta.data$nCount_RNA,
                           nFeature_RNA = analysis@meta.data$nFeature_RNA)
+    # print(results_dir)
+    analysis <- seurat_filter(sample = sample, seurat = analysis, assay = assay, min_genes = min_genes, min_counts = min_counts,
+                              min_cells = min_cells, min_mt = min_mt, max_genes = max_genes,
+                              max_counts = max_counts, max_cells = max_cells, max_mt = max_mt, results_dir = results_dir)
     list_plot <- list()
     list_plot[["count"]] <- plot_filter(df_plot, x_name = "samples", y_name = "nCount_RNA",
                                              low = min_counts, high = max_counts)
@@ -102,10 +107,6 @@ filter_data <- function(analysis, sample = "", method = "Seurat", assay = "RNA",
         print(list_plot[[i]])
       }
     }
-    # print(results_dir)
-    analysis <- seurat_filter(sample = sample, seurat = analysis, assay = assay, min_genes = min_genes, min_counts = min_counts,
-                              min_cells = min_cells, min_mt = min_mt, max_genes = max_genes,
-                              max_counts = max_counts, max_cells = max_cells, max_mt = max_mt, results_dir = results_dir)
   } else {
     stop(paste0(method, " is an unsupported method."))
   }
@@ -146,10 +147,11 @@ normalize_data <- function(analysis, method = "Seurat", assay = "RNA", nfeatures
 #' @param sample Sample name, will be used to name the images files.
 #' @param method The analysis method. Default "Seurat"
 #' @param assay Which assay to compute the PCA on. Default "RNA"
-#' @param npc Number of components to compute. Default 50
+#' @param npcs Number of components to compute. Default 50
 #' @param plots_dir The path to save the plots. Keep empty to skip plot saving. Default ""
 #'
 #' @return An analysis object of type method with PCA.
+#' @importFrom ggplot2 ggsave
 #' @export
 pca <- function(analysis, sample = "", method = "Seurat", assay = "RNA", npcs = 50, plots_dir = "") {
   checkmate::assert_string(method)
@@ -230,6 +232,7 @@ neighbors <- function(analysis, method = "Seurat", k.param = 20) {
 #' @param plots_dir The path to save the plots. Keep empty to skip plot saving. Default ""
 #'
 #' @return An analysis object of type method with clusters.
+#' @importFrom ggplot2 ggsave
 #' @export
 clustering <- function(analysis, sample = "", method = "Seurat", res_clustree = c(), resolution = 1, plots_dir = "") {
   checkmate::assert_string(method)
@@ -269,7 +272,8 @@ clustering <- function(analysis, sample = "", method = "Seurat", res_clustree = 
 #' @param plot_clustering Which clustering to colour the UMAP with. Default "RNA_snn_res.1"
 #' @param plots_dir The path to save the plots. Keep empty to skip plot saving. Default ""
 #'
-#' @return an analysis object
+#' @return an analysis object.
+#' @importFrom ggplot2 ggsave
 #' @export
 #'
 #' @examples
@@ -316,6 +320,12 @@ umap <- function(analysis, sample = "", method = "Seurat", n_neighbors = 30, plo
 #' @examples
 #'
 #' @importFrom magrittr %>%
+#' @import dplyr
+#' @import readr
+#' @importFrom dplyr group_by
+#' @importFrom dplyr slice_min
+#' @importFrom dplyr slice_max
+#' @importFrom readr write_csv
 find_all_DE <- function(analysis, sample = "", method = "Seurat",
                     test = "wilcox", logfc_threshold = 0.25, pvalue_threshold = 0.05,
                     results_dir = "") {
@@ -333,10 +343,10 @@ find_all_DE <- function(analysis, sample = "", method = "Seurat",
     df_de <- seurat_all_DE(analysis, assay = "RNA", slot = "data", method = method, logfc_threshold = logfc_threshold, pvalue_threshold = pvalue_threshold, min_pct = 0.1, only.pos = FALSE)
   }
   if (results_dir != "") {
-    top_de <- df_de %>% group_by(cluster) %>% slice_min(p_val, n = 10)
+    top_de <- df_de %>% dplyr::group_by(df_de$cluster) %>% dplyr::slice_min(df_de$p_val, n = 10) %>% dplyr::slice_max(df_de$avg_log2FC, n = 10)
 
-    write_csv(df_de, file.path(results_dir, paste0(sample, "_DE.csv")))
-    write_csv(top_de, file.path(results_dir, paste0(sample, "_top10_DE.csv")))
+    readr::write_csv(df_de, file.path(results_dir, paste0(sample, "_DE.csv")))
+    readr::write_csv(top_de, file.path(results_dir, paste0(sample, "_top10_DE.csv")))
 
   }
   return(df_de)

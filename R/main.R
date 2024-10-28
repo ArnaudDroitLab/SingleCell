@@ -186,7 +186,7 @@ integrate <- function(samples,
 }
 
 
-#' Title
+#' Analyze a seurat object and sort expressed genes on cells
 #'
 #' @param analysis Object to use.
 #' @param sample Sample name.
@@ -219,8 +219,8 @@ integrate <- function(samples,
 #' If this parameter is NULL, clustree will be skipped. Clustree is an optional part of step 10. Default c(1:10/10, 5:8/4)
 #' @param resolution_clustering Which final resolution to keep (can be a resolution not in `resolutions_clustree`).
 #' Typically resolutions range between 0.1 and 2. Default 1
-#' @param k.param_neighbors Number of neighbors to use when computing UMAP. Default 30
-#' @param n_neighbors ##
+#' @param k.param_neighbors Number of neighbors to use when computing UMAP. Default 20.
+#' @param n_neighbors Number of neighbors to use when computing the UMAP. Default 30
 #' @param de_test Which statistical tests to use for DE. To see available options, see the documentation for Seurat::FindAllMarkers. Default "wilcox"
 #' @param de_logfc Filter genes based on a minimum logged fold change. Default 0.25
 #' @param de_pvalue Filter genes based on a maximum pvalue. Default 0.05

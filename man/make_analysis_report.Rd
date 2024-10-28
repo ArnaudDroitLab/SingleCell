@@ -15,6 +15,8 @@ make_analysis_report(
 )
 }
 \arguments{
+\item{sample}{List of samples to include in the report.}
+
 \item{report_path}{Path to where the report should be located.}
 
 \item{report_name}{Name to give to the report file.}
@@ -28,8 +30,6 @@ Must be a subdirectory in \code{report_path}. Default "results"}
 \item{title}{The title of the report. Default to "Analysis report"}
 
 \item{force}{Set to true if you want to overwrite the report that could already exists. Default FALSE}
-
-\item{samples}{List of samples to include in the report.}
 }
 \value{
 Path to the report as a string.

@@ -12,6 +12,14 @@ theme_white_bg <- function(){
 #' @param high The higher cutoff to put on the plot. Defaults to Inf, which will not put a higher cutoff.
 #'
 #' @return A ggplot object.
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 aes
+#' @importFrom ggplot2 geom_jitter
+#' @importFrom ggplot2 alpha
+#' @importFrom ggplot2 theme_bw
+#' @importFrom ggplot2 theme
+#' @importFrom ggplot2 element_blank
+#' @importFrom ggplot2 geom_hline
 #' @export
 plot_filter <- function(df, x_name = "x", y_name = "y", low = 0, high = Inf) {
   checkmate::assert_data_frame(df)
@@ -26,7 +34,7 @@ plot_filter <- function(df, x_name = "x", y_name = "y", low = 0, high = Inf) {
   p <- ggplot2::ggplot(df, ggplot2::aes(x = .data[[x_name]], y = .data[[y_name]], fill = .data[[x_name]])) +
     ggplot2::geom_violin() +
     ggplot2::geom_jitter(size = 0.2, color = ggplot2::alpha("black", 0.4), fill = ggplot2::alpha("black", 0.4)) +
-    theme_white_bg() +
+    ggplot2::theme_bw() +
     ggplot2::theme(axis.title.x=ggplot2::element_blank())
 
   low = max(low, min(0, min(df[[y_name]])))
@@ -35,6 +43,35 @@ plot_filter <- function(df, x_name = "x", y_name = "y", low = 0, high = Inf) {
   p <- p + ggplot2::geom_hline(yintercept=low, linetype="dashed", color = "red")
   p <- p + ggplot2::geom_hline(yintercept=high, linetype="dashed", color = "red")
   return(p)
+}
+
+#' Barplots that represent the filtering statistics for the seurat filtration
+#'
+#' @param df dataframe with the statistics
+#'
+#' @return Barplots as a ggplot object
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 geom_bar
+#' @importFrom ggplot2 aes
+#' @importFrom ggplot2 geom_text
+#' @importFrom ggplot2 scale_x_discrete
+#' @importFrom ggplot2 theme_bw
+#' @export
+#'
+#' @examples
+plot_filtering_stats <- function(df) {
+  checkmate::assert_data_frame(df)
+  p <- ggplot2::ggplot(data = df, ggplot2::aes(x = rownames(df), .data[["Genes"]])) +
+    ggplot2::geom_bar(stat = "identity", color = "#D44C7E", fill = "#F39BBC", width = 0.8) +
+    ggplot2::geom_text(aes(label = .data[["Genes"]]), vjust = 1.5, size = 3) +
+    ggplot2::scale_x_discrete(name = "", limits = c("Before", "After", "Filtered_out"), labels = c("Before", "After", "Filtered")) +
+    ggplot2::theme_bw()
+  q <- ggplot2::ggplot(data = df, ggplot2::aes(x = rownames(df), .data[["Cells"]])) +
+    ggplot2::geom_bar(stat = "identity", color = "#FFC107", fill = "#FFE493", width = 0.8) +
+    ggplot2::geom_text(aes(label = .data[["Cells"]]), vjust = 1.5, size = 3) +
+    ggplot2::scale_x_discrete(name = "", limits = c("Before", "After", "Filtered_out"), labels = c("Before", "After", "Filtered")) +
+    ggplot2::theme_bw()
+  return(p + q)
 }
 
 #' Make the Elbow plot of a dimension reduction
@@ -46,10 +83,17 @@ plot_filter <- function(df, x_name = "x", y_name = "y", low = 0, high = Inf) {
 #' @param seurat A Seurat object
 #' @param reduction Which reduction to us. Must be present in the Seurat object. Default "pca"
 #' @param npc Number of components to plot. Default 50
+#' @param k.param.neighbors Number of k.param for neighbors joining. Default 20
 #'
 #' @return The elbow plot as a ggplot object
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 geom_vline
+#' @importFrom ggplot2 aes
+#' @importFrom ggplot2 geom_point
+#' @importFrom ggplot2 theme_bw
+#' @importFrom ggplot2 scale_y_continuous
 #' @export
-plot_seurat_elbow <- function(seurat, reduction = "pca", npc = 50) {
+plot_seurat_elbow <- function(seurat, reduction = "pca", npc = 50, k.param.neighbors = 20) {
   checkmate::assert_class(seurat, "Seurat")
   check_reduction(seurat, reduction)
   checkmate::assert_int(npc)
@@ -57,8 +101,8 @@ plot_seurat_elbow <- function(seurat, reduction = "pca", npc = 50) {
 
   df <- data.frame("Standard_Deviation" = seurat@reductions[[reduction]]@stdev[1:npc], PC = 1:npc)
   p <- ggplot2::ggplot(df, ggplot2::aes(x = .data[["PC"]], y = .data[["Standard_Deviation"]])) +
-    ggplot2::geom_point() +
-    theme_white_bg()
+    ggplot2::geom_point() + ggplot2::scale_y_continuous("Standard Deviation") +
+    ggplot2::theme_bw() + ggplot2::geom_vline(aes(xintercept = k.param.neighbors), colour = "steelblue3")
   return(p)
 }
 
@@ -74,6 +118,11 @@ plot_seurat_elbow <- function(seurat, reduction = "pca", npc = 50) {
 #' @param slot Which slot to use within the assay (if applicable). Default "data"
 #'
 #' @return A ggplot graph
+#' @importFrom Seurat FetchData
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 aes
+#' @importFrom ggplot2 geom_point
+#' @importFrom ggplot2 theme_bw
 #' @export
 plot_seurat_dim <- function(seurat, reduction = "pca", colour_by = "orig.ident", assay = "RNA", slot = "data") {
   check_assay(seurat, assay)
@@ -91,7 +140,7 @@ plot_seurat_dim <- function(seurat, reduction = "pca", colour_by = "orig.ident",
   p <- ggplot2::ggplot(df, ggplot2::aes(x = .data[[x]], y = .data[[y]],
                                         fill = .data[[colour_by]], colour = .data[[colour_by]])) +
     ggplot2::geom_point() +
-    theme_white_bg()
+    ggplot2::theme_bw()
   return(p)
 }
 
@@ -104,6 +153,7 @@ plot_seurat_dim <- function(seurat, reduction = "pca", colour_by = "orig.ident",
 #' This should be the whole prefix before the resolution number. Default "RNA_snn_res."
 #'
 #' @return a ggplot graph
+#' @importFrom clustree clustree
 #' @export
 plot_seurat_clustree <- function(seurat, prefix = "RNA_snn_res.") {
   checkmate::assert_class(seurat, "Seurat")

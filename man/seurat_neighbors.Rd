@@ -12,7 +12,7 @@ seurat_neighbors(seurat, k.param = 20)
 \item{k.param}{Defines k for the k-nearest neighbor algorithm. Default 20}
 }
 \value{
-A Seurat object with KNN
+A Seurat object with KNN.
 }
 \description{
 Compute the KNN graph using FindNeighbors from Seurat

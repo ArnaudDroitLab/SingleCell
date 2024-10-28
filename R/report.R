@@ -72,6 +72,9 @@ add_text_report <- function(report, txt = "") {
 #' @param title Title to give the image
 #'
 #' @return Nothing
+#' @importFrom tools file_path_sans_ext
+#' @importFrom stringr str_replace_all
+#' @importFrom stringr str_to_title
 #' @export
 #'
 #' @examples
@@ -166,6 +169,7 @@ add_textfile_report <- function(report, relative_textfile) {
 #' @param title Title to give to the report
 #'
 #' @return Nothing
+#' @importFrom rmarkdown render
 #' @export
 #'
 #' @examples
@@ -199,7 +203,7 @@ build_report <- function(report, title) {
 make_integration_report <- function(samples, report_path, report_name = "integration.Rmd", plots_relative_path = "plots", data_relative_path = "results", title = "Integration report", force = FALSE) {
 
   # Every file will be sample_name.ext, you should report here name.ext, sample_ will be automatically added. Currently only accepts .csv and .png
-  steps_files <- list(Filtering = list(plots = c("count_filter_plot.png", "feature_filter_plot.png", "mitochondria_filter_plot.png"), df = c("filtering_stats.csv")),
+  steps_files <- list(Filtering = list(plots = c("count_filter_plot.png", "feature_filter_plot.png", "mitochondria_filter_plot.png", "stats_filter_plot.png"), df = c("filtering_stats.csv")),
                       PCA = list(plots = c("Elbow_pca_plot.png", "PCA_pca_plot.png"))
                       )
   report <- file.path(report_path, report_name)
@@ -216,7 +220,7 @@ make_integration_report <- function(samples, report_path, report_name = "integra
   initialize_report(report_name, report_path, force = force)
 
   for (step in names(steps_files)) {
-    add_title_report(report, stringr::step, 1)
+    add_title_report(report, toString(step), 1)
     textfile <- file.path(".report", paste0("integration_", step, ".txt"))
     if (file.exists(file.path(report_path, textfile))) {
       add_textfile_report(report, textfile)
@@ -253,7 +257,7 @@ make_integration_report <- function(samples, report_path, report_name = "integra
 
 #' Make the integration report, with the files to include hardcoded inside.
 #'
-#' @param samples List of samples to include in the report.
+#' @param sample List of samples to include in the report.
 #' @param report_path Path to where the report should be located.
 #' @param report_name Name to give to the report file.
 #' @param plots_relative_path Path to the plots directory, relative to the `report_path`.
@@ -275,7 +279,7 @@ make_analysis_report <- function(sample, report_path, report_name, plots_relativ
                       PCA = list(plots = c("Elbow_pca_plot.png", "PCA_pca_plot.png")),
                       "Clustering tree" = list(plots = "clustree.png"),
                       UMAP = list(plots = c("sample_umap_plot.png", "clusters_umap_plot.png")),
-                      DE = list(df = c("top10_DE.csv")))
+                      DE = list(df = c("top10_DE.csv", "stats_DE.csv")))
   report <- file.path(report_path, report_name)
   if (file.exists(report)) {
     if (force) {
@@ -313,9 +317,9 @@ make_analysis_report <- function(sample, report_path, report_name, plots_relativ
         filepaths <- lapply(filepaths, function(x) file.path(data_relative_path, paste0(sample, "_", x)))
         filepaths <- filepaths[file.exists(file.path(report_path, filepaths))]
         if (step == "DE") {
-          for (df in filepaths) add_df_report_no_rownames(report, df)
+          for (df in filepaths) {add_df_report_no_rownames(report, df)}
         } else {
-          for (df in filepaths) add_df_report(report, df)
+          for (df in filepaths) {add_df_report(report, df)}
         }
 
       }

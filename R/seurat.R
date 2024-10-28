@@ -28,6 +28,8 @@ check_reduction <- function(seurat, reduction = "pca") {
 #' @param project The project name, put here the name of the sample currently being analyzed
 #'
 #' @return A Seurat object containing the data from the matrix
+#' @importFrom Seurat Read10X
+#' @importFrom Seurat CreateSeuratObject
 #' @export
 seurat_load_10x <- function(path_to_matrix, project = "seurat") {
   checkmate::assert_directory_exists(path_to_matrix)
@@ -51,6 +53,7 @@ seurat_load_10x <- function(path_to_matrix, project = "seurat") {
 #' it will be skipped. Default NULL
 #'
 #' @return A Seurat object
+#' @importFrom Seurat PercentageFeatureSet
 #' @export
 seurat_compute_mt <- function(seurat, assay = "RNA", organism="", mitochondrial_genes=NULL) {
   check_assay(seurat, assay)
@@ -88,6 +91,10 @@ seurat_compute_mt <- function(seurat, assay = "RNA", organism="", mitochondrial_
 #' @param results_dir The path to save the dataframe. Keep empty to skip plot saving. Default ""
 #'
 #' @return A Seurat object with its count matrix filtered.
+#' @importFrom SeuratObject Cells
+#' @importFrom SeuratObject GetAssayData
+#' @importFrom Seurat DefaultAssay
+#' @importFrom Seurat Cells
 #' @export
 seurat_filter <- function(sample, seurat, assay = "RNA", min_genes = 100, min_counts = 100,
                           min_cells = 1, min_mt = 0, max_genes = Inf, max_counts=Inf,
@@ -132,6 +139,7 @@ seurat_filter <- function(sample, seurat, assay = "RNA", min_genes = 100, min_co
   df_filtered <- data.frame(Cells = c(n_cells, n_cells2, n_cells-n_cells2), Genes = c(n_genes, n_genes2, n_genes-n_genes2),
                    row.names = c("Before", "After", "Filtered_out"))
   if (results_dir != "") {
+    df_filtered <- df_filtered
     save_csv <- file.path(results_dir, paste0(sample, "_", "filtering_stats.csv"))
     write.csv(df_filtered, save_csv, row.names = TRUE)
   }
@@ -144,6 +152,7 @@ seurat_filter <- function(sample, seurat, assay = "RNA", min_genes = 100, min_co
 #' @param assay Assay to normalize. Default RNA
 #'
 #' @return A Seurat object with normalized data.
+#' @importFrom Seurat NormalizeData
 #' @export
 seurat_normalize <- function(seurat, assay = "RNA") {
   check_assay(seurat, assay)
@@ -159,6 +168,7 @@ seurat_normalize <- function(seurat, assay = "RNA") {
 #' @param method What to use for features selection. Default vst
 #'
 #' @return A Seurat object with variable features selected.
+#' @importFrom Seurat FindVariableFeatures
 #' @export
 seurat_features <- function(seurat, assay = "RNA", nfeatures = 2000, method = "vst") {
   check_assay(seurat, assay)
@@ -175,6 +185,7 @@ seurat_features <- function(seurat, assay = "RNA", nfeatures = 2000, method = "v
 #' @param features Features to scale. Default all.genes
 #'
 #' @return A seurat object with scaled features.
+#' @importFrom Seurat ScaleData
 #' @export
 seurat_scale <- function(seurat, assay = "RNA", features = NULL) {
   check_assay(seurat, assay)
@@ -190,6 +201,7 @@ seurat_scale <- function(seurat, assay = "RNA", features = NULL) {
 #' @param npcs Number of components to compute. Default 50
 #'
 #' @return A seurat object with PCA.
+#' @importFrom Seurat RunPCA
 #' @export
 seurat_pca <- function(seurat, assay = "RNA", npcs = 50) {
   check_assay(seurat, assay)
@@ -200,11 +212,16 @@ seurat_pca <- function(seurat, assay = "RNA", npcs = 50) {
 
 #' Integrate a list of Seurat objects together.
 #'
-#' @param analysis_list A list of several objects to integrate together. These objects must all be of the same type.
+#' @param seurat_list A list of several objects to integrate together. These objects must all be of the same type.
 #' @param nfeatures The number of features to use in integration selection. Default 5000
 #' @param assay Which assay to use. Default "RNA"
 #'
 #' @return A Seurat object with all the analysis from the list integrated together.
+#' @importFrom Seurat RenameCells
+#' @importFrom Seurat Cells
+#' @importFrom Seurat SelectIntegrationFeatures
+#' @importFrom Seurat FindIntegrationAnchors
+#' @importFrom Seurat IntegrateData
 #' @export
 seurat_integrate <- function(seurat_list, nfeatures = 5000, assay = "RNA") {
   checkmate::assert_int(nfeatures)
@@ -226,7 +243,8 @@ seurat_integrate <- function(seurat_list, nfeatures = 5000, assay = "RNA") {
 #' @param seurat The Seurat object.
 #' @param k.param Defines k for the k-nearest neighbor algorithm. Default 20
 #'
-#' @return A Seurat object with KNN
+#' @return A Seurat object with KNN.
+#' @importFrom Seurat FindNeighbors
 #' @export
 seurat_neighbors <- function(seurat, k.param = 20) {
   checkmate::assert_class(seurat, "Seurat")
@@ -242,6 +260,7 @@ seurat_neighbors <- function(seurat, k.param = 20) {
 #' @param prefix The prefix to use. Default to "RNA_snn"
 #'
 #' @return Seurat object with clusters
+#' @importFrom Seurat FindClusters
 #' @export
 seurat_clustering <- function(seurat, resolution = 1, prefix = "RNA_snn") {
   checkmate::assert_class(seurat, "Seurat")
@@ -255,8 +274,11 @@ seurat_clustering <- function(seurat, resolution = 1, prefix = "RNA_snn") {
 #'
 #' @param seurat The Seurat object.
 #' @param n.neighbors Number of neighbors to use when computing the UMAP. Default 30
+#' @param dims Number of dimension used. Default 1:20
 #'
-#' @return Seurat object with UMAP
+#' @return Seurat object with UMAP.
+#' @importFrom Seurat RunUMAP
+#' @importFrom Seurat FindAllMarkers
 #' @export
 seurat_umap <- function(seurat, n.neighbors = 30, dims = 1:20) {
   checkmate::assert_class(seurat, "Seurat")

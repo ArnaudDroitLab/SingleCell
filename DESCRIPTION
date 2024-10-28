@@ -15,7 +15,9 @@ Imports:
     Seurat,
     SeuratObject,
     tools,
+    stringr,
     rmarkdown,
-    dplyr,
     ggplot2,
-    magrittr
+    magrittr,
+    dplyr,
+    readr
