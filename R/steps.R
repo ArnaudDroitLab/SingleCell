@@ -26,7 +26,6 @@ load_data <- function(path_to_count, sample, from = "Cellranger", to = "Seurat")
   return(analysis)
 }
 
-
 #' Filter out genes and cells outside the min and max limits for several parameters.
 #'
 #' @param analysis The analysis object.
@@ -54,7 +53,7 @@ filter_data <- function(analysis, sample = "", method = "Seurat", assay = "RNA",
                         mitochondrial_genes = c(), min_genes = 100, min_counts = 100,
                         min_cells = 1, min_mt = 0, max_genes = Inf, max_counts=Inf,
                         max_cells = Inf, max_mt = 20, plots_dir = "", results_dir = "") {
-
+  
   checkmate::assert_string(sample)
   checkmate::assert_string(method)
   checkmate::assert_class(analysis, method)
@@ -70,34 +69,31 @@ filter_data <- function(analysis, sample = "", method = "Seurat", assay = "RNA",
   checkmate::assert_numeric(max_mt)
   checkmate::assert_string(plots_dir, na.ok = TRUE)
   checkmate::assert_directory(results_dir)
-
+  
   if (method == "Seurat") {
     check_assay(analysis, assay)
     analysis <- seurat_compute_mt(analysis, assay, organism, mitochondrial_genes)
     df_plot <- data.frame(samples = analysis@meta.data$orig.ident,
                           nCount_RNA = analysis@meta.data$nCount_RNA,
                           nFeature_RNA = analysis@meta.data$nFeature_RNA)
-    # print(results_dir)
-    analysis <- seurat_filter(sample = sample, seurat = analysis, assay = assay, min_genes = min_genes, min_counts = min_counts,
-                              min_cells = min_cells, min_mt = min_mt, max_genes = max_genes,
-                              max_counts = max_counts, max_cells = max_cells, max_mt = max_mt, results_dir = results_dir)
+    
     list_plot <- list()
     list_plot[["count"]] <- plot_filter(df_plot, x_name = "samples", y_name = "nCount_RNA",
-                                             low = min_counts, high = max_counts)
+                                        low = min_counts, high = max_counts)
     list_plot[["feature"]] <- plot_filter(df_plot, x_name = "samples", y_name = "nFeature_RNA",
-                                               low = min_genes, high = max_genes)
+                                          low = min_genes, high = max_genes)
     if ("percent_mt" %in% colnames(analysis@meta.data)) {
       df_plot$percent_mitochondria <- analysis@meta.data$percent_mt
       list_plot[["mitochondria"]] <- plot_filter(df_plot, x_name = "samples", y_name = "percent_mitochondria",
-                                                      low = min_mt, high = max_mt)
+                                                 low = min_mt, high = max_mt)
     }
     if (checkmate::check_directory_exists(plots_dir) == TRUE) {
       filename = file.path(plots_dir, paste0(sample, "_filter_plots.pdf"))
       # pdf(filename, onefile = TRUE)
       for (i in names(list_plot)) {
         ggplot2::ggsave(paste(sample, i,  "filter_plot.png", sep = "_"), plot = list_plot[[i]],
-                        device = "png", path = plots_dir, dpi = 200, width = 500 + 300*length(unique(df_plot$samples)), # 800 px width is ok for 1 sample
-                        height = 1200, units = "px")
+                                device = "png", path = plots_dir, dpi = 200, width = 500 + 300*length(unique(df_plot$samples)), # 800 px width is ok for 1 sample
+                                height = 1200, units = "px")
         # print(list_plot[[i]])
       }
       # dev.off()
@@ -107,6 +103,12 @@ filter_data <- function(analysis, sample = "", method = "Seurat", assay = "RNA",
         print(list_plot[[i]])
       }
     }
+    # print(results_dir)
+    analysis <- seurat_filter(sample = sample, seurat = analysis, assay = assay, min_genes = min_genes, min_counts = min_counts,
+                              min_cells = min_cells, min_mt = min_mt, max_genes = max_genes,
+                              max_counts = max_counts, max_cells = max_cells, max_mt = max_mt, results_dir = results_dir, 
+                              plots_dir = plots_dir)
+    
   } else {
     stop(paste0(method, " is an unsupported method."))
   }
@@ -218,7 +220,7 @@ neighbors <- function(analysis, method = "Seurat", k.param = 20) {
     stop(paste0(method, " is an unsupported method."))
   }
   return(analysis)
-}
+
 
 #' Perform the clustering step, and optionally a clustree graph
 #'
@@ -291,10 +293,20 @@ umap <- function(analysis, sample = "", method = "Seurat", n_neighbors = 30, plo
       list_plot <- list()
       list_plot[["sample"]] <- plot_seurat_dim(analysis, reduction = "umap", colour_by = "orig.ident")
       list_plot[["clusters"]] <- plot_seurat_dim(analysis, reduction = "umap", colour_by = plot_clustering)
+      list_plot[["clusters_numbers"]] <- Seurat::LabelClusters(list_plot[["clusters"]], id = plot_clustering, 
+                                                               color = "black", box = TRUE) + NoLegend()
+      list_plot[["nCount"]] <- plot_seurat_dim(analysis, reduction = "umap", colour_by = "nCount_RNA")
+      
+      if (checkmate::testFileExists(file.path(plots_dir, paste0(sample, "_mitochondria_filter_plot.png")))) {
+        list_plot[["mitochondria"]] <- plot_seurat_dim(analysis, reduction = "umap", colour_by = "percent_mt")
+        } else {print("Mitochondria file does not exist")}
+      
       for (i in names(list_plot)) {
-        ggplot2::ggsave(paste(sample, i,  "umap_plot.png", sep = "_"), plot = list_plot[[i]],
+        if (i != "clusters") {
+          ggplot2::ggsave(paste(sample, i,  "umap_plot.png", sep = "_"), plot = list_plot[[i]],
                         device = "png", path = plots_dir, dpi = 200, width = 1500,
                         height = 1200, units = "px")
+          }
       }
     }
 
@@ -313,6 +325,7 @@ umap <- function(analysis, sample = "", method = "Seurat", n_neighbors = 30, plo
 #' @param logfc_threshold Filter genes based on a minimum logged fold change. Default 0.25
 #' @param pvalue_threshold Filter genes based on a maximum pvalue. Default 0.05
 #' @param results_dir The path to save the tables. Keep empty to skip plot saving. Default ""
+#' @param variable what to isolate from the FetchData. Default "seurat_clusters"
 #'
 #' @return A dataframe that contains the differentially expressed genes for each cluster against all other clusters.
 #' @export
@@ -326,12 +339,20 @@ umap <- function(analysis, sample = "", method = "Seurat", n_neighbors = 30, plo
 #' @importFrom dplyr slice_min
 #' @importFrom dplyr slice_max
 #' @importFrom readr write_csv
+#' @importFrom dplyr arrange
+#' @importFrom dplyr select
+#' @importFrom dplyr filter
+#' @importFrom dplyr summarise
+#' @importFrom dplyr rename
+#' @importFrom Seurat FetchData
+
 find_all_DE <- function(analysis, sample = "", method = "Seurat",
                     test = "wilcox", logfc_threshold = 0.25, pvalue_threshold = 0.05,
-                    results_dir = "") {
+                    results_dir = "", variable = "seurat_clusters") {
 
   checkmate::assert_string(method)
   checkmate::assert_class(analysis, method)
+  checkmate::assert_string(variable)
   checkmate::assert_string(sample)
   checkmate::assert_string(results_dir)
   checkmate::assert_string(test)
@@ -340,13 +361,46 @@ find_all_DE <- function(analysis, sample = "", method = "Seurat",
   if (results_dir != "") {checkmate::assert_directory(results_dir)}
 
   if (method == "Seurat") {
-    df_de <- seurat_all_DE(analysis, assay = "RNA", slot = "data", method = method, logfc_threshold = logfc_threshold, pvalue_threshold = pvalue_threshold, min_pct = 0.1, only.pos = FALSE)
+    df_de <- seurat_all_DE(analysis, assay = "RNA", slot = "data", method = method, logfc_threshold = logfc_threshold, 
+                           pvalue_threshold = pvalue_threshold, min_pct = 0.1, only.pos = FALSE)
   }
   if (results_dir != "") {
-    top_de <- df_de %>% dplyr::group_by(df_de$cluster) %>% dplyr::slice_min(df_de$p_val, n = 10) %>% dplyr::slice_max(df_de$avg_log2FC, n = 10)
+    top_de <- df_de %>% dplyr::group_by(cluster) %>% dplyr::slice_min(p_val, n = 10) %>% dplyr::slice_max(avg_log2FC, n = 10)
 
     readr::write_csv(df_de, file.path(results_dir, paste0(sample, "_DE.csv")))
     readr::write_csv(top_de, file.path(results_dir, paste0(sample, "_top10_DE.csv")))
+    
+    if (variable %in% colnames(analysis@meta.data)) {
+      # Fetch the cluster data using the variable
+      print(paste("The variable", variable, "exists, we can go on with the analysis."))
+    } else {
+      stop(paste("The variable", variable, "does not exist in the metadata."))
+    }
+    
+    df_stats <- Seurat::FetchData(analysis, vars = variable) %>%
+      group_by(!!sym(variable)) %>% 
+      summarise(CellCount = n(), .groups = "drop") %>% 
+      arrange(!!sym(variable)) %>%
+      mutate(Differentially_Expressed = df_de %>% 
+               group_by(cluster) %>% 
+               summarise(n = n(), .groups = "drop") %>% 
+               arrange(cluster) %>% 
+               pull(n),
+             UpRegulated = df_de %>% 
+               filter(avg_log2FC > 0) %>% 
+               group_by(cluster) %>% 
+               summarise(n = n(), .groups = "drop") %>% 
+               arrange(cluster) %>% 
+               pull(n),
+             DownRegulated = df_de %>% 
+               filter(avg_log2FC < 0) %>% 
+               group_by(cluster) %>% 
+               summarise(n = n(), .groups = "drop") %>% 
+               arrange(cluster) %>% 
+               pull(n)) %>%
+      rename(Cluster = variable)
+    
+    readr::write_csv(df_stats, file.path(results_dir, paste0(sample,"_summary_per_clusters.csv")))
 
   }
   return(df_de)

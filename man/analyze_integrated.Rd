@@ -32,7 +32,8 @@ analyze_integrated(
   de_test = "wilcox",
   de_logfc = 0.25,
   de_pvalue = 0.05,
-  force_report = FALSE
+  force_report = FALSE,
+  variable = "seurat_clusters"
 )
 }
 \arguments{
@@ -101,6 +102,8 @@ Typically resolutions range between 0.1 and 2. Default 1}
 
 \item{force_report}{Whether to overwrite the report if it already exists. If this is FALSE, and a file \code{analysis.Rmd} already exists,
 report creation will be skipped. Default FALSE}
+
+\item{variable}{The column name that is going to be used for extracting the cluster number per barcode. Default "seurat_clusters"}
 }
 \value{
 An analysis object.

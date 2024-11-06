@@ -89,16 +89,18 @@ seurat_compute_mt <- function(seurat, assay = "RNA", organism="", mitochondrial_
 #' @param min_mt All cells having a lower percentage of mitochondria will be filtered out. Default 0
 #' @param max_mt All cells having a higher percentage of mitochondria will be filtered out. Default Inf
 #' @param results_dir The path to save the dataframe. Keep empty to skip plot saving. Default ""
+#' @param plots_dir The path to save the plots. Keep empty to skip plot saving. Default ""
 #'
 #' @return A Seurat object with its count matrix filtered.
 #' @importFrom SeuratObject Cells
 #' @importFrom SeuratObject GetAssayData
 #' @importFrom Seurat DefaultAssay
 #' @importFrom Seurat Cells
+#' @importFrom ggplot2 ggsave
 #' @export
 seurat_filter <- function(sample, seurat, assay = "RNA", min_genes = 100, min_counts = 100,
                           min_cells = 1, min_mt = 0, max_genes = Inf, max_counts=Inf,
-                          max_cells = Inf, max_mt = Inf, results_dir = "") {
+                          max_cells = Inf, max_mt = Inf, results_dir = "", plots_dir = "") {
   check_assay(seurat, assay)
   checkmate::assert_numeric(min_genes)
   checkmate::assert_numeric(min_counts)
@@ -109,10 +111,10 @@ seurat_filter <- function(sample, seurat, assay = "RNA", min_genes = 100, min_co
   checkmate::assert_numeric(max_cells)
   checkmate::assert_numeric(max_mt)
   checkmate::assert_directory(results_dir)
-
+  
   n_cells = length(Seurat::Cells(seurat))
   n_genes = nrow(seurat@assays[[assay]]@counts)
-
+  
   if (min_cells > 0 | max_cells < length(SeuratObject::Cells(seurat))) {
     counts <- as.matrix(SeuratObject::GetAssayData(seurat, slot = "counts", assay = assay))
     genes_count <- rowSums(counts > 0)
@@ -126,18 +128,25 @@ seurat_filter <- function(sample, seurat, assay = "RNA", min_genes = 100, min_co
       seurat = subset(seurat, features = genes_filter)
     }
   }
-
+  
   seurat = subset(seurat, subset = (nFeature_RNA >= min_genes & nFeature_RNA <= max_genes &
                                       nCount_RNA >= min_counts & nCount_RNA <= max_counts))
-
+  
   if ("percent_mt" %in% colnames(seurat@meta.data)) {
     seurat = subset(seurat, subset = (percent_mt >= min_mt & percent_mt <= max_mt))
   }
-
+  
   n_cells2 = length(Seurat::Cells(seurat))
   n_genes2 = nrow(seurat@assays$RNA@counts)
   df_filtered <- data.frame(Cells = c(n_cells, n_cells2, n_cells-n_cells2), Genes = c(n_genes, n_genes2, n_genes-n_genes2),
-                   row.names = c("Before", "After", "Filtered_out"))
+                            row.names = c("Before", "After", "Filtered_out"))
+  
+  if (plots_dir != "") {
+    stat <- plot_filtering_stats(df_filtered, x_name = "Genes", y_name = "Cells")
+    ggplot2::ggsave(paste(sample, "stats_filter_plot.png", sep = "_"), plot = stat, device = "png", path = plots_dir, dpi = 200, width = 1500, height = 1200, 
+                    units = "px")
+  } else {print(paste0("Directory ", plots_dir, " does not exist, not saving images and showing them to screen."))}
+  
   if (results_dir != "") {
     df_filtered <- df_filtered
     save_csv <- file.path(results_dir, paste0(sample, "_", "filtering_stats.csv"))
@@ -287,7 +296,25 @@ seurat_umap <- function(seurat, n.neighbors = 30, dims = 1:20) {
   return(seurat)
 }
 
-seurat_all_DE <- function(seurat, assay = "RNA", slot = "data", method = "wilcox", logfc_threshold = 0.25, min_pct = 0.1, pvalue_threshold = 0.05, only.pos = FALSE) {
+#' Function to find all genetic markers per clusters
+#'
+#' @param seurat The Seurat object.
+#' @param assay Which assay to make the filters on. Default "RNA"
+#' @param slot Slot to pull data from. Default "data"
+#' @param method The statistic test that compares expression for each duo. Default "wilcox"
+#' @param logfc_threshold The threshold for the log value. Shows result that have a difference of that value. Default 0.25
+#' @param min_pct only test genes that are detected in a minimum fraction of min.pct cells in either of the two populations. 
+#' Meant to spped up the function by not testing genes that are very infrequently expressed. Default 0.1
+#' @param pvalue_threshold Threshold of significant difference between expression of markers. Default 0.05
+#' @param only.pos Only return positive markers. Default FALSE
+#'
+#' @return A table with all the markers per clusters with p-values and the Fold Change log value
+#' @importFrom Seurat FindAllMarkers
+#' @export
+#'
+#' @examples
+seurat_all_DE <- function(seurat, assay = "RNA", slot = "data", method = "wilcox", logfc_threshold = 0.25, 
+                          min_pct = 0.1, pvalue_threshold = 0.05, only.pos = FALSE) {
   check_assay(seurat, assay)
   checkmate::assert_string(slot)
   checkmate::assert_string(method)
@@ -299,6 +326,7 @@ seurat_all_DE <- function(seurat, assay = "RNA", slot = "data", method = "wilcox
                                     verbose = T, only.pos = only.pos,
                                     assay = assay, slot = slot,
                                     logfc.threshold = logfc_threshold, min.pct = min_pct)
+  
   return(markers)
 }
 

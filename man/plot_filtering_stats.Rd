@@ -4,10 +4,14 @@
 \alias{plot_filtering_stats}
 \title{Barplots that represent the filtering statistics for the seurat filtration}
 \usage{
-plot_filtering_stats(df)
+plot_filtering_stats(df, x_name = "Genes", y_name = "Cells")
 }
 \arguments{
-\item{df}{dataframe with the statistics}
+\item{df}{Data frame as the output by seurat_filter that has the filtering statistics}
+
+\item{x_name}{The first column that needs to be work with for the first barplot. Default "Genes"}
+
+\item{y_name}{The second column that needs to be work with for the second barplot. Default "Cells"}
 }
 \value{
 Barplots as a ggplot object

@@ -146,6 +146,13 @@ add_df_report_no_rownames <- function(report, csv_relative_path) {
       "```\n\n", file = report, sep = "", append = TRUE)
 }
 
+add_check_box <- function(report, checklist) {
+  checkmate::assert_file_exists(report)
+  
+  cat("- [ ] &nbsp;&nbsp;", checklist)
+}
+
+
 #' Add a chunk of code to read content of file in a report.
 #'
 #' @param report Path to the report.
@@ -275,11 +282,14 @@ make_integration_report <- function(samples, report_path, report_name = "integra
 make_analysis_report <- function(sample, report_path, report_name, plots_relative_path = "plots", data_relative_path = "results", title = "Analysis report", force = FALSE) {
 
   # Every file will be sample_name.ext, you should report here name.ext, sample_ will be automatically added. Currently only accepts .csv and .png
-  steps_files <- list(Filtering = list(plots = c("count_filter_plot.png", "feature_filter_plot.png", "mitochondria_filter_plot.png"), df = c("filtering_stats.csv")),
+  steps_files <- list(Filtering = list(plots = c("count_filter_plot.png", "feature_filter_plot.png", "mitochondria_filter_plot.png"), 
+                                       df = c("filtering_stats.csv")),
+                      Filtering_stats = list(plots = "stats_filter_plot.png"),
                       PCA = list(plots = c("Elbow_pca_plot.png", "PCA_pca_plot.png")),
                       "Clustering tree" = list(plots = "clustree.png"),
-                      UMAP = list(plots = c("sample_umap_plot.png", "clusters_umap_plot.png")),
-                      DE = list(df = c("top10_DE.csv", "stats_DE.csv")))
+                      UMAP = list(plots = c("sample_umap_plot.png", "clusters_numbers_umap_plot.png", 
+                                            "mitochondria_umap_plot.png", "nCount_umap_plot.png")),
+                      DE = list(df = c("top10_DE.csv", "summary_per_clusters.csv")))
   report <- file.path(report_path, report_name)
   if (file.exists(report)) {
     if (force) {
@@ -291,6 +301,12 @@ make_analysis_report <- function(sample, report_path, report_name, plots_relativ
   }
 
   initialize_report(report_name, report_path, force = force)
+  
+  checklist_steps <- list(Filtering = "Filtering", 
+                          Elbow = "Elbow", 
+                          Tree = "Clustering Tree", 
+                          Table = "Cluster Table", 
+                          UMAP = "UMAP")
 
   for (step in names(steps_files)) {
     add_title_report(report, step, 1)
@@ -307,9 +323,10 @@ make_analysis_report <- function(sample, report_path, report_name, plots_relativ
       if (type == "plots") {
         filepaths <- lapply(filepaths, function(x) file.path(plots_relative_path, paste0(sample, "_", x)))
         filepaths <- filepaths[file.exists(file.path(report_path, filepaths))]
-        if (step %in% c("Clustering tree", "UMAP")) {
+        if (step %in% c("Clustering tree", "UMAP", "Filtering_stats")) {
           add_images_knit_report(report, filepaths, ncol = 1)
-        } else {
+        } 
+        else {
           add_images_knit_report(report, filepaths, ncol = if (length(filepaths)%%3 == 0) 3 else 2)
         }
 
