@@ -190,7 +190,8 @@ plot_seurat_dim <- function(seurat, reduction = "pca", colour_by = "orig.ident",
       ggplot2::geom_point() +
       ggplot2::theme_bw() + 
       ggplot2::theme(legend.position = "top", legend.key = element_rect(fill = "white", colour = "black")) +
-      ggplot2::guides(color = ggplot2::guide_legend(title = NULL))
+      ggplot2::guides(color = ggplot2::guide_legend(title = NULL)) + 
+      ggplot2::theme(legend.position = "top")
   }
   return(p)
 }
