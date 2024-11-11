@@ -138,15 +138,16 @@ seurat_filter <- function(sample, seurat, assay = "RNA", min_genes = 100, min_co
   
   n_cells2 = length(Seurat::Cells(seurat))
   n_genes2 = nrow(seurat@assays$RNA@counts)
-  df_filtered <- data.frame(Cells = c(n_cells, n_cells2, n_cells-n_cells2), Genes = c(n_genes, n_genes2, n_genes-n_genes2),
-                            row.names = c("Before", "After", "Filtered_out"))
-  
-  if (plots_dir != "") {
-    stat <- plot_filtering_stats(df_filtered, x_name = "Genes", y_name = "Cells")
-    ggplot2::ggsave(paste(sample, "stats_filter_plot.png", sep = "_"), plot = stat, device = "png", path = plots_dir, dpi = 200, width = 1500, height = 1200, 
-                    units = "px")
-  } else {print(paste0("Directory ", plots_dir, " does not exist, not saving images and showing them to screen."))}
-  
+  percent_cells <- ((n_cells-n_cells2)/n_cells) * 100
+  percent_gene <- ((n_genes-n_genes2)/n_genes) * 100
+  df_filtered <- data.frame(
+    Before = c(n_cells, n_genes),
+    After = c(n_cells2, n_genes2),
+    Filtered_out = c(n_cells - n_cells2, n_genes- n_genes2),
+    Percentage = c(round(percent_cells,2), round(percent_gene, 2)),
+    row.names = c("Cells", "Genes")
+  )
+
   if (results_dir != "") {
     df_filtered <- df_filtered
     save_csv <- file.path(results_dir, paste0(sample, "_", "filtering_stats.csv"))
@@ -313,19 +314,32 @@ seurat_umap <- function(seurat, n.neighbors = 30, dims = 1:20) {
 #' @export
 #'
 #' @examples
-seurat_all_DE <- function(seurat, assay = "RNA", slot = "data", method = "wilcox", logfc_threshold = 0.25, 
-                          min_pct = 0.1, pvalue_threshold = 0.05, only.pos = FALSE) {
+seurat_all_DE <- function(seurat, sample = "", assay = "RNA", slot = "data", method = "wilcox", logfc_threshold = 0.25, 
+                          min_pct = 0.1, pvalue_threshold = 0.05, only.pos = FALSE, seurat_object = "saved") {
   check_assay(seurat, assay)
   checkmate::assert_string(slot)
   checkmate::assert_string(method)
   checkmate::assert_double(logfc_threshold, len = 1)
   checkmate::assert_double(min_pct, len = 1)
   checkmate::assert_logical(only.pos, len = 1)
+  checkmate::assert_string(seurat_object)
 
   markers <- Seurat::FindAllMarkers(seurat, method = method,
                                     verbose = T, only.pos = only.pos,
                                     assay = assay, slot = slot,
                                     logfc.threshold = logfc_threshold, min.pct = min_pct)
+  
+  if (!is.null(seurat_object)) {
+    stopifnot(is(seurat_object, "character"))
+    if (!dir.exists(seurat_object)) {
+      dir.create(seurat_object)
+    }
+  }
+  
+  output_seurat <- paste0(seurat_object, "/", sample, ".rds")
+  if (!is.null(seurat_object) & !file.exists(output_seurat)) {
+    saveRDS(markers, output_seurat)
+  }
   
   return(markers)
 }

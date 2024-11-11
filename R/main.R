@@ -262,7 +262,8 @@ analyze_integrated <- function(analysis,
                                de_logfc = 0.25,
                                de_pvalue = 0.05,
                                force_report = FALSE, 
-                               variable = "seurat_clusters") {
+                               variable = "seurat_clusters", 
+                               seurat_object = "saved") {
 
   checkmate::assert_int(step, lower = 6, upper = Inf)
   checkmate::assert_string(method)
@@ -382,7 +383,8 @@ analyze_integrated <- function(analysis,
                             logfc_threshold = de_logfc,
                             pvalue_threshold = de_pvalue,
                             results_dir = results_dir, 
-                            variable = variable)
+                            variable = variable, 
+                            seurat_object = seurat_object)
   }
 
   if (save_path != "") {

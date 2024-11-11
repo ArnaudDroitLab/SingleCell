@@ -220,7 +220,7 @@ neighbors <- function(analysis, method = "Seurat", k.param = 20) {
     stop(paste0(method, " is an unsupported method."))
   }
   return(analysis)
-
+}
 
 #' Perform the clustering step, and optionally a clustree graph
 #'
@@ -348,7 +348,7 @@ umap <- function(analysis, sample = "", method = "Seurat", n_neighbors = 30, plo
 
 find_all_DE <- function(analysis, sample = "", method = "Seurat",
                     test = "wilcox", logfc_threshold = 0.25, pvalue_threshold = 0.05,
-                    results_dir = "", variable = "seurat_clusters") {
+                    results_dir = "", variable = "seurat_clusters", seurat_object = "saved") {
 
   checkmate::assert_string(method)
   checkmate::assert_class(analysis, method)
@@ -360,10 +360,17 @@ find_all_DE <- function(analysis, sample = "", method = "Seurat",
   checkmate::assert_number(pvalue_threshold, lower = 0, upper = 1)
   if (results_dir != "") {checkmate::assert_directory(results_dir)}
 
-  if (method == "Seurat") {
-    df_de <- seurat_all_DE(analysis, assay = "RNA", slot = "data", method = method, logfc_threshold = logfc_threshold, 
-                           pvalue_threshold = pvalue_threshold, min_pct = 0.1, only.pos = FALSE)
+  output_seurat <- paste0(seurat_object, "/", sample, ".rds")
+  if (!is.null(seurat_object) & file.exists(output_seurat)) {
+    df_de <- readRDS(output_seurat)
+    print("Seurat object found, skipping finding Markers. Congradulations.")
+  } else {
+    if (method == "Seurat") {
+      df_de <- seurat_all_DE(analysis, sample = sample, assay = "RNA", slot = "data", method = method, logfc_threshold = logfc_threshold, 
+                             pvalue_threshold = pvalue_threshold, min_pct = 0.1, only.pos = FALSE, seurat_object = seurat_object)
+    }
   }
+    
   if (results_dir != "") {
     top_de <- df_de %>% dplyr::group_by(cluster) %>% dplyr::slice_min(p_val, n = 10) %>% dplyr::slice_max(avg_log2FC, n = 10)
 
@@ -378,33 +385,35 @@ find_all_DE <- function(analysis, sample = "", method = "Seurat",
     }
     
     df_stats <- Seurat::FetchData(analysis, vars = variable) %>%
-      group_by(!!sym(variable)) %>% 
-      summarise(CellCount = n(), .groups = "drop") %>% 
-      arrange(!!sym(variable)) %>%
-      mutate(Differentially_Expressed = df_de %>% 
-               group_by(cluster) %>% 
-               summarise(n = n(), .groups = "drop") %>% 
-               arrange(cluster) %>% 
-               pull(n),
+      dplyr::group_by(!!sym(variable)) %>% 
+      dplyr::summarise(CellCount = n(), .groups = "drop") %>% 
+      dplyr::arrange(!!sym(variable)) %>%
+      dplyr::mutate(Differentially_Expressed = df_de %>% 
+               dplyr::group_by(cluster) %>% 
+               dplyr::summarise(n = n(), .groups = "drop") %>% 
+               dplyr::arrange(cluster) %>% 
+               dplyr::pull(n),
              UpRegulated = df_de %>% 
-               filter(avg_log2FC > 0) %>% 
-               group_by(cluster) %>% 
-               summarise(n = n(), .groups = "drop") %>% 
-               arrange(cluster) %>% 
-               pull(n),
+               dplyr::filter(avg_log2FC > 0) %>% 
+               dplyr::group_by(cluster) %>% 
+               dplyr::summarise(n = n(), .groups = "drop") %>% 
+               dplyr::arrange(cluster) %>% 
+               dplyr::pull(n),
              DownRegulated = df_de %>% 
-               filter(avg_log2FC < 0) %>% 
-               group_by(cluster) %>% 
-               summarise(n = n(), .groups = "drop") %>% 
-               arrange(cluster) %>% 
-               pull(n)) %>%
-      rename(Cluster = variable)
+               dplyr::filter(avg_log2FC < 0) %>% 
+               dplyr::group_by(cluster) %>% 
+               dplyr::summarise(n = n(), .groups = "drop") %>% 
+               dplyr::arrange(cluster) %>% 
+               dplyr::pull(n)) %>%
+      dplyr::rename(Cluster = variable)
     
     readr::write_csv(df_stats, file.path(results_dir, paste0(sample,"_summary_per_clusters.csv")))
 
   }
   return(df_de)
 }
+
+
 
 
 

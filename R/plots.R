@@ -79,7 +79,7 @@ plot_filtering_stats <- function(df, x_name = "Genes", y_name = "Cells") {
   if (df[[x_name]][1] - df[[x_name]][2] != df[[x_name]][3]) {stop("Filtration cannot add features.")}
   if (df[[y_name]][1] - df[[y_name]][2] != df[[y_name]][3]) {stop("Filtration cannot add features.")}
   
-  if (isFALSE(identical(rownames(df), c("Before", "After", "Filtered_out")))) {
+  if (isFALSE(identical(rownames(df), c("Before", "After", "Filtered_out", "Percentage")))) {
     stop(paste0("Dataframe should be ordered like this = 'Before', 'After', 'Filtered_out'."))
          }
   

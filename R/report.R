@@ -210,7 +210,7 @@ build_report <- function(report, title) {
 make_integration_report <- function(samples, report_path, report_name = "integration.Rmd", plots_relative_path = "plots", data_relative_path = "results", title = "Integration report", force = FALSE) {
 
   # Every file will be sample_name.ext, you should report here name.ext, sample_ will be automatically added. Currently only accepts .csv and .png
-  steps_files <- list(Filtering = list(plots = c("count_filter_plot.png", "feature_filter_plot.png", "mitochondria_filter_plot.png", "stats_filter_plot.png"), df = c("filtering_stats.csv")),
+  steps_files <- list(Filtering = list(plots = c("count_filter_plot.png", "feature_filter_plot.png", "mitochondria_filter_plot.png"), df = c("filtering_stats.csv")),
                       PCA = list(plots = c("Elbow_pca_plot.png", "PCA_pca_plot.png"))
                       )
   report <- file.path(report_path, report_name)
@@ -284,7 +284,6 @@ make_analysis_report <- function(sample, report_path, report_name, plots_relativ
   # Every file will be sample_name.ext, you should report here name.ext, sample_ will be automatically added. Currently only accepts .csv and .png
   steps_files <- list(Filtering = list(plots = c("count_filter_plot.png", "feature_filter_plot.png", "mitochondria_filter_plot.png"), 
                                        df = c("filtering_stats.csv")),
-                      Filtering_stats = list(plots = "stats_filter_plot.png"),
                       PCA = list(plots = c("Elbow_pca_plot.png", "PCA_pca_plot.png")),
                       "Clustering tree" = list(plots = "clustree.png"),
                       UMAP = list(plots = c("sample_umap_plot.png", "clusters_numbers_umap_plot.png", 
