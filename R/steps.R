@@ -131,9 +131,13 @@ normalize_data <- function(analysis, method = "Seurat", assay = "RNA", nfeatures
   checkmate::assert_vector(features, null.ok = TRUE)
   if (method == "Seurat") {
     check_assay(analysis, assay)
-    analysis <- seurat_normalize(analysis, assay)
-    analysis <- seurat_features(analysis, assay, nfeatures, selection_method)
-    analysis <- seurat_scale(analysis, assay, features)
+    if (assay == "integrated") {
+      analysis <- seurat_scale(analysis, assay, features)
+    } else {
+      analysis <- seurat_normalize(analysis, assay)
+      analysis <- seurat_features(analysis, assay, nfeatures, selection_method)
+      analysis <- seurat_scale(analysis, assay, features)
+    }
   } else {
     stop(paste0(method, " is an unsupported method."))
   }
