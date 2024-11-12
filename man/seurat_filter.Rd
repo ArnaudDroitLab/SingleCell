@@ -16,7 +16,8 @@ seurat_filter(
   max_counts = Inf,
   max_cells = Inf,
   max_mt = Inf,
-  results_dir = ""
+  results_dir = "",
+  plots_dir = ""
 )
 }
 \arguments{
@@ -43,6 +44,8 @@ seurat_filter(
 \item{max_mt}{All cells having a higher percentage of mitochondria will be filtered out. Default Inf}
 
 \item{results_dir}{The path to save the dataframe. Keep empty to skip plot saving. Default ""}
+
+\item{plots_dir}{The path to save the plots. Keep empty to skip plot saving. Default ""}
 }
 \value{
 A Seurat object with its count matrix filtered.

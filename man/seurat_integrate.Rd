@@ -7,11 +7,11 @@
 seurat_integrate(seurat_list, nfeatures = 5000, assay = "RNA")
 }
 \arguments{
+\item{seurat_list}{A list of several objects to integrate together. These objects must all be of the same type.}
+
 \item{nfeatures}{The number of features to use in integration selection. Default 5000}
 
 \item{assay}{Which assay to use. Default "RNA"}
-
-\item{analysis_list}{A list of several objects to integrate together. These objects must all be of the same type.}
 }
 \value{
 A Seurat object with all the analysis from the list integrated together.

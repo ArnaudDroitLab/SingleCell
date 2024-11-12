@@ -22,9 +22,9 @@ pca(
 
 \item{assay}{Which assay to compute the PCA on. Default "RNA"}
 
-\item{plots_dir}{The path to save the plots. Keep empty to skip plot saving. Default ""}
+\item{npcs}{Number of components to compute. Default 50}
 
-\item{npc}{Number of components to compute. Default 50}
+\item{plots_dir}{The path to save the plots. Keep empty to skip plot saving. Default ""}
 }
 \value{
 An analysis object of type method with PCA.
