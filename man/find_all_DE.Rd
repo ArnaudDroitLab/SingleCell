@@ -12,7 +12,8 @@ find_all_DE(
   logfc_threshold = 0.25,
   pvalue_threshold = 0.05,
   results_dir = "",
-  variable = "seurat_clusters"
+  variable = "seurat_clusters",
+  seurat_object = "saved"
 )
 }
 \arguments{

@@ -263,7 +263,7 @@ analyze_integrated <- function(analysis,
                                de_pvalue = 0.05,
                                force_report = FALSE, 
                                variable = "seurat_clusters", 
-                               seurat_object = "saved") {
+                               force_DE = FALSE) {
 
   checkmate::assert_int(step, lower = 6, upper = Inf)
   checkmate::assert_string(method)
@@ -293,6 +293,7 @@ analyze_integrated <- function(analysis,
 
   checkmate::assert_vector(resolutions_clustree, min.len = 1)
   checkmate::assert_number(resolution_clustering, lower = 0)
+  checkmate::assert_logical(force_DE)
 
   if (save_path != "") {
     checkmate::assert_directory(save_path)
@@ -384,7 +385,7 @@ analyze_integrated <- function(analysis,
                             pvalue_threshold = de_pvalue,
                             results_dir = results_dir, 
                             variable = variable, 
-                            seurat_object = seurat_object)
+                            force_DE = force_DE)
   }
 
   if (save_path != "") {

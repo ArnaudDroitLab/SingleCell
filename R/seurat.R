@@ -315,31 +315,18 @@ seurat_umap <- function(seurat, n.neighbors = 30, dims = 1:20) {
 #'
 #' @examples
 seurat_all_DE <- function(seurat, sample = "", assay = "RNA", slot = "data", method = "wilcox", logfc_threshold = 0.25, 
-                          min_pct = 0.1, pvalue_threshold = 0.05, only.pos = FALSE, seurat_object = "saved") {
+                          min_pct = 0.1, pvalue_threshold = 0.05, only.pos = FALSE) {
   check_assay(seurat, assay)
   checkmate::assert_string(slot)
   checkmate::assert_string(method)
   checkmate::assert_double(logfc_threshold, len = 1)
   checkmate::assert_double(min_pct, len = 1)
   checkmate::assert_logical(only.pos, len = 1)
-  checkmate::assert_string(seurat_object)
 
   markers <- Seurat::FindAllMarkers(seurat, method = method,
                                     verbose = T, only.pos = only.pos,
                                     assay = assay, slot = slot,
                                     logfc.threshold = logfc_threshold, min.pct = min_pct)
-  
-  if (!is.null(seurat_object)) {
-    stopifnot(is(seurat_object, "character"))
-    if (!dir.exists(seurat_object)) {
-      dir.create(seurat_object)
-    }
-  }
-  
-  output_seurat <- paste0(seurat_object, "/", sample, ".rds")
-  if (!is.null(seurat_object) & !file.exists(output_seurat)) {
-    saveRDS(markers, output_seurat)
-  }
   
   return(markers)
 }

@@ -33,7 +33,8 @@ analyze_integrated(
   de_logfc = 0.25,
   de_pvalue = 0.05,
   force_report = FALSE,
-  variable = "seurat_clusters"
+  variable = "seurat_clusters",
+  seurat_object = "saved"
 )
 }
 \arguments{

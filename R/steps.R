@@ -348,7 +348,7 @@ umap <- function(analysis, sample = "", method = "Seurat", n_neighbors = 30, plo
 
 find_all_DE <- function(analysis, sample = "", method = "Seurat",
                     test = "wilcox", logfc_threshold = 0.25, pvalue_threshold = 0.05,
-                    results_dir = "", variable = "seurat_clusters", seurat_object = "saved") {
+                    results_dir = "", variable = "seurat_clusters", force_DE = FALSE) {
 
   checkmate::assert_string(method)
   checkmate::assert_class(analysis, method)
@@ -358,32 +358,27 @@ find_all_DE <- function(analysis, sample = "", method = "Seurat",
   checkmate::assert_string(test)
   checkmate::assert_number(logfc_threshold, lower = 0)
   checkmate::assert_number(pvalue_threshold, lower = 0, upper = 1)
+  checkmate::assert_logical(force_DE)
+  
   if (results_dir != "") {checkmate::assert_directory(results_dir)}
 
-  output_seurat <- paste0(seurat_object, "/", sample, ".rds")
-  if (!is.null(seurat_object) & file.exists(output_seurat)) {
-    df_de <- readRDS(output_seurat)
-    print("Seurat object found, skipping finding Markers. Congradulations.")
-  } else {
+  path_DE_saved <- file.path(results_dir, paste0(sample, "_DE.csv"))
+  if (!force_DE & file.exists(path_DE_saved)) {
+    print("DE data frame found, skipping finding Markers. Congradulations.")
+    return()
+  }
+
     if (method == "Seurat") {
       df_de <- seurat_all_DE(analysis, sample = sample, assay = "RNA", slot = "data", method = method, logfc_threshold = logfc_threshold, 
-                             pvalue_threshold = pvalue_threshold, min_pct = 0.1, only.pos = FALSE, seurat_object = seurat_object)
+                             pvalue_threshold = pvalue_threshold, min_pct = 0.1, only.pos = FALSE)
     }
-  }
-    
+  
   if (results_dir != "") {
     top_de <- df_de %>% dplyr::group_by(cluster) %>% dplyr::slice_min(p_val, n = 10) %>% dplyr::slice_max(avg_log2FC, n = 10)
 
     readr::write_csv(df_de, file.path(results_dir, paste0(sample, "_DE.csv")))
     readr::write_csv(top_de, file.path(results_dir, paste0(sample, "_top10_DE.csv")))
-    
-    if (variable %in% colnames(analysis@meta.data)) {
-      # Fetch the cluster data using the variable
-      print(paste("The variable", variable, "exists, we can go on with the analysis."))
-    } else {
-      stop(paste("The variable", variable, "does not exist in the metadata."))
-    }
-    
+
     df_stats <- Seurat::FetchData(analysis, vars = variable) %>%
       dplyr::group_by(!!sym(variable)) %>% 
       dplyr::summarise(CellCount = n(), .groups = "drop") %>% 
