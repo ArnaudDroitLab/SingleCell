@@ -115,6 +115,9 @@ seurat_filter <- function(sample, seurat, assay = "RNA", min_genes = 100, min_co
   n_cells = length(Seurat::Cells(seurat))
   n_genes = nrow(seurat@assays[[assay]]@counts)
   
+  seurat = subset(seurat, subset = (nFeature_RNA >= min_genes & nFeature_RNA <= max_genes &
+                                      nCount_RNA >= min_counts & nCount_RNA <= max_counts))
+  
   if (min_cells > 0 | max_cells < length(SeuratObject::Cells(seurat))) {
     counts <- as.matrix(SeuratObject::GetAssayData(seurat, slot = "counts", assay = assay))
     genes_count <- rowSums(counts > 0)
@@ -129,21 +132,18 @@ seurat_filter <- function(sample, seurat, assay = "RNA", min_genes = 100, min_co
     }
   }
   
-  seurat = subset(seurat, subset = (nFeature_RNA >= min_genes & nFeature_RNA <= max_genes &
-                                      nCount_RNA >= min_counts & nCount_RNA <= max_counts))
-  
   if ("percent_mt" %in% colnames(seurat@meta.data)) {
     seurat = subset(seurat, subset = (percent_mt >= min_mt & percent_mt <= max_mt))
   }
   
   n_cells2 = length(Seurat::Cells(seurat))
-  n_genes2 = nrow(seurat@assays$RNA@counts)
+  n_genes2 = nrow(seurat@assays[[assay]]@counts)
   percent_cells <- ((n_cells-n_cells2)/n_cells) * 100
   percent_gene <- ((n_genes-n_genes2)/n_genes) * 100
   df_filtered <- data.frame(
     Before = c(n_cells, n_genes),
     After = c(n_cells2, n_genes2),
-    Filtered_out = c(n_cells - n_cells2, n_genes- n_genes2),
+    Filtered_out = c(n_cells - n_cells2, n_genes - n_genes2),
     Percentage = c(round(percent_cells,2), round(percent_gene, 2)),
     row.names = c("Cells", "Genes")
   )
