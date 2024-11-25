@@ -11,7 +11,9 @@ find_all_DE(
   test = "wilcox",
   logfc_threshold = 0.25,
   pvalue_threshold = 0.05,
-  results_dir = ""
+  results_dir = "",
+  variable = "seurat_clusters",
+  seurat_object = "saved"
 )
 }
 \arguments{
@@ -28,6 +30,8 @@ find_all_DE(
 \item{pvalue_threshold}{Filter genes based on a maximum pvalue. Default 0.05}
 
 \item{results_dir}{The path to save the tables. Keep empty to skip plot saving. Default ""}
+
+\item{variable}{what to isolate from the FetchData. Default "seurat_clusters"}
 }
 \value{
 A dataframe that contains the differentially expressed genes for each cluster against all other clusters.

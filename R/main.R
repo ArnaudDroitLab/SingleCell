@@ -186,7 +186,7 @@ integrate <- function(samples,
 }
 
 
-#' Title
+#' Analyze a seurat object and sort expressed genes on cells
 #'
 #' @param analysis Object to use.
 #' @param sample Sample name.
@@ -219,13 +219,16 @@ integrate <- function(samples,
 #' If this parameter is NULL, clustree will be skipped. Clustree is an optional part of step 10. Default c(1:10/10, 5:8/4)
 #' @param resolution_clustering Which final resolution to keep (can be a resolution not in `resolutions_clustree`).
 #' Typically resolutions range between 0.1 and 2. Default 1
-#' @param k.param_neighbors Number of neighbors to use when computing UMAP. Default 30
-#' @param n_neighbors ##
+#' @param k.param_neighbors Number of neighbors to use when computing UMAP. Default 20.
+#' @param n_neighbors Number of neighbors to use when computing the UMAP. Default 30
 #' @param de_test Which statistical tests to use for DE. To see available options, see the documentation for Seurat::FindAllMarkers. Default "wilcox"
 #' @param de_logfc Filter genes based on a minimum logged fold change. Default 0.25
 #' @param de_pvalue Filter genes based on a maximum pvalue. Default 0.05
 #' @param force_report Whether to overwrite the report if it already exists. If this is FALSE, and a file `analysis.Rmd` already exists,
 #' report creation will be skipped. Default FALSE
+#' @param variable The column name that is going to be used for extracting the cluster number per barcode. Default "seurat_clusters"
+#' @param force_DE Whether to force the DE to be recomputed if a DE file already exists. Default FALSE
+#' @param skip Which steps to skip, keep empty to do all the steps. Default c()
 #'
 #' @return An analysis object.
 #' @export
@@ -260,7 +263,10 @@ analyze_integrated <- function(analysis,
                                de_test = "wilcox",
                                de_logfc = 0.25,
                                de_pvalue = 0.05,
-                               force_report = FALSE) {
+                               force_report = FALSE,
+                               variable = "seurat_clusters",
+                               force_DE = FALSE,
+                               skip = c()) {
 
   checkmate::assert_int(step, lower = 6, upper = Inf)
   checkmate::assert_string(method)
@@ -290,6 +296,8 @@ analyze_integrated <- function(analysis,
 
   checkmate::assert_vector(resolutions_clustree, min.len = 1)
   checkmate::assert_number(resolution_clustering, lower = 0)
+  checkmate::assert_logical(force_DE)
+  checkmate::assert_numeric(skip, unique = TRUE, finite = TRUE, upper = 12)
 
   if (save_path != "") {
     checkmate::assert_directory(save_path)
@@ -306,7 +314,7 @@ analyze_integrated <- function(analysis,
     results_dir <- ""
   }
 
-  if (step<=6) {
+  if (step<=6 & ! 6 %in% skip) {
     analysis <- filter_data(analysis,
                             sample,
                             method = method,
@@ -326,7 +334,7 @@ analyze_integrated <- function(analysis,
     checkmate::assert_class(analysis, method)
   }
 
-  if (step<=7) {
+  if (step<=7 & ! 7 %in% skip) {
     analysis <- normalize_data(analysis,
                                method = method,
                                assay = assay,
@@ -335,7 +343,7 @@ analyze_integrated <- function(analysis,
     checkmate::assert_class(analysis, method)
   }
 
-  if (step<=8) {
+  if (step<=8 & ! 8 %in% skip) {
     analysis <- pca(analysis,
                     sample,
                     method = method,
@@ -346,14 +354,14 @@ analyze_integrated <- function(analysis,
 
   }
 
-  if (step<=9) {
+  if (step<=9 & ! 9 %in% skip) {
     analysis <- neighbors(analysis,
                           method = method,
                           k.param = k.param_neighbors)
     checkmate::assert_class(analysis, method)
   }
 
-  if (step<=10) {
+  if (step<=10 & ! 10 %in% skip) {
     analysis <- clustering(analysis,
                            sample = sample,
                            method = method,
@@ -363,7 +371,7 @@ analyze_integrated <- function(analysis,
     checkmate::assert_class(analysis, method)
   }
 
-  if (step<=11) {
+  if (step<=11 & ! 11 %in% skip) {
     analysis <- umap(analysis,
                      sample = sample,
                      method = method,
@@ -372,14 +380,16 @@ analyze_integrated <- function(analysis,
                      plot_clustering = paste0("RNA_snn_res.", resolution_clustering))
   }
 
-  if (step<=12) {
+  if (step<=12 & ! 12 %in% skip) {
     de_genes <- find_all_DE(analysis,
                             sample = sample,
                             method = method,
                             test = de_test,
                             logfc_threshold = de_logfc,
                             pvalue_threshold = de_pvalue,
-                            results_dir = results_dir)
+                            results_dir = results_dir,
+                            variable = variable,
+                            force_DE = force_DE)
   }
 
   if (save_path != "") {

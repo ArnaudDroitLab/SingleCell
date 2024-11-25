@@ -27,7 +27,7 @@ umap(
 \item{plots_dir}{The path to save the plots. Keep empty to skip plot saving. Default ""}
 }
 \value{
-an analysis object
+an analysis object.
 }
 \description{
 Will plot a first umap showing the orig.ident,

@@ -2,7 +2,7 @@
 % Please edit documentation in R/main.R
 \name{analyze_integrated}
 \alias{analyze_integrated}
-\title{Title}
+\title{Analyze a seurat object and sort expressed genes on cells}
 \usage{
 analyze_integrated(
   analysis,
@@ -32,7 +32,9 @@ analyze_integrated(
   de_test = "wilcox",
   de_logfc = 0.25,
   de_pvalue = 0.05,
-  force_report = FALSE
+  force_report = FALSE,
+  variable = "seurat_clusters",
+  seurat_object = "saved"
 )
 }
 \arguments{
@@ -83,7 +85,7 @@ Keep empty to skip mitochondrial detection. Default ""}
 
 \item{npcs_pca}{Number of principal components to compute in the PCA. Default 50}
 
-\item{k.param_neighbors}{Number of neighbors to use when computing UMAP. Default 30}
+\item{k.param_neighbors}{Number of neighbors to use when computing UMAP. Default 20.}
 
 \item{resolutions_clustree}{Which resolutions to compute and run the clustree on.
 If this parameter is NULL, clustree will be skipped. Clustree is an optional part of step 10. Default c(1:10/10, 5:8/4)}
@@ -91,8 +93,7 @@ If this parameter is NULL, clustree will be skipped. Clustree is an optional par
 \item{resolution_clustering}{Which final resolution to keep (can be a resolution not in \code{resolutions_clustree}).
 Typically resolutions range between 0.1 and 2. Default 1}
 
-\item{n_neighbors}{\subsection{}{
-}}
+\item{n_neighbors}{Number of neighbors to use when computing the UMAP. Default 30}
 
 \item{de_test}{Which statistical tests to use for DE. To see available options, see the documentation for Seurat::FindAllMarkers. Default "wilcox"}
 
@@ -102,10 +103,12 @@ Typically resolutions range between 0.1 and 2. Default 1}
 
 \item{force_report}{Whether to overwrite the report if it already exists. If this is FALSE, and a file \code{analysis.Rmd} already exists,
 report creation will be skipped. Default FALSE}
+
+\item{variable}{The column name that is going to be used for extracting the cluster number per barcode. Default "seurat_clusters"}
 }
 \value{
 An analysis object.
 }
 \description{
-Title
+Analyze a seurat object and sort expressed genes on cells
 }

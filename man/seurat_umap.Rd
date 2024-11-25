@@ -10,9 +10,11 @@ seurat_umap(seurat, n.neighbors = 30, dims = 1:20)
 \item{seurat}{The Seurat object.}
 
 \item{n.neighbors}{Number of neighbors to use when computing the UMAP. Default 30}
+
+\item{dims}{Number of dimension used. Default 1:20}
 }
 \value{
-Seurat object with UMAP
+Seurat object with UMAP.
 }
 \description{
 Compute the UMAP using RunUMAP from Seurat
