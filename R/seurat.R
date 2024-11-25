@@ -259,7 +259,7 @@ seurat_integrate <- function(seurat_list, nfeatures = 5000, assay = "RNA") {
 seurat_neighbors <- function(seurat, k.param = 20) {
   checkmate::assert_class(seurat, "Seurat")
   checkmate::assert_int(k.param, lower = 2)
-  seurat <- Seurat::FindNeighbors(seurat, k.param = k.param)
+  seurat <- Seurat::FindNeighbors(seurat, k.param = k.param, graph.name = "RNA_snn")
   return(seurat)
 }
 

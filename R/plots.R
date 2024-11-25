@@ -169,12 +169,12 @@ plot_seurat_dim <- function(seurat, reduction = "pca", colour_by = "orig.ident",
   colnames(df) <- c(x, y, colour_by)
   
   if (colour_by == "nCount_RNA") {
-    df <- df %>% mutate(!!sym(colour_by) := log(!!sym(colour_by))) %>% dplyr::arrange(!!sym(colour_by))
+    df <- df %>% mutate(!!sym(colour_by) := log2(!!sym(colour_by))) %>% dplyr::arrange(!!sym(colour_by))
     p <- ggplot2::ggplot(df, ggplot2::aes(x = .data[[x]], y = .data[[y]])) +
       ggplot2::geom_point(aes(colour = .data[[colour_by]])) +
       ggplot2::theme_bw() +
       ggplot2::scale_colour_gradient(high = "#429DEF", low = "#ECECEC") +
-      ggplot2::labs(color = paste0("log(RNA count)")) + 
+      ggplot2::labs(color = paste0("log2(RNA count)")) + 
       ggplot2::theme(legend.position = "top")
   } else if (colour_by == "percent_mt") {
     df <- df %>% dplyr::arrange(!!sym(colour_by))
@@ -183,6 +183,14 @@ plot_seurat_dim <- function(seurat, reduction = "pca", colour_by = "orig.ident",
       ggplot2::theme_bw() +
       ggplot2::scale_colour_gradient(high = "#F39243", low = "#ECECEC") +
       ggplot2::labs(color = "Mitochondrial percentage") + 
+      ggplot2::theme(legend.position = "top")
+  } else if (colour_by == "orig.ident") {
+    p <- ggplot2::ggplot(df, ggplot2::aes(x = .data[[x]], y = .data[[y]],
+                                          colour = .data[[colour_by]])) +
+      ggplot2::geom_point(alpha = 0.4) +
+      ggplot2::theme_bw() + 
+      ggplot2::theme(legend.position = "top", legend.key = element_rect(fill = "white", colour = "black")) +
+      ggplot2::guides(color = ggplot2::guide_legend(title = NULL)) + 
       ggplot2::theme(legend.position = "top")
   } else {
     p <- ggplot2::ggplot(df, ggplot2::aes(x = .data[[x]], y = .data[[y]],

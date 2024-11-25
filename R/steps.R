@@ -218,6 +218,7 @@ neighbors <- function(analysis, method = "Seurat", k.param = 20) {
   checkmate::assert_string(method)
   checkmate::assert_class(analysis, method)
   checkmate::assert_int(k.param)
+  
   if (method == "Seurat") {
     analysis <- seurat_neighbors(analysis, k.param = k.param)
   } else {
@@ -245,7 +246,7 @@ clustering <- function(analysis, sample = "", method = "Seurat", res_clustree = 
   checkmate::assert_class(analysis, method)
   checkmate::assert_double(res_clustree, lower = 0, null.ok = TRUE)
   checkmate::assert_double(resolution, len = 1, lower = 0)
-
+  
   if (method == "Seurat") {
     if (length(res_clustree) > 0) {
       for (res in res_clustree) {
@@ -290,7 +291,7 @@ umap <- function(analysis, sample = "", method = "Seurat", n_neighbors = 30, plo
   checkmate::assert_string(plots_dir)
   checkmate::assert_double(n_neighbors, len = 1, lower = 0)
   if (plots_dir != "") {checkmate::assert_directory(plots_dir)}
-
+  
   if (method == "Seurat") {
     analysis <- seurat_umap(analysis, n.neighbors = n_neighbors)
     if (checkmate::check_directory_exists(plots_dir) == TRUE) {
@@ -301,9 +302,9 @@ umap <- function(analysis, sample = "", method = "Seurat", n_neighbors = 30, plo
                                                                color = "black", box = TRUE) + NoLegend()
       list_plot[["nCount"]] <- plot_seurat_dim(analysis, reduction = "umap", colour_by = "nCount_RNA")
       
-      if (checkmate::testFileExists(file.path(plots_dir, paste0(sample, "_mitochondria_filter_plot.png")))) {
+      if (length(analysis[["percent_mt"]]) > 0) {
         list_plot[["mitochondria"]] <- plot_seurat_dim(analysis, reduction = "umap", colour_by = "percent_mt")
-        } else {print("Mitochondria file does not exist")}
+        } else {print("Mitochondria pattern does not exist in the seurat object.")}
       
       for (i in names(list_plot)) {
         if (i != "clusters") {
