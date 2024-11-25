@@ -108,7 +108,6 @@ filter_data <- function(analysis, sample = "", method = "Seurat", assay = "RNA",
                               min_cells = min_cells, min_mt = min_mt, max_genes = max_genes,
                               max_counts = max_counts, max_cells = max_cells, max_mt = max_mt, results_dir = results_dir,
                               plots_dir = plots_dir)
-
   } else {
     stop(paste0(method, " is an unsupported method."))
   }
@@ -304,7 +303,6 @@ umap <- function(analysis, sample = "", method = "Seurat", n_neighbors = 30, plo
       if (checkmate::testFileExists(file.path(plots_dir, paste0(sample, "_mitochondria_filter_plot.png")))) {
         list_plot[["mitochondria"]] <- plot_seurat_dim(analysis, reduction = "umap", colour_by = "percent_mt")
         } else {print("Mitochondria file does not exist")}
-
       for (i in names(list_plot)) {
         if (i != "clusters") {
           ggplot2::ggsave(paste(sample, i,  "umap_plot.png", sep = "_"), plot = list_plot[[i]],
@@ -405,7 +403,6 @@ find_all_DE <- function(analysis, sample = "", method = "Seurat",
                dplyr::arrange(cluster) %>%
                dplyr::pull(n)) %>%
       dplyr::rename(Cluster = variable)
-
     readr::write_csv(df_stats, file.path(results_dir, paste0(sample,"_summary_per_clusters.csv")))
 
   }
@@ -437,6 +434,8 @@ annotate_clusters <- function(analysis, sample = "", method = "manual", ..., res
 
 
 }
+
+
 
 
 

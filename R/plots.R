@@ -75,6 +75,7 @@ plot_filtering_stats <- function(df, x_name = "Genes", y_name = "Cells") {
 
   checkmate::assert_data_frame(df)
 
+
   if (!x_name %in% colnames(df)) {
     stop(paste0("First column is missing from the data frame."))
   }
