@@ -412,9 +412,14 @@ find_all_DE <- function(analysis, sample = "", method = "Seurat",
 
 
 
-annotate_clusters <- function(analysis, sample = "", method = "manual", ..., results_dir = "", plots_dir = "") {
+annotate_clusters <- function(analysis, sample = "", method = "manual", ..., group.by = "orig.ident", results_dir = "", plots_dir = "") {
   checkmate::assert_string(method)
   checkmate::assert_string(sample)
+  checkmate::assert_string(group.by, null.ok = FALSE)
+  group_by = features_in_seurat(seurat, group.by)
+  if (is.null(group_by)) {
+    stop("group.by ", group.by, " not found in seurat object.")
+  }
   checkmate::assert_string(results_dir)
   if (results_dir != "") {checkmate::assert_directory(results_dir)}
   checkmate::assert_string(plots_dir)
@@ -422,17 +427,25 @@ annotate_clusters <- function(analysis, sample = "", method = "manual", ..., res
 
   if (method == "manual") {
     clust_genes <- list(...)
-    checkmate::assert_list(clust_genes, any.missing = FALSE, min.len = 1, null.ok = FALSE, types = "character")
+    checkmate::assert_list(clust_genes, any.missing = FALSE, min.len = 1, null.ok = TRUE, types = "character")
+    if (is.null(clust_genes)) {
+      warning("No signature provided for manual cluster annotation.")
+      return()
+    }
 
     for (cell_type in clust_genes) {
       markers <- clust_genes[[cell_type]]
+      markers <- features_in_seurat(seurat, markers)
+      if (is.null(markers)) {
+        warning("None of the genes for cell type ", cell_type, " were found in the Seurat object, skipping violin plots.")
+        next
+      }
+      p <- plot_seurat_violin(seurat, features = markers, group.by = group.by)
+      ggplot2::ggsave(paste(sample, cell_type,  "anotation_violin.png", sep = "_"), plot = p,
+                       device = "png", path = plots_dir, dpi = 200, width = 1500,
+                       height = 75 + 300 * length(markers), units = "px")
     }
-
-
   }
-
-
-
 }
 
 

@@ -22,6 +22,25 @@ check_reduction <- function(seurat, reduction = "pca") {
   }
 }
 
+features_in_seurat <- function(seurat, features) {
+  checkmate::assert_class(seurat, "Seurat")
+  checkmate::assert_character(features, null.ok = TRUE)
+  if (is.null(features)) {
+    return(features)
+  }
+  features_in <- features[features %in% row.names(seurat)]
+  features_in <- c(features_in, features[features %in% colnames(seurat@meta.data)])
+  return(features_in)
+}
+
+get_clusters <- function(seurat, column) {
+  feature <- features_in_seurat(seurat, column)
+  if (is.null(feature)) {
+    return(NULL)
+  }
+  return(seurat@meta.data[[feature]])
+}
+
 #' load Cellranger data for Seurat
 #'
 #' @param path_to_matrix The path to a cellranger matrix directory
@@ -111,13 +130,13 @@ seurat_filter <- function(sample, seurat, assay = "RNA", min_genes = 100, min_co
   checkmate::assert_numeric(max_cells)
   checkmate::assert_numeric(max_mt)
   checkmate::assert_directory(results_dir)
-  
+
   n_cells = length(Seurat::Cells(seurat))
   n_genes = nrow(seurat@assays[[assay]]@counts)
-  
+
   seurat = subset(seurat, subset = (nFeature_RNA >= min_genes & nFeature_RNA <= max_genes &
                                       nCount_RNA >= min_counts & nCount_RNA <= max_counts))
-  
+
   if (min_cells > 0 | max_cells < length(SeuratObject::Cells(seurat))) {
     counts <- as.matrix(SeuratObject::GetAssayData(seurat, slot = "counts", assay = assay))
     genes_count <- rowSums(counts > 0)
@@ -131,11 +150,11 @@ seurat_filter <- function(sample, seurat, assay = "RNA", min_genes = 100, min_co
       seurat = subset(seurat, features = genes_filter)
     }
   }
-  
+
   if ("percent_mt" %in% colnames(seurat@meta.data)) {
     seurat = subset(seurat, subset = (percent_mt >= min_mt & percent_mt <= max_mt))
   }
-  
+
   n_cells2 = length(Seurat::Cells(seurat))
   n_genes2 = nrow(seurat@assays[[assay]]@counts)
   percent_cells <- ((n_cells-n_cells2)/n_cells) * 100
@@ -304,7 +323,7 @@ seurat_umap <- function(seurat, n.neighbors = 30, dims = 1:20) {
 #' @param slot Slot to pull data from. Default "data"
 #' @param method The statistic test that compares expression for each duo. Default "wilcox"
 #' @param logfc_threshold The threshold for the log value. Shows result that have a difference of that value. Default 0.25
-#' @param min_pct only test genes that are detected in a minimum fraction of min.pct cells in either of the two populations. 
+#' @param min_pct only test genes that are detected in a minimum fraction of min.pct cells in either of the two populations.
 #' Meant to spped up the function by not testing genes that are very infrequently expressed. Default 0.1
 #' @param pvalue_threshold Threshold of significant difference between expression of markers. Default 0.05
 #' @param only.pos Only return positive markers. Default FALSE
@@ -314,7 +333,7 @@ seurat_umap <- function(seurat, n.neighbors = 30, dims = 1:20) {
 #' @export
 #'
 #' @examples
-seurat_all_DE <- function(seurat, sample = "", assay = "RNA", slot = "data", method = "wilcox", logfc_threshold = 0.25, 
+seurat_all_DE <- function(seurat, sample = "", assay = "RNA", slot = "data", method = "wilcox", logfc_threshold = 0.25,
                           min_pct = 0.1, pvalue_threshold = 0.05, only.pos = FALSE) {
   check_assay(seurat, assay)
   checkmate::assert_string(slot)
@@ -327,7 +346,7 @@ seurat_all_DE <- function(seurat, sample = "", assay = "RNA", slot = "data", met
                                     verbose = T, only.pos = only.pos,
                                     assay = assay, slot = slot,
                                     logfc.threshold = logfc_threshold, min.pct = min_pct)
-  
+
   return(markers)
 }
 

@@ -7,8 +7,8 @@ colorblind_palette_7 <- function() {
   c("#F0E442", "#56B4E9", "#E69F00", "#009E73", "#D55E00", "#0072B2", "#CC79A7")
 }
 
-get_colorblind_x <- function(x) {
-  colorblind_palette_7()[0:(x-1)%%7+1]
+get_color_x <- function(x, color_list = colorblind_palette_7()) {
+  color_list[0:(x-1)%%7+1]
 }
 
 #' Plot qc as violin plot, adding cutoffs lines.
@@ -224,13 +224,26 @@ plot_seurat_clustree <- function(seurat, prefix = "RNA_snn_res.") {
 }
 
 
+#' Make a violin plot, using the features (genes or elements of metadata) from the Seurat object.
+#'
+#' @param seurat The Seurat object from which to
+#' @param features
+#' @param group.by
+#' @param assay
+#' @param slot
+#' @param show_points
+#'
+#' @return
+#' @export
+#'
+#' @examples
 plot_seurat_violin <- function(seurat, features, group.by = "orig.ident", assay = "RNA", slot = "data", show_points = TRUE) {
 
   df_large <- Seurat::FetchData(seurat, vars = c(group.by, features), assay = "RNA", slot = "data")
   # Use melt to change data.frame format
   df_long <- reshape2::melt(df_large, id.vars = group.by, measure.vars = features,
                          variable.name = "feature", value.name = "expression")
-  colors <- get_colorblind_x(length(unique(df_large[[group.by]])))
+  colors <- get_color_x(length(unique(df_large[[group.by]])), color_list = colorblind_palette_7())
 
   p <- ggplot(df_long, aes(x = factor(.data[[group.by]]), y = .data[["expression"]], fill = .data[[group.by]])) +
     ggplot2::geom_violin() +
@@ -245,33 +258,7 @@ plot_seurat_violin <- function(seurat, features, group.by = "orig.ident", assay 
                    strip.text = element_text(face = "bold")) +
     ggplot2::scale_fill_manual(values = colors) +
     xlab("Identity")
-
-
-
-
-
-  a <- ggplot(pbmc, aes(x = factor(group.by), y = "expression", fill = group.by)) +
-    geom_violin(scale = "width", adjust = 1, trim = TRUE) +
-    scale_y_continuous(expand = c(0, 0), position="right", labels = function(x)
-      c(rep(x = "", times = length(x)-2), x[length(x) - 1], "")) +
-    facet_grid(rows = vars(Feat), scales = "free", switch = "y") +
-    theme_cowplot(font_size = 12) +
-    theme(legend.position = "none", panel.spacing = unit(0, "lines"),
-          plot.title = element_text(hjust = 0.5),
-          panel.background = element_rect(fill = NA, color = "black"),
-          strip.background = element_blank(),
-          strip.text = element_text(face = "bold"),
-          strip.text.y.left = element_text(angle = 0)) +
-    ggtitle("Identity on x-axis") + xlab("Identity") + ylab("Expression Level")
-
-  p <- ggplot2::ggplot(data = groups_CD14, ggplot2::aes(y = CD14, x = Sample_Tag)) +
-    ggplot2::geom_violin(data = groups_CD14, ggplot2::aes(fill = Sample_Tag)) +
-    ggplot2::geom_jitter(color = "grey3", size = 0.3, alpha = 0.1) +
-    ggplot2::theme_bw() +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)) +
-    ggplot2::scale_x_discrete("") +
-    ggplot2::scale_y_continuous("Expression level") +
-    NoLegend()
+  return(p)
 
 }
 
