@@ -424,15 +424,13 @@ annotate_clusters <- function(analysis, sample = "", method = "manual", ..., res
   
   if (method == "manual") {
     clust_genes <- list(...)
-    checkmate::assert_list(clust_genes, any.missing = FALSE, min.len = 1, null.ok = FALSE, types = "character")
-    
+    checkmate::assert_list(clust_genes, any.missing = FALSE, min.len = 1, null.ok = TRUE, types = "character")
+    if (is.null(clust_genes)) {
+      warning("No signature provided for manual cluster annotation.")
+      return()
+    }
     for (cell_type in clust_genes) {
       markers <- clust_genes[[cell_type]]
     }
-    
-    
   }
-  
-  
-  
 }
