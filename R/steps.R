@@ -434,7 +434,7 @@ annotate_clusters <- function(analysis, sample = "", method = "manual", ..., gro
       warning("No signature provided for manual cluster annotation.")
       return()
     }
-    
+  
     for (cell_type in clust_genes) {
       markers <- clust_genes[[cell_type]]
       markers <- features_in_seurat(seurat, markers)

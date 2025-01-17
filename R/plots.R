@@ -250,9 +250,8 @@ plot_seurat_violin <- function(seurat, features, group.by = "orig.ident", assay 
                    strip.text = element_text(face = "bold")) +
     ggplot2::scale_fill_manual(values = colors) +
     xlab("Identity")
-  
   return(p)
-  
+
 }
 
 
