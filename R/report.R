@@ -100,10 +100,14 @@ add_images_knit_report <- function(report, images_relative_path, ncol = 2) {
   for (image_relative_path in images_relative_path) {
     checkmate::assert_file(file.path(dirname(report), images_relative_path))
   }
-
-  cat("```{r, fig.show='hold', out.width='", 100%/%ncol, "%'}\n",
-      "knitr::include_graphics(c('", paste0(images_relative_path, collapse = "','"), "'))\n",
-      "```\n\n", file = report, sep = "", append = TRUE)
+  
+  if (length(images_relative_path) == 0) {
+    cat("")
+  } else {
+    cat("```{r, fig.show='hold', out.width='", 100%/%ncol, "%'}\n",
+        "knitr::include_graphics(c('", paste0(images_relative_path, collapse = "','"), "'))\n",
+        "```\n\n", file = report, sep = "", append = TRUE)
+  }
 
 }
 
@@ -237,7 +241,7 @@ make_integration_report <- function(samples, report_path, report_name = "integra
       # add_title_report(report, sample, 2)
       for (type in names(steps_files[[step]])) {
         filepaths <- steps_files[[step]][[type]]
-        if (length(filepaths) < 0) {
+        if (length(filepaths) == 0) {
           next
         }
 
@@ -300,12 +304,6 @@ make_analysis_report <- function(sample, report_path, report_name, plots_relativ
   }
 
   initialize_report(report_name, report_path, force = force)
-  
-  checklist_steps <- list(Filtering = "Filtering", 
-                          Elbow = "Elbow", 
-                          Tree = "Clustering Tree", 
-                          Table = "Cluster Table", 
-                          UMAP = "UMAP")
 
   for (step in names(steps_files)) {
     add_title_report(report, step, 1)
@@ -322,7 +320,7 @@ make_analysis_report <- function(sample, report_path, report_name, plots_relativ
       if (type == "plots") {
         filepaths <- lapply(filepaths, function(x) file.path(plots_relative_path, paste0(sample, "_", x)))
         filepaths <- filepaths[file.exists(file.path(report_path, filepaths))]
-        if (step %in% c("Clustering tree", "UMAP", "Filtering_stats")) {
+        if (step %in% c("Clustering tree", "UMAP")) {
           add_images_knit_report(report, filepaths, ncol = 1)
         } 
         else {

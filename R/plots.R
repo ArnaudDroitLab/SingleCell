@@ -39,16 +39,16 @@ plot_filter <- function(df, x_name = "x", y_name = "y", low = 0, high = Inf) {
   checkmate::assert_numeric(low)
   checkmate::assert_numeric(high)
   if (low > high) {stop("Low cannot be superior to high.")}
-
+  
   p <- ggplot2::ggplot(df, ggplot2::aes(x = .data[[x_name]], y = .data[[y_name]], fill = .data[[x_name]])) +
     ggplot2::geom_violin() +
     ggplot2::geom_jitter(size = 0.2, color = ggplot2::alpha("black", 0.4), fill = ggplot2::alpha("black", 0.4)) +
     ggplot2::theme_bw() +
     ggplot2::theme(axis.title.x=ggplot2::element_blank())
-
+  
   low = max(low, min(0, min(df[[y_name]])))
   high = min(high, max(df[[y_name]]) + 1)
-
+  
   p <- p + ggplot2::geom_hline(yintercept=low, linetype="dashed", color = "red")
   p <- p + ggplot2::geom_hline(yintercept=high, linetype="dashed", color = "red")
   return(p)
@@ -72,26 +72,26 @@ plot_filter <- function(df, x_name = "x", y_name = "y", low = 0, high = Inf) {
 #' @examples
 
 plot_filtering_stats <- function(df, x_name = "Genes", y_name = "Cells") {
-
+  
   checkmate::assert_data_frame(df)
-
-
+  
+  
   if (!x_name %in% colnames(df)) {
     stop(paste0("First column is missing from the data frame."))
   }
-
+  
   if (!y_name %in% colnames(df)) {
     stop(paste0("Second column is missing from the data frame."))
   }
-
-
+  
+  
   if (df[[x_name]][1] - df[[x_name]][2] != df[[x_name]][3]) {stop("Filtration cannot add features.")}
   if (df[[y_name]][1] - df[[y_name]][2] != df[[y_name]][3]) {stop("Filtration cannot add features.")}
-
+  
   if (isFALSE(identical(rownames(df), c("Before", "After", "Filtered_out", "Percentage")))) {
     stop(paste0("Dataframe should be ordered like this = 'Before', 'After', 'Filtered_out'."))
-         }
-
+  }
+  
   p <- ggplot2::ggplot(data = df, aes(x = row.names(df), .data[[x_name]])) +
     ggplot2::geom_bar(stat = "identity", color = "#D44C7E", fill = "#F39BBC", width = 0.8) +
     ggplot2::geom_text(ggplot2::aes(label = .data[[x_name]]), vjust = 1.5, size = 3) +
@@ -132,7 +132,7 @@ plot_seurat_elbow <- function(seurat, reduction = "pca", npc = 50, k.param.neigh
   checkmate::assert_int(npc)
   checkmate::assert_int(k.param.neighbors)
   if (length(seurat@reductions[[reduction]]@stdev)<npc) {stop(paste0(reduction, " does not have ", npc, " components."))}
-
+  
   df <- data.frame("Standard_Deviation" = seurat@reductions[[reduction]]@stdev[1:npc], PC = 1:npc)
   p <- ggplot2::ggplot(df, ggplot2::aes(x = .data[["PC"]], y = .data[["Standard_Deviation"]])) +
     ggplot2::geom_point() + ggplot2::scale_y_continuous("Standard Deviation") +
@@ -169,21 +169,21 @@ plot_seurat_dim <- function(seurat, reduction = "pca", colour_by = "orig.ident",
   check_reduction(seurat, reduction)
   checkmate::assert_string(colour_by)
   checkmate::assert_string(slot)
-
+  
   x = paste0(reduction,"1")
   y = paste0(reduction,"2")
   df <- data.frame(x = seurat@reductions[[reduction]]@cell.embeddings[,1],
                    y = seurat@reductions[[reduction]]@cell.embeddings[,2],
                    colour_by = Seurat::FetchData(seurat, colour_by, assay = assay, slot = slot))
   colnames(df) <- c(x, y, colour_by)
-
+  
   if (colour_by == "nCount_RNA") {
-    df <- df %>% mutate(!!sym(colour_by) := log(!!sym(colour_by))) %>% dplyr::arrange(!!sym(colour_by))
+    df <- df %>% mutate(!!sym(colour_by) := log2(!!sym(colour_by))) %>% dplyr::arrange(!!sym(colour_by))
     p <- ggplot2::ggplot(df, ggplot2::aes(x = .data[[x]], y = .data[[y]])) +
       ggplot2::geom_point(aes(colour = .data[[colour_by]])) +
       ggplot2::theme_bw() +
       ggplot2::scale_colour_gradient(high = "#429DEF", low = "#ECECEC") +
-      ggplot2::labs(color = paste0("log(RNA count)")) +
+      ggplot2::labs(color = paste0("log2(RNA count)")) +
       ggplot2::theme(legend.position = "top")
   } else if (colour_by == "percent_mt") {
     df <- df %>% dplyr::arrange(!!sym(colour_by))
@@ -219,6 +219,11 @@ plot_seurat_dim <- function(seurat, reduction = "pca", colour_by = "orig.ident",
 plot_seurat_clustree <- function(seurat, prefix = "RNA_snn_res.") {
   checkmate::assert_class(seurat, "Seurat")
   checkmate::assert_character(prefix, max.len = 1)
+  greping <- paste0("^", prefix)
+  seurat_prefix_column <- grep(greping, colnames(seurat@meta.data), value = TRUE)
+  for (col in seurat_prefix_column) {
+    checkmate::assert_factor(seurat@meta.data[[col]])
+  }
   p <- clustree::clustree(seurat@meta.data, prefix=prefix)
   return(p)
 }
@@ -238,7 +243,7 @@ plot_seurat_clustree <- function(seurat, prefix = "RNA_snn_res.") {
 #'
 #' @examples
 plot_seurat_violin <- function(seurat, features, group.by = "orig.ident", assay = "RNA", slot = "data", show_points = TRUE) {
-
+  
   df_large <- Seurat::FetchData(seurat, vars = c(group.by, features), assay = "RNA", slot = "data")
   # Use melt to change data.frame format
   df_long <- reshape2::melt(df_large, id.vars = group.by, measure.vars = features,
@@ -261,7 +266,6 @@ plot_seurat_violin <- function(seurat, features, group.by = "orig.ident", assay 
   return(p)
 
 }
-
 
 
 
