@@ -38,6 +38,8 @@
 #' @param nfeatures_integration Number of features to use in the integration process. Default 5000
 #' @param force_report Whether to overwrite the report if it already exists. If this is FALSE, and a file `integration.Rmd` already exists,
 #' report creation will be skipped. Default FALSE
+#' @param k.filter How many neighbors (k) to use when filtering anchors
+#' @param k.weight Number of neighbors to consider when weighting anchors
 #'
 #' @return an analysis object containing the integrated data.
 #' @export
@@ -67,8 +69,8 @@ integrate <- function(samples,
                       selection_method_normalize = "vst",
                       npcs_pca = 50,
                       nfeatures_integration = 5000,
-                      force_report = FALSE) {
-
+                      force_report = FALSE, k.weight = 100, k.filter = 100) {
+  
   checkmate::assert_character(samples, min.len = 2)
   checkmate::assert_int(step, lower = 1, upper = 5)
   checkmate::assert_string(path_to_count)
@@ -80,7 +82,7 @@ integrate <- function(samples,
   if (step >= 2) {checkmate::assert_list(analysis_list, types = method, null.ok = FALSE, len = length(samples))}
   checkmate::assert_string(assay)
   checkmate::assert_string(save_path)
-
+  
   checkmate::assert_string(organism)
   checkmate::assert_character(mitochondrial_genes, null.ok = TRUE)
   checkmate::assert_int(min_genes)
@@ -91,14 +93,14 @@ integrate <- function(samples,
   checkmate::assert_number(max_counts)
   checkmate::assert_number(max_cells)
   checkmate::assert_number(max_mt)
-
+  
   checkmate::assert_int(nfeatures_normalize)
   checkmate::assert_string(selection_method_normalize)
-
+  
   checkmate::assert_int(npcs_pca, lower = 2)
-
+  
   checkmate::assert_int(nfeatures_integration)
-
+  
   if (save_path != "") {
     checkmate::assert_directory(save_path)
     plots_dir <- file.path(save_path, "plots")
@@ -113,19 +115,19 @@ integrate <- function(samples,
     plots_dir <- ""
     results_dir <- ""
   }
-
-
-
+  
+  
+  
   if (step<=1) {
     analysis_list <- lapply(samples, function(x) {load_data(path_to_count,
                                                             x,
                                                             from = from,
                                                             to = method)})
-
+    
     print("finished loading")
   }
   checkmate::assert_list(analysis_list, types = method, len = length(samples))
-
+  
   if (step<=2) {
     analysis_list <- lapply(1:length(samples),
                             function(x) {filter_data(analysis_list[[x]],
@@ -146,7 +148,7 @@ integrate <- function(samples,
                                                      results_dir = results_dir)})
   }
   checkmate::assert_list(analysis_list, types = method, len = length(samples))
-
+  
   if (step<=3) {
     analysis_list <- lapply(1:length(samples),
                             function(x) {normalize_data(analysis_list[[x]],
@@ -156,7 +158,7 @@ integrate <- function(samples,
                                                         selection_method = selection_method_normalize)})
   }
   checkmate::assert_list(analysis_list, types = method, len = length(samples))
-
+  
   if (step<=4) {
     analysis_list <- lapply(1:length(samples),
                             function(x) {pca(analysis_list[[x]],
@@ -167,20 +169,21 @@ integrate <- function(samples,
                                              plots_dir = plots_dir)})
   }
   checkmate::assert_list(analysis_list, types = method, len = length(samples))
-
+  
   if (step<=5) {
     analysis <- integrate_data(analysis_list,
-                          method = method,
-                          nfeatures = nfeatures_integration,
-                          assay = assay)
+                               method = method,
+                               nfeatures = nfeatures_integration,
+                               assay = assay, 
+                               k.weight = k.weight, k.filter = k.filter)
   }
   checkmate::assert_list(analysis_list, types = method, len = length(samples))
-
+  
   if (results_dir != "" & file_name != "") {
     file_path = file.path(results_dir, file_name)
     saveRDS(analysis, file = file_path)
   }
-
+  
   make_integration_report(samples = samples, report_path = save_path, report_name = "integration.Rmd", plots_relative_path = "plots", data_relative_path = "results", force = force_report)
   return(analysis)
 }
@@ -227,8 +230,8 @@ integrate <- function(samples,
 #' @param force_report Whether to overwrite the report if it already exists. If this is FALSE, and a file `analysis.Rmd` already exists,
 #' report creation will be skipped. Default FALSE
 #' @param variable The column name that is going to be used for extracting the cluster number per barcode. Default "seurat_clusters"
-#' @param force_DE If you want to force FindAllMarkers. If FALSE and the DE.csv table in the results repository is there, the markers
-#' will be analyzed again. If this is TRUE, the step will be skipped. Default FALSE.
+#' @param force_DE Whether to force the DE to be recomputed if a DE file already exists. Default FALSE
+#' @param skip Which steps to skip, keep empty to do all the steps. Default c()
 #'
 #' @return An analysis object.
 #' @export
@@ -263,10 +266,11 @@ analyze_integrated <- function(analysis,
                                de_test = "wilcox",
                                de_logfc = 0.25,
                                de_pvalue = 0.05,
-                               force_report = FALSE, 
+                               force_report = FALSE,
                                variable = "seurat_clusters",
-                               force_DE = FALSE) {
-
+                               force_DE = FALSE,
+                               skip = c()) {
+  
   checkmate::assert_int(step, lower = 6, upper = Inf)
   checkmate::assert_string(method)
   if (!method %in% c("Seurat")) {stop(paste0(method, " is an unsupported analysis method."))}
@@ -274,7 +278,7 @@ analyze_integrated <- function(analysis,
   checkmate::assert_string(assay)
   checkmate::assert_string(save_path)
   if (save_path != "") {checkmate::assert_directory(save_path)}
-
+  
   checkmate::assert_string(organism)
   checkmate::assert_character(mitochondrial_genes, null.ok = TRUE)
   checkmate::assert_int(min_genes)
@@ -285,18 +289,19 @@ analyze_integrated <- function(analysis,
   checkmate::assert_number(max_counts)
   checkmate::assert_number(max_cells)
   checkmate::assert_number(max_mt)
-
+  
   checkmate::assert_int(nfeatures_normalize)
   checkmate::assert_string(selection_method_normalize)
-
+  
   checkmate::assert_int(npcs_pca, lower = 2)
-
+  
   checkmate::assert_int(k.param_neighbors, lower = 2)
-
+  
   checkmate::assert_vector(resolutions_clustree, min.len = 1)
   checkmate::assert_number(resolution_clustering, lower = 0)
   checkmate::assert_logical(force_DE)
-
+  checkmate::assert_numeric(skip, unique = TRUE, finite = TRUE, upper = 12, null.ok = TRUE)
+  
   if (save_path != "") {
     checkmate::assert_directory(save_path)
     plots_dir <- file.path(save_path, "plots")
@@ -311,8 +316,8 @@ analyze_integrated <- function(analysis,
     plots_dir <- ""
     results_dir <- ""
   }
-
-  if (step<=6) {
+  
+  if (step<=6 & ! 6 %in% skip) {
     analysis <- filter_data(analysis,
                             sample,
                             method = method,
@@ -331,8 +336,8 @@ analyze_integrated <- function(analysis,
                             results_dir = results_dir)
     checkmate::assert_class(analysis, method)
   }
-
-  if (step<=7) {
+  
+  if (step<=7 & ! 7 %in% skip) {
     analysis <- normalize_data(analysis,
                                method = method,
                                assay = assay,
@@ -340,8 +345,8 @@ analyze_integrated <- function(analysis,
                                selection_method = selection_method_normalize)
     checkmate::assert_class(analysis, method)
   }
-
-  if (step<=8) {
+  
+  if (step<=8 & ! 8 %in% skip) {
     analysis <- pca(analysis,
                     sample,
                     method = method,
@@ -349,17 +354,17 @@ analyze_integrated <- function(analysis,
                     npcs = npcs_pca,
                     plots_dir = plots_dir)
     checkmate::assert_class(analysis, method)
-
+    
   }
-
-  if (step<=9) {
+  
+  if (step<=9 & ! 9 %in% skip) {
     analysis <- neighbors(analysis,
                           method = method,
                           k.param = k.param_neighbors)
     checkmate::assert_class(analysis, method)
   }
-
-  if (step<=10) {
+  
+  if (step<=10 & ! 10 %in% skip) {
     analysis <- clustering(analysis,
                            sample = sample,
                            method = method,
@@ -368,8 +373,8 @@ analyze_integrated <- function(analysis,
                            plots_dir = plots_dir)
     checkmate::assert_class(analysis, method)
   }
-
-  if (step<=11) {
+  
+  if (step<=11 & ! 11 %in% skip) {
     analysis <- umap(analysis,
                      sample = sample,
                      method = method,
@@ -377,30 +382,24 @@ analyze_integrated <- function(analysis,
                      plots_dir = plots_dir,
                      plot_clustering = paste0("RNA_snn_res.", resolution_clustering))
   }
-
-  if (step<=12) {
+  
+  if (step<=12 & ! 12 %in% skip) {
     de_genes <- find_all_DE(analysis,
                             sample = sample,
                             method = method,
                             test = de_test,
                             logfc_threshold = de_logfc,
                             pvalue_threshold = de_pvalue,
-                            results_dir = results_dir, 
-                            variable = variable, 
+                            results_dir = results_dir,
+                            variable = variable,
                             force_DE = force_DE)
   }
-
+  
   if (save_path != "") {
     file_path = file.path(results_dir, file_name)
     saveRDS(analysis, file = file_path)
   }
   make_analysis_report(sample = sample, report_path = save_path, report_name = "analysis.Rmd", plots_relative_path = "plots", data_relative_path = "results", force = force_report)
-
+  
   return(analysis)
 }
-
-
-
-
-
-

@@ -1,79 +1,61 @@
 library(testthat)
 library(Seurat)
+library(ggplot2)
 
-# Seurat object
-
-seurat <- get_demo_seurat_object()
-
-# Example setup: Create a mock Seurat object
-create_mock_seurat <- function() {
-  set.seed(123)
-  data <- matrix(rnorm(2000), nrow = 200, ncol = 10)
-  rownames(data) <- paste0("Gene", 1:200)
-  colnames(data) <- paste0("Cell", 1:10)
-  
-  seurat_obj <- CreateSeuratObject(counts = data)
-  
-  # Remove zero variance features
-  seurat_obj <- seurat_obj[Matrix::rowSums(seurat_obj@assays$RNA@counts) > 0, ]
-  
-  # Identify variable features
-  seurat_obj <- FindVariableFeatures(seurat_obj)
-  
-  # Check how many variable features were found
-  variable_features <- VariableFeatures(seurat_obj)
-  if (length(variable_features) == 0) {
-    stop("No variable features found; ensure your data has sufficient variability.")
-  }
-  
-  # Scale the data
-  seurat_obj <- ScaleData(seurat_obj)
-  
-  # Set npc safely
-  npc <- min(30, length(variable_features), ncol(seurat_obj) - 1)
-  
-  # Check for enough cells
-  if (ncol(seurat_obj) < 2) {
-    stop("Not enough cells to perform PCA.")
-  }
-  
-  # Run PCA
-  seurat_obj <- RunPCA(seurat_obj, npcs = npc)
-  
-  return(seurat_obj)
-}
+# Seurat data for testing
+seurat <- get_demo_seurat_object_pca()
 
 
-
-# Create a mock Seurat object for testing
-mock_seurat <- create_mock_seurat()
-
-test_that("plot_seurat_elbow handles correct inputs", {
-  expect_s3_class(plot_seurat_elbow(mock_seurat, npc = min(30, length(VariableFeatures(mock_seurat)), ncol(mock_seurat) - 1)), "gg")
+test_that("plot_seurat_elbow throws an error with invalid Seurat object", {
+  
+  expect_error(plot_seurat_elbow(1, reduction = "pca", npc = 20, k.param.neighbors = 10), 
+               "Assertion on 'seurat' failed: Must inherit from class 'Seurat', but has class 'numeric'.")
 })
 
-test_that("plot_seurat_elbow checks Seurat object class", {
-  expect_error(plot_seurat_elbow("not_a_seurat"), 
-               "Assertion on 'seurat' failed: Must inherit from class 'Seurat', but has class 'character'.", fixed = TRUE)
+test_that("plot_seurat_elbow throws an error with invalid reduction", {
+
+  expect_error(plot_seurat_elbow(seurat, reduction = "invalid_reduction", npc = 20, k.param.neighbors = 10),
+               "Reduction invalid_reduction not in seurat object.")
 })
 
-test_that("plot_seurat_elbow checks for valid reduction", {
-  expect_error(plot_seurat_elbow(mock_seurat, reduction = "invalid_reduction"), 
-               "not in seurat object.")
+test_that("plot_seurat_elbow checks for numeric npc and param", {
+  
+  # Attempt to use a non-numeric value for npc
+  expect_error(plot_seurat_elbow(seurat, reduction = "pca", npc = "help", k.param.neighbors = 10),
+               "Assertion on 'npc' failed: Must be of type 'single integerish value', not 'character'.")
+  
+  # Attempt to use a non-numeric value for param
+  expect_error(plot_seurat_elbow(seurat, reduction = "pca", npc = 50, k.param.neighbors = "me"),
+               "Assertion on 'k.param.neighbors' failed: Must be of type 'single integerish value', not 'character'.")
+  
 })
 
-test_that("plot_seurat_elbow checks npc against available components", {
-  expect_error(plot_seurat_elbow(mock_seurat, npc = 20), 
-               "pca does not have 20 components.", fixed = TRUE)
+test_that("plot_seurat_elbow throws an error with invalid npc", {
+  
+  # Attempt to use more components than available
+  expect_error(plot_seurat_elbow(seurat, reduction = "pca", npc = 80, k.param.neighbors = 10),
+               "pca does not have 80 components.")
 })
 
-test_that("plot_seurat_elbow works with default parameters", {
-  plot <- plot_seurat_elbow(mock_seurat)
-  expect_s3_class(plot, "gg")
+test_that("plot_seurat_elbow outputs a proper ggplot with a vline", {
+  
+  # Call the function with valid inputs
+  p <- plot_seurat_elbow(seurat, reduction = "pca", npc = 20, k.param.neighbors = 10)
+  
+  # Check if a ggplot object is returned
+  expect_s3_class(p, "gg")
+  
+  # Check if plot contains the expected vertical line (k.param.neighbors)
+  expect_true(any(grepl("xintercept", as.character(ggplot_build(p)))))
 })
 
-test_that("plot_seurat_elbow handles custom npc and k.param.neighbors", {
-  plot <- plot_seurat_elbow(mock_seurat, npc = 5, k.param.neighbors = 3)
-  expect_s3_class(plot, "gg")
-  expect_true("Standard Deviation" %in% colnames(plot$data))
+test_that("plot_seurat_elbow generates the plot without errors", {
+  
+  p <- plot_seurat_elbow(seurat, reduction = "pca", npc = 20, k.param.neighbors = 10)
+  plot <- ggplot2::ggplot_build(p)
+  
+  # Check that the plot was generated and contains expected components
+  expect_s3_class(p, "gg")
+  expect_true("Standard_Deviation" %in% ggplot2::ggplot_build(p)$plot$labels$y)
 })
+

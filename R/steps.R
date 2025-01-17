@@ -21,7 +21,7 @@ load_data <- function(path_to_count, sample, from = "Cellranger", to = "Seurat")
   } else {
     stop(paste0("Unsupported conversion from ", from, " to ", to, "."))
   }
-
+  
   checkmate::assert_class(analysis, to)
   return(analysis)
 }
@@ -92,8 +92,8 @@ filter_data <- function(analysis, sample = "", method = "Seurat", assay = "RNA",
       # pdf(filename, onefile = TRUE)
       for (i in names(list_plot)) {
         ggplot2::ggsave(paste(sample, i,  "filter_plot.png", sep = "_"), plot = list_plot[[i]],
-                                device = "png", path = plots_dir, dpi = 200, width = 500 + 300*length(unique(df_plot$samples)), # 800 px width is ok for 1 sample
-                                height = 1200, units = "px")
+                        device = "png", path = plots_dir, dpi = 200, width = 500 + 300*length(unique(df_plot$samples)), # 800 px width is ok for 1 sample
+                        height = 1200, units = "px", limitsize = FALSE)
         # print(list_plot[[i]])
       }
       # dev.off()
@@ -106,9 +106,8 @@ filter_data <- function(analysis, sample = "", method = "Seurat", assay = "RNA",
     # print(results_dir)
     analysis <- seurat_filter(sample = sample, seurat = analysis, assay = assay, min_genes = min_genes, min_counts = min_counts,
                               min_cells = min_cells, min_mt = min_mt, max_genes = max_genes,
-                              max_counts = max_counts, max_cells = max_cells, max_mt = max_mt, results_dir = results_dir, 
+                              max_counts = max_counts, max_cells = max_cells, max_mt = max_mt, results_dir = results_dir,
                               plots_dir = plots_dir)
-    
   } else {
     stop(paste0(method, " is an unsupported method."))
   }
@@ -174,7 +173,7 @@ pca <- function(analysis, sample = "", method = "Seurat", assay = "RNA", npcs = 
       for (i in names(list_plot)) {
         ggplot2::ggsave(paste(sample, i,  "pca_plot.png", sep = "_"), plot = list_plot[[i]],
                         device = "png", path = plots_dir, dpi = 200, width = 1500,
-                        height = 1200, units = "px")
+                        height = 1200, units = "px", limitsize = FALSE)
       }
     }
   } else {
@@ -192,14 +191,16 @@ pca <- function(analysis, sample = "", method = "Seurat", assay = "RNA", npcs = 
 #'
 #' @return An analysis object with all the analysis from the list integrated together.
 #' @export
-integrate_data <- function(analysis_list, method = "Seurat", nfeatures = 5000, assay = "RNA") {
+integrate_data <- function(analysis_list, method = "Seurat", nfeatures = 5000, assay = "RNA",
+                           k.weight = k.weight, k.filter = k.filter) {
   checkmate::assert_string(method)
   checkmate::assert_int(nfeatures)
   if (method == "Seurat") {
     for (i in analysis_list) {
       check_assay(i, assay)
     }
-    analysis <- seurat_integrate(analysis_list, nfeatures = nfeatures, assay = assay)
+    analysis <- seurat_integrate(analysis_list, nfeatures = nfeatures, assay = assay, 
+                                 k.weight = k.weight, k.filter = k.filter)
   } else {
     stop(paste0(method, " is an unsupported method."))
   }
@@ -218,7 +219,6 @@ neighbors <- function(analysis, method = "Seurat", k.param = 20) {
   checkmate::assert_string(method)
   checkmate::assert_class(analysis, method)
   checkmate::assert_int(k.param)
-  
   if (method == "Seurat") {
     analysis <- seurat_neighbors(analysis, k.param = k.param)
   } else {
@@ -256,8 +256,8 @@ clustering <- function(analysis, sample = "", method = "Seurat", res_clustree = 
         clustree_plot <- plot_seurat_clustree(analysis, prefix = "RNA_snn_res.")
         ggplot2::ggsave(paste(sample, "clustree.png", sep = "_"), plot = clustree_plot,
                         device = "png", path = plots_dir, dpi = 200, width = 1500,
-                        height = 2000, units = "px")
-        }
+                        height = 2000, units = "px", limitsize = FALSE)
+      }
     }
     analysis <- seurat_clustering(analysis, resolution = resolution)
   } else {
@@ -298,23 +298,22 @@ umap <- function(analysis, sample = "", method = "Seurat", n_neighbors = 30, plo
       list_plot <- list()
       list_plot[["sample"]] <- plot_seurat_dim(analysis, reduction = "umap", colour_by = "orig.ident")
       list_plot[["clusters"]] <- plot_seurat_dim(analysis, reduction = "umap", colour_by = plot_clustering)
-      list_plot[["clusters_numbers"]] <- Seurat::LabelClusters(list_plot[["clusters"]], id = plot_clustering, 
+      list_plot[["clusters_numbers"]] <- Seurat::LabelClusters(list_plot[["clusters"]], id = plot_clustering,
                                                                color = "black", box = TRUE) + NoLegend()
       list_plot[["nCount"]] <- plot_seurat_dim(analysis, reduction = "umap", colour_by = "nCount_RNA")
       
-      if (length(analysis[["percent_mt"]]) > 0) {
+      if (checkmate::testFileExists(file.path(plots_dir, paste0(sample, "_mitochondria_filter_plot.png")))) {
         list_plot[["mitochondria"]] <- plot_seurat_dim(analysis, reduction = "umap", colour_by = "percent_mt")
-        } else {print("Mitochondria pattern does not exist in the seurat object.")}
-      
+      } else {print("Mitochondria file does not exist")}
       for (i in names(list_plot)) {
         if (i != "clusters") {
           ggplot2::ggsave(paste(sample, i,  "umap_plot.png", sep = "_"), plot = list_plot[[i]],
-                        device = "png", path = plots_dir, dpi = 200, width = 1500,
-                        height = 1200, units = "px")
-          }
+                          device = "png", path = plots_dir, dpi = 200, width = 1500,
+                          height = 1200, units = "px", limitsize = FALSE)
+        }
       }
     }
-
+    
   } else {
     stop(paste0(method, " is an unsupported method."))
   }
@@ -352,9 +351,9 @@ umap <- function(analysis, sample = "", method = "Seurat", n_neighbors = 30, plo
 #' @importFrom Seurat FetchData
 
 find_all_DE <- function(analysis, sample = "", method = "Seurat",
-                    test = "wilcox", logfc_threshold = 0.25, pvalue_threshold = 0.05,
-                    results_dir = "", variable = "seurat_clusters", force_DE = FALSE) {
-
+                        test = "wilcox", logfc_threshold = 0.25, pvalue_threshold = 0.05,
+                        results_dir = "", variable = "seurat_clusters", force_DE = FALSE) {
+  
   checkmate::assert_string(method)
   checkmate::assert_class(analysis, method)
   checkmate::assert_string(variable)
@@ -366,49 +365,48 @@ find_all_DE <- function(analysis, sample = "", method = "Seurat",
   checkmate::assert_logical(force_DE)
   
   if (results_dir != "") {checkmate::assert_directory(results_dir)}
-
+  
   path_DE_saved <- file.path(results_dir, paste0(sample, "_DE.csv"))
-  if (!force_DE & file.exists(path_DE_saved)) {
+  if (!force_DE) {
     print("DE data frame found, skipping finding Markers. Congradulations.")
     return()
   }
-
-    if (method == "Seurat") {
-      df_de <- seurat_all_DE(analysis, sample = sample, assay = "RNA", slot = "data", method = method, logfc_threshold = logfc_threshold, 
-                             pvalue_threshold = pvalue_threshold, min_pct = 0.1, only.pos = FALSE)
-    }
+  
+  if (method == "Seurat") {
+    df_de <- seurat_all_DE(analysis, sample = sample, assay = "RNA", slot = "data", method = method, logfc_threshold = logfc_threshold,
+                           pvalue_threshold = pvalue_threshold, min_pct = 0.1, only.pos = FALSE)
+  }
   
   if (results_dir != "") {
     top_de <- df_de %>% dplyr::group_by(cluster) %>% dplyr::slice_min(p_val, n = 10) %>% dplyr::slice_max(avg_log2FC, n = 10)
-
+    
     readr::write_csv(df_de, file.path(results_dir, paste0(sample, "_DE.csv")))
     readr::write_csv(top_de, file.path(results_dir, paste0(sample, "_top10_DE.csv")))
-
-    df_stats <- Seurat::FetchData(analysis, vars = variable) %>%
-      dplyr::group_by(!!sym(variable)) %>% 
-      dplyr::summarise(CellCount = n(), .groups = "drop") %>% 
-      dplyr::arrange(!!sym(variable)) %>%
-      dplyr::mutate(Differentially_Expressed = df_de %>% 
-               dplyr::group_by(cluster) %>% 
-               dplyr::summarise(n = n(), .groups = "drop") %>% 
-               dplyr::arrange(cluster) %>% 
-               dplyr::pull(n),
-             UpRegulated = df_de %>% 
-               dplyr::filter(avg_log2FC > 0) %>% 
-               dplyr::group_by(cluster) %>% 
-               dplyr::summarise(n = n(), .groups = "drop") %>% 
-               dplyr::arrange(cluster) %>% 
-               dplyr::pull(n),
-             DownRegulated = df_de %>% 
-               dplyr::filter(avg_log2FC < 0) %>% 
-               dplyr::group_by(cluster) %>% 
-               dplyr::summarise(n = n(), .groups = "drop") %>% 
-               dplyr::arrange(cluster) %>% 
-               dplyr::pull(n)) %>%
-      dplyr::rename(Cluster = variable)
     
+    df_stats <- Seurat::FetchData(analysis, vars = variable) %>%
+      dplyr::group_by(!!sym(variable)) %>%
+      dplyr::summarise(CellCount = n(), .groups = "drop") %>%
+      dplyr::arrange(!!sym(variable)) %>%
+      dplyr::mutate(Differentially_Expressed = df_de %>%
+                      dplyr::group_by(cluster) %>%
+                      dplyr::summarise(n = n(), .groups = "drop") %>%
+                      dplyr::arrange(cluster) %>%
+                      dplyr::pull(n),
+                    UpRegulated = df_de %>%
+                      dplyr::filter(avg_log2FC > 0) %>%
+                      dplyr::group_by(cluster) %>%
+                      dplyr::summarise(n = n(), .groups = "drop") %>%
+                      dplyr::arrange(cluster) %>%
+                      dplyr::pull(n),
+                    DownRegulated = df_de %>%
+                      dplyr::filter(avg_log2FC < 0) %>%
+                      dplyr::group_by(cluster) %>%
+                      dplyr::summarise(n = n(), .groups = "drop") %>%
+                      dplyr::arrange(cluster) %>%
+                      dplyr::pull(n)) %>%
+      dplyr::rename(Cluster = variable)
     readr::write_csv(df_stats, file.path(results_dir, paste0(sample,"_summary_per_clusters.csv")))
-
+    
   }
   return(df_de)
 }
@@ -416,7 +414,25 @@ find_all_DE <- function(analysis, sample = "", method = "Seurat",
 
 
 
-
-
-
-
+annotate_clusters <- function(analysis, sample = "", method = "manual", ..., results_dir = "", plots_dir = "") {
+  checkmate::assert_string(method)
+  checkmate::assert_string(sample)
+  checkmate::assert_string(results_dir)
+  if (results_dir != "") {checkmate::assert_directory(results_dir)}
+  checkmate::assert_string(plots_dir)
+  if (plots_dir != "") {checkmate::assert_directory(plots_dir)}
+  
+  if (method == "manual") {
+    clust_genes <- list(...)
+    checkmate::assert_list(clust_genes, any.missing = FALSE, min.len = 1, null.ok = FALSE, types = "character")
+    
+    for (cell_type in clust_genes) {
+      markers <- clust_genes[[cell_type]]
+    }
+    
+    
+  }
+  
+  
+  
+}

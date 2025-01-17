@@ -13,6 +13,12 @@ get_demo_seurat_object <- function() {
   return(pbmc)
 }
 
+get_demo_seurat_object_no_mt <- function() {
+  pbmc <- readRDS(system.file("extdata", "pbmc.rds", package = "SingleCell"))
+  pbmc <- subset(pbmc, subset = nFeature_RNA > 500 & nFeature_RNA < 700)
+  return(pbmc)
+}
+
 get_demo_seurat_object_pca <- function() {
   pbmc <- get_demo_seurat_object()
   
@@ -34,7 +40,9 @@ get_demo_seurat_object_clust <- function() {
   pbmc <- Seurat::ScaleData(pbmc, features = all.genes)
   pbmc <- Seurat::RunPCA(pbmc)
   pbmc <- Seurat::FindNeighbors(pbmc, k.param = 20, graph.name = "RNA_snn")
-  pbmc <- Seurat::FindClusters(seurat, resolution = 0.5)
+  pbmc <- Seurat::FindClusters(pbmc, resolution = 0.5, prefix = "RNA_snn")
+  pbmc <- Seurat::FindClusters(pbmc, resolution = 1, prefix = "RNA_snn")
+  pbmc <- Seurat::FindClusters(pbmc, resolution = 2, prefix = "RNA_snn")
   
   return(pbmc)
 }
@@ -49,6 +57,8 @@ get_demo_seurat_object_umap <- function() {
   pbmc <- Seurat::RunPCA(pbmc)
   pbmc <- Seurat::FindNeighbors(pbmc, k.param = 20, graph.name = "RNA_snn")
   pbmc <- Seurat::FindClusters(pbmc, resolution = 0.5, prefix = "RNA_snn")
+  pbmc <- Seurat::FindClusters(pbmc, resolution = 1, prefix = "RNA_snn")
+  pbmc <- Seurat::FindClusters(pbmc, resolution = 2, prefix = "RNA_snn")
   pbmc <- Seurat::RunUMAP(pbmc, n.neighbors = 30, n.components = 2, dims = 1:20)
   
   return(pbmc)

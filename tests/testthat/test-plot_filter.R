@@ -16,7 +16,6 @@ test_that("plot_filter produces a ggplot object", {
 test_that("plot_filter handles cutoffs correctly", {
   p <- plot_filter(test_df, x_name = "group", y_name = "value", low = 7, high = 12)
   
-  # Check if the plot contains the specified cutoff lines
   low_line <- ggplot_build(p)$layout$panel_params[[1]]$y.range[1] <= 7
   high_line <- ggplot_build(p)$layout$panel_params[[1]]$y.range[2] >= 12
   

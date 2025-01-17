@@ -233,7 +233,8 @@ seurat_pca <- function(seurat, assay = "RNA", npcs = 50) {
 #' @importFrom Seurat FindIntegrationAnchors
 #' @importFrom Seurat IntegrateData
 #' @export
-seurat_integrate <- function(seurat_list, nfeatures = 5000, assay = "RNA") {
+seurat_integrate <- function(seurat_list, nfeatures = 5000, assay = "RNA", k.filter = 100, 
+                             k.weight = 100) {
   checkmate::assert_int(nfeatures)
   for (i in seurat_list) {
     check_assay(i, assay)
@@ -242,9 +243,10 @@ seurat_integrate <- function(seurat_list, nfeatures = 5000, assay = "RNA") {
     Seurat::RenameCells(x, new.names = paste0(x@meta.data[["orig.ident"]], "_", Seurat::Cells(x)))
   })
   features <- Seurat::SelectIntegrationFeatures(object.list = seurat_list, nfeatures = nfeatures)
-  anchors <- Seurat::FindIntegrationAnchors(object.list = seurat_list, anchor.features = features, assay = rep_len(assay, length(seurat_list)))
+  anchors <- Seurat::FindIntegrationAnchors(object.list = seurat_list, anchor.features = features, 
+                                            k.filter = k.filter, assay = rep_len(assay, length(seurat_list)))
 
-  seurat_integrated <- Seurat::IntegrateData(anchorset = anchors)
+  seurat_integrated <- Seurat::IntegrateData(anchorset = anchors, k.weight = k.weight)
   return(seurat_integrated)
 }
 

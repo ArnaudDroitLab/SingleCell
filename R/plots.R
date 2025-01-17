@@ -3,6 +3,14 @@ theme_white_bg <- function(){
                  axis.line = ggplot2::element_line())
 }
 
+colorblind_palette_7 <- function() {
+  c("#F0E442", "#56B4E9", "#E69F00", "#009E73", "#D55E00", "#0072B2", "#CC79A7")
+}
+
+get_colorblind_x <- function(x) {
+  colorblind_palette_7()[0:(x-1)%%7+1]
+}
+
 #' Plot qc as violin plot, adding cutoffs lines.
 #'
 #' @param df A data frame containing x_name and y_name.
@@ -31,16 +39,16 @@ plot_filter <- function(df, x_name = "x", y_name = "y", low = 0, high = Inf) {
   checkmate::assert_numeric(low)
   checkmate::assert_numeric(high)
   if (low > high) {stop("Low cannot be superior to high.")}
-
+  
   p <- ggplot2::ggplot(df, ggplot2::aes(x = .data[[x_name]], y = .data[[y_name]], fill = .data[[x_name]])) +
     ggplot2::geom_violin() +
     ggplot2::geom_jitter(size = 0.2, color = ggplot2::alpha("black", 0.4), fill = ggplot2::alpha("black", 0.4)) +
     ggplot2::theme_bw() +
     ggplot2::theme(axis.title.x=ggplot2::element_blank())
-
+  
   low = max(low, min(0, min(df[[y_name]])))
   high = min(high, max(df[[y_name]]) + 1)
-
+  
   p <- p + ggplot2::geom_hline(yintercept=low, linetype="dashed", color = "red")
   p <- p + ggplot2::geom_hline(yintercept=high, linetype="dashed", color = "red")
   return(p)
@@ -64,8 +72,9 @@ plot_filter <- function(df, x_name = "x", y_name = "y", low = 0, high = Inf) {
 #' @examples
 
 plot_filtering_stats <- function(df, x_name = "Genes", y_name = "Cells") {
-
+  
   checkmate::assert_data_frame(df)
+  
   
   if (!x_name %in% colnames(df)) {
     stop(paste0("First column is missing from the data frame."))
@@ -81,18 +90,18 @@ plot_filtering_stats <- function(df, x_name = "Genes", y_name = "Cells") {
   
   if (isFALSE(identical(rownames(df), c("Before", "After", "Filtered_out", "Percentage")))) {
     stop(paste0("Dataframe should be ordered like this = 'Before', 'After', 'Filtered_out'."))
-         }
+  }
   
   p <- ggplot2::ggplot(data = df, aes(x = row.names(df), .data[[x_name]])) +
     ggplot2::geom_bar(stat = "identity", color = "#D44C7E", fill = "#F39BBC", width = 0.8) +
     ggplot2::geom_text(ggplot2::aes(label = .data[[x_name]]), vjust = 1.5, size = 3) +
-    ggplot2::scale_x_discrete(name = "", limits = c("Before", "After", "Filtered_out"), 
+    ggplot2::scale_x_discrete(name = "", limits = c("Before", "After", "Filtered_out"),
                               labels = c("Before", "After", "Filtered")) +
     ggplot2::theme_bw()
   q <- ggplot2::ggplot(data = df, aes(x = row.names(df), .data[[y_name]])) +
     ggplot2::geom_bar(stat = "identity", color = "#FFC107", fill = "#FFE493", width = 0.8) +
     ggplot2::geom_text(ggplot2::aes(label = .data[[y_name]]), vjust = 1.5, size = 3) +
-    ggplot2::scale_x_discrete(name = "", limits = c("Before", "After", "Filtered_out"), 
+    ggplot2::scale_x_discrete(name = "", limits = c("Before", "After", "Filtered_out"),
                               labels = c("Before", "After", "Filtered")) +
     ggplot2::theme_bw()
   return(p + q)
@@ -123,7 +132,7 @@ plot_seurat_elbow <- function(seurat, reduction = "pca", npc = 50, k.param.neigh
   checkmate::assert_int(npc)
   checkmate::assert_int(k.param.neighbors)
   if (length(seurat@reductions[[reduction]]@stdev)<npc) {stop(paste0(reduction, " does not have ", npc, " components."))}
-
+  
   df <- data.frame("Standard_Deviation" = seurat@reductions[[reduction]]@stdev[1:npc], PC = 1:npc)
   p <- ggplot2::ggplot(df, ggplot2::aes(x = .data[["PC"]], y = .data[["Standard_Deviation"]])) +
     ggplot2::geom_point() + ggplot2::scale_y_continuous("Standard Deviation") +
@@ -174,7 +183,7 @@ plot_seurat_dim <- function(seurat, reduction = "pca", colour_by = "orig.ident",
       ggplot2::geom_point(aes(colour = .data[[colour_by]])) +
       ggplot2::theme_bw() +
       ggplot2::scale_colour_gradient(high = "#429DEF", low = "#ECECEC") +
-      ggplot2::labs(color = paste0("log2(RNA count)")) + 
+      ggplot2::labs(color = paste0("log2(RNA count)")) +
       ggplot2::theme(legend.position = "top")
   } else if (colour_by == "percent_mt") {
     df <- df %>% dplyr::arrange(!!sym(colour_by))
@@ -182,23 +191,15 @@ plot_seurat_dim <- function(seurat, reduction = "pca", colour_by = "orig.ident",
       ggplot2::geom_point(aes(colour = .data[[colour_by]])) +
       ggplot2::theme_bw() +
       ggplot2::scale_colour_gradient(high = "#F39243", low = "#ECECEC") +
-      ggplot2::labs(color = "Mitochondrial percentage") + 
-      ggplot2::theme(legend.position = "top")
-  } else if (colour_by == "orig.ident") {
-    p <- ggplot2::ggplot(df, ggplot2::aes(x = .data[[x]], y = .data[[y]],
-                                          colour = .data[[colour_by]])) +
-      ggplot2::geom_point(alpha = 0.4) +
-      ggplot2::theme_bw() + 
-      ggplot2::theme(legend.position = "top", legend.key = element_rect(fill = "white", colour = "black")) +
-      ggplot2::guides(color = ggplot2::guide_legend(title = NULL)) + 
+      ggplot2::labs(color = "Mitochondrial percentage") +
       ggplot2::theme(legend.position = "top")
   } else {
     p <- ggplot2::ggplot(df, ggplot2::aes(x = .data[[x]], y = .data[[y]],
                                           colour = .data[[colour_by]])) +
       ggplot2::geom_point() +
-      ggplot2::theme_bw() + 
+      ggplot2::theme_bw() +
       ggplot2::theme(legend.position = "top", legend.key = element_rect(fill = "white", colour = "black")) +
-      ggplot2::guides(color = ggplot2::guide_legend(title = NULL)) + 
+      ggplot2::guides(color = ggplot2::guide_legend(title = NULL)) +
       ggplot2::theme(legend.position = "top")
   }
   return(p)
@@ -218,23 +219,63 @@ plot_seurat_dim <- function(seurat, reduction = "pca", colour_by = "orig.ident",
 plot_seurat_clustree <- function(seurat, prefix = "RNA_snn_res.") {
   checkmate::assert_class(seurat, "Seurat")
   checkmate::assert_character(prefix, max.len = 1)
+  greping <- paste0("^", prefix)
+  seurat_prefix_column <- grep(greping, colnames(seurat@meta.data), value = TRUE)
+  for (col in seurat_prefix_column) {
+    checkmate::assert_factor(seurat@meta.data[[col]])
+  }
   p <- clustree::clustree(seurat@meta.data, prefix=prefix)
   return(p)
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+plot_seurat_violin <- function(seurat, features, group.by = "orig.ident", assay = "RNA", slot = "data", show_points = TRUE) {
+  
+  df_large <- Seurat::FetchData(seurat, vars = c(group.by, features), assay = "RNA", slot = "data")
+  # Use melt to change data.frame format
+  df_long <- reshape2::melt(df_large, id.vars = group.by, measure.vars = features,
+                            variable.name = "feature", value.name = "expression")
+  colors <- get_colorblind_x(length(unique(df_large[[group.by]])))
+  
+  p <- ggplot(df_long, aes(x = factor(.data[[group.by]]), y = .data[["expression"]], fill = .data[[group.by]])) +
+    ggplot2::geom_violin() +
+    ggplot2::geom_jitter(color = "grey3", size = 0.2, alpha = 0.2) +
+    ggplot2::scale_y_continuous("Expression level", position="right") +
+    facet_grid(rows = vars(feature), scales = "free", switch = "y") +
+    ggplot2::theme_bw() +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+                   panel.spacing = unit(0, "lines"),
+                   legend.position = "none",
+                   strip.text.y.left = element_text(angle = 0),
+                   strip.text = element_text(face = "bold")) +
+    ggplot2::scale_fill_manual(values = colors) +
+    xlab("Identity")
+  
+  
+  
+  
+  
+  a <- ggplot(pbmc, aes(x = factor(group.by), y = "expression", fill = group.by)) +
+    geom_violin(scale = "width", adjust = 1, trim = TRUE) +
+    scale_y_continuous(expand = c(0, 0), position="right", labels = function(x)
+      c(rep(x = "", times = length(x)-2), x[length(x) - 1], "")) +
+    facet_grid(rows = vars(Feat), scales = "free", switch = "y") +
+    theme_cowplot(font_size = 12) +
+    theme(legend.position = "none", panel.spacing = unit(0, "lines"),
+          plot.title = element_text(hjust = 0.5),
+          panel.background = element_rect(fill = NA, color = "black"),
+          strip.background = element_blank(),
+          strip.text = element_text(face = "bold"),
+          strip.text.y.left = element_text(angle = 0)) +
+    ggtitle("Identity on x-axis") + xlab("Identity") + ylab("Expression Level")
+  
+  p <- ggplot2::ggplot(data = groups_CD14, ggplot2::aes(y = CD14, x = Sample_Tag)) +
+    ggplot2::geom_violin(data = groups_CD14, ggplot2::aes(fill = Sample_Tag)) +
+    ggplot2::geom_jitter(color = "grey3", size = 0.3, alpha = 0.1) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)) +
+    ggplot2::scale_x_discrete("") +
+    ggplot2::scale_y_continuous("Expression level") +
+    NoLegend()
+  
+}
