@@ -444,8 +444,8 @@ annotate_clusters <- function(analysis, sample = "", method = "manual", ..., gro
       }
       p <- plot_seurat_violin(seurat, features = markers, group.by = group.by)
       ggplot2::ggsave(paste(sample, cell_type,  "anotation_violin.png", sep = "_"), plot = p,
-                      device = "png", path = plots_dir, dpi = 200, width = 1500,
-                      height = 75 + 300 * length(markers), units = "px")
+                       device = "png", path = plots_dir, dpi = 200, width = 1500,
+                       height = 75 + 300 * length(markers), units = "px")
     }
   }
 }

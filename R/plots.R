@@ -234,7 +234,7 @@ plot_seurat_violin <- function(seurat, features, group.by = "orig.ident", assay 
   df_large <- Seurat::FetchData(seurat, vars = c(group.by, features), assay = "RNA", slot = "data")
   # Use melt to change data.frame format
   df_long <- reshape2::melt(df_large, id.vars = group.by, measure.vars = features,
-                            variable.name = "feature", value.name = "expression")
+                         variable.name = "feature", value.name = "expression")
   colors <- get_color_x(length(unique(df_large[[group.by]])), color_list = colorblind_palette_7())
   
   p <- ggplot(df_long, aes(x = factor(.data[[group.by]]), y = .data[["expression"]], fill = .data[[group.by]])) +
