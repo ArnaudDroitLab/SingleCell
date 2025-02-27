@@ -3,7 +3,7 @@
 #' Check if object is of class seurat, check that assay is a string, and check that assay is present in seurat
 #'
 #' @param seurat an object to check
-#' @param assay an assay to chack
+#' @param assay an assay to check
 #'
 #' @return nothing
 check_assay <- function(seurat, assay="RNA") {

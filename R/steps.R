@@ -331,7 +331,7 @@ umap <- function(analysis, sample = "", method = "Seurat", n_neighbors = 30, plo
 #' @param results_dir The path to save the tables. Keep empty to skip plot saving. Default ""
 #' @param variable what to isolate from the FetchData. Default "seurat_clusters"
 #'
-#' @return A dataframe that contains the differentially expressed genes for each cluster against all other clusters.
+#' @return A dataframe that contains the different gene expression for each cluster against all other clusters.
 #' @export
 #'
 #' @examples
