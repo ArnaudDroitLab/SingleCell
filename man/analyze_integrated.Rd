@@ -34,7 +34,8 @@ analyze_integrated(
   de_pvalue = 0.05,
   force_report = FALSE,
   variable = "seurat_clusters",
-  seurat_object = "saved"
+  force_DE = FALSE,
+  skip = c()
 )
 }
 \arguments{
@@ -105,6 +106,10 @@ Typically resolutions range between 0.1 and 2. Default 1}
 report creation will be skipped. Default FALSE}
 
 \item{variable}{The column name that is going to be used for extracting the cluster number per barcode. Default "seurat_clusters"}
+
+\item{force_DE}{Whether to force the DE to be recomputed if a DE file already exists. Default FALSE}
+
+\item{skip}{Which steps to skip, keep empty to do all the steps. Default c()}
 }
 \value{
 An analysis object.

@@ -4,7 +4,13 @@
 \alias{seurat_integrate}
 \title{Integrate a list of Seurat objects together.}
 \usage{
-seurat_integrate(seurat_list, nfeatures = 5000, assay = "RNA")
+seurat_integrate(
+  seurat_list,
+  nfeatures = 5000,
+  assay = "RNA",
+  k.filter = 100,
+  k.weight = 100
+)
 }
 \arguments{
 \item{seurat_list}{A list of several objects to integrate together. These objects must all be of the same type.}

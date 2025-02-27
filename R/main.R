@@ -69,7 +69,9 @@ integrate <- function(samples,
                       selection_method_normalize = "vst",
                       npcs_pca = 50,
                       nfeatures_integration = 5000,
-                      force_report = FALSE, k.weight = 100, k.filter = 100) {
+                      force_report = FALSE, 
+                      k.weight = 100, 
+                      k.filter = 100) {
   
   checkmate::assert_character(samples, min.len = 2)
   checkmate::assert_int(step, lower = 1, upper = 5)

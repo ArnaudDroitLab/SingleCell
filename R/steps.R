@@ -240,6 +240,7 @@ neighbors <- function(analysis, method = "Seurat", k.param = 20) {
 #'
 #' @return An analysis object of type method with clusters.
 #' @importFrom ggplot2 ggsave
+#' @importFrom ggraph guide_edge_colourbar
 #' @export
 clustering <- function(analysis, sample = "", method = "Seurat", res_clustree = c(), resolution = 1, plots_dir = "") {
   checkmate::assert_string(method)
@@ -368,7 +369,7 @@ find_all_DE <- function(analysis, sample = "", method = "Seurat",
   
   path_DE_saved <- file.path(results_dir, paste0(sample, "_DE.csv"))
   if (!force_DE) {
-    print("DE data frame found, skipping finding Markers. Congradulations.")
+    print("force_DE = FALSE, skipping finding Markers. Congratulations.")
     return()
   }
   

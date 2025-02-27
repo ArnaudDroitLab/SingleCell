@@ -215,6 +215,7 @@ plot_seurat_dim <- function(seurat, reduction = "pca", colour_by = "orig.ident",
 #'
 #' @return a ggplot graph
 #' @importFrom clustree clustree
+#' @importFrom ggraph guide_edge_colourbar
 #' @export
 plot_seurat_clustree <- function(seurat, prefix = "RNA_snn_res.") {
   checkmate::assert_class(seurat, "Seurat")

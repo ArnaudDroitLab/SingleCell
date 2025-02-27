@@ -29,7 +29,9 @@ integrate(
   selection_method_normalize = "vst",
   npcs_pca = 50,
   nfeatures_integration = 5000,
-  force_report = FALSE
+  force_report = FALSE,
+  k.weight = 100,
+  k.filter = 100
 )
 }
 \arguments{
@@ -93,6 +95,10 @@ if a supported organism is provided. Leave \code{organism} and \code{mitochondri
 
 \item{force_report}{Whether to overwrite the report if it already exists. If this is FALSE, and a file \code{integration.Rmd} already exists,
 report creation will be skipped. Default FALSE}
+
+\item{k.weight}{Number of neighbors to consider when weighting anchors}
+
+\item{k.filter}{How many neighbors (k) to use when filtering anchors}
 }
 \value{
 an analysis object containing the integrated data.
