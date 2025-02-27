@@ -1,0 +1,11 @@
+#header {
+  background-image: url("logo.png");
+  background-repeat: no-repeat;
+  background-size: auto 90%;
+  background-position: 100% 50%;
+}
+
+#header .title.toc-ignore {
+ font-size: 50px;
+}
+}

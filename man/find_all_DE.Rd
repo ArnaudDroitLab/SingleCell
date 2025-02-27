@@ -13,7 +13,7 @@ find_all_DE(
   pvalue_threshold = 0.05,
   results_dir = "",
   variable = "seurat_clusters",
-  seurat_object = "saved"
+  force_DE = FALSE
 )
 }
 \arguments{

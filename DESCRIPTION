@@ -20,7 +20,8 @@ Imports:
     ggplot2,
     magrittr,
     dplyr,
-    readr
+    readr,
+    ggraph
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

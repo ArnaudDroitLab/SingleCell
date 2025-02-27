@@ -8,7 +8,9 @@ integrate_data(
   analysis_list,
   method = "Seurat",
   nfeatures = 5000,
-  assay = "RNA"
+  assay = "RNA",
+  k.weight = k.weight,
+  k.filter = k.filter
 )
 }
 \arguments{

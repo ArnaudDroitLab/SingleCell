@@ -13,8 +13,7 @@ seurat_all_DE(
   logfc_threshold = 0.25,
   min_pct = 0.1,
   pvalue_threshold = 0.05,
-  only.pos = FALSE,
-  seurat_object = "saved"
+  only.pos = FALSE
 )
 }
 \arguments{
