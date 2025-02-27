@@ -7,8 +7,8 @@ colorblind_palette_7 <- function() {
   c("#F0E442", "#56B4E9", "#E69F00", "#009E73", "#D55E00", "#0072B2", "#CC79A7")
 }
 
-get_colorblind_x <- function(x) {
-  colorblind_palette_7()[0:(x-1)%%7+1]
+get_color_x <- function(x, color_list = colorblind_palette_7()) {
+  color_list[0:(x-1)%%7+1]
 }
 
 #' Plot qc as violin plot, adding cutoffs lines.
@@ -230,6 +230,19 @@ plot_seurat_clustree <- function(seurat, prefix = "RNA_snn_res.") {
 }
 
 
+#' Make a violin plot, using the features (genes or elements of metadata) from the Seurat object.
+#'
+#' @param seurat The Seurat object from which to
+#' @param features
+#' @param group.by
+#' @param assay
+#' @param slot
+#' @param show_points
+#'
+#' @return
+#' @export
+#'
+#' @examples
 plot_seurat_violin <- function(seurat, features, group.by = "orig.ident", assay = "RNA", slot = "data", show_points = TRUE) {
   
   df_large <- Seurat::FetchData(seurat, vars = c(group.by, features), assay = "RNA", slot = "data")

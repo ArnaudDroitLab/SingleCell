@@ -191,10 +191,10 @@ integrate <- function(samples,
 }
 
 
-#' Analyze a seurat object and sort expressed genes on cells
+#' Analyze and report the Seurat Single Cell pipeline.
 #'
-#' @param analysis Object to use.
-#' @param sample Sample name.
+#' @param analysis A Seurat object to use consisting of multiple assays.
+#' @param sample Sample name. Default "integrated".
 #' @param step Steps range from 6 to 11, following the steps from previous function `integrate`,
 #' with each number making the function start at one of the following steps :
 #' 6 : `filter data`, 7 : `normalize data`, 8 : `compute pca`, 9 : `find neighbors`, 10 : `find clusters`, 11 : `compute UMAP`.
@@ -215,8 +215,10 @@ integrate <- function(samples,
 #' @param max_cells All genes having a higher number of cells expressing it will be filtered out. Default Inf
 #' @param min_counts All cells having a lower number of counts will be filtered out. Default 0
 #' @param max_counts All cells having a higher number of counts will be filtered out. Default Inf
-#' @param min_mt All cells having a lower percentage of mitochondria will be filtered out. Default 0
-#' @param max_mt All cells having a higher percentage of mitochondria will be filtered out. Default Inf
+#' @param min_mt All cells having a lower percentage of mitochondria will be filtered out. If no organism or
+#' mitochondrial genes list is offered, this argument will be ignored. Default 0
+#' @param max_mt All cells having a higher percentage of mitochondria will be filtered out. If no organism or
+#' mitochondrial genes list is offered, this argument will be ignored. Default Inf
 #' @param nfeatures_normalize Number of variable genes to select for scaling. Default 2000
 #' @param selection_method_normalize What method to use for features selection during scaling. Default "vst"
 #' @param npcs_pca Number of principal components to compute in the PCA. Default 50
@@ -336,7 +338,7 @@ analyze_integrated <- function(analysis,
                             max_mt = max_mt,
                             plots_dir = plots_dir,
                             results_dir = results_dir)
-    checkmate::assert_class(analysis, method)
+    checkmate::assert_class(analysis, method) # Pretty clear on that point
   }
   
   if (step<=7 & ! 7 %in% skip) {
@@ -363,7 +365,7 @@ analyze_integrated <- function(analysis,
     analysis <- neighbors(analysis,
                           method = method,
                           k.param = k.param_neighbors)
-    checkmate::assert_class(analysis, method)
+    checkmate::assert_class(analysis, method) # I don't understand this part
   }
   
   if (step<=10 & ! 10 %in% skip) {
