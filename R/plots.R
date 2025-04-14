@@ -225,7 +225,8 @@ plot_seurat_clustree <- function(seurat, prefix = "RNA_snn_res.") {
   for (col in seurat_prefix_column) {
     checkmate::assert_factor(seurat@meta.data[[col]])
   }
-  p <- clustree::clustree(seurat@meta.data, prefix=prefix)
+  p <- clustree::clustree(seurat@meta.data, prefix=prefix) + 
+    guides(edge_colourbar = 'none')
   return(p)
 }
 
@@ -243,17 +244,40 @@ plot_seurat_clustree <- function(seurat, prefix = "RNA_snn_res.") {
 #' @export
 #'
 #' @examples
-plot_seurat_violin <- function(seurat, features, group.by = "orig.ident", assay = "RNA", slot = "data", show_points = TRUE) {
+plot_seurat_violin <- function(seurat, features, group.by = "orig.ident", assay = "RNA", slot = "data", show_points = TRUE, taxonomy = "ensembl", threshold = NULL, alpha = 0.2, box_fill = "lightgrey") {
   
   df_large <- Seurat::FetchData(seurat, vars = c(group.by, features), assay = "RNA", slot = "data")
   # Use melt to change data.frame format
-  df_long <- reshape2::melt(df_large, id.vars = group.by, measure.vars = features,
+  
+  if (taxonomy == "ensembl") {
+    gene_list_translated <- AnnotationDbi::mapIds(
+      org.Hs.eg.db,
+      keys = colnames(df_large)[2:length(df_large)],
+      column = "SYMBOL", 
+      keytype = "ENSEMBL"
+    )
+    gene_list_names <- names(gene_list_translated)
+    gene_list_translated <- unname(gene_list_translated)
+  } else {
+    gene_list_names <- gene_list
+    gene_list_translated <- gene_list
+  }
+  
+  colnames(df_large) <- c(group.by, gene_list_translated)
+  
+  df_long <- reshape2::melt(df_large, id.vars = group.by, measure.vars = gene_list_translated,
                          variable.name = "feature", value.name = "expression")
+  
+  if (length(threshold) > 0) {
+    df_long <- df_long %>%
+      dplyr::filter(expression > threshold)
+  }
+  
   colors <- get_color_x(length(unique(df_large[[group.by]])), color_list = colorblind_palette_7())
-
+  
   p <- ggplot(df_long, aes(x = factor(.data[[group.by]]), y = .data[["expression"]], fill = .data[[group.by]])) +
     ggplot2::geom_violin() +
-    ggplot2::geom_jitter(color = "grey3", size = 0.2, alpha = 0.2) +
+    ggplot2::geom_jitter(color = "grey3", size = 0.2, alpha = alpha) +
     ggplot2::scale_y_continuous("Expression level", position="right") +
     facet_grid(rows = vars(feature), scales = "free", switch = "y") +
     ggplot2::theme_bw() +
@@ -261,7 +285,8 @@ plot_seurat_violin <- function(seurat, features, group.by = "orig.ident", assay 
                    panel.spacing = unit(0, "lines"),
                    legend.position = "none",
                    strip.text.y.left = element_text(angle = 0),
-                   strip.text = element_text(face = "bold")) +
+                   strip.text = element_text(face = "bold"), 
+                   strip.background = element_rect(fill = box_fill, color = "black")) +
     ggplot2::scale_fill_manual(values = colors) +
     xlab("Identity")
   return(p)
