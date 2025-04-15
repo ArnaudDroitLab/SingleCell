@@ -34,7 +34,7 @@ find_all_DE(
 \item{variable}{what to isolate from the FetchData. Default "seurat_clusters"}
 }
 \value{
-A dataframe that contains the differentially expressed genes for each cluster against all other clusters.
+A dataframe that contains the different gene expression for each cluster against all other clusters.
 }
 \description{
 Find DE between all clusters

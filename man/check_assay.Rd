@@ -9,7 +9,7 @@ check_assay(seurat, assay = "RNA")
 \arguments{
 \item{seurat}{an object to check}
 
-\item{assay}{an assay to chack}
+\item{assay}{an assay to check}
 }
 \value{
 nothing

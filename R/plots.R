@@ -225,8 +225,7 @@ plot_seurat_clustree <- function(seurat, prefix = "RNA_snn_res.") {
   for (col in seurat_prefix_column) {
     checkmate::assert_factor(seurat@meta.data[[col]])
   }
-  p <- clustree::clustree(seurat@meta.data, prefix=prefix) + 
-    guides(edge_colourbar = 'none')
+  p <- clustree::clustree(seurat@meta.data, prefix=prefix)
   return(p)
 }
 
