@@ -2,7 +2,7 @@
 % Please edit documentation in R/main.R
 \name{analyze_integrated}
 \alias{analyze_integrated}
-\title{Analyze a seurat object and sort expressed genes on cells}
+\title{Analyze and report the Seurat Single Cell pipeline.}
 \usage{
 analyze_integrated(
   analysis,
@@ -39,9 +39,9 @@ analyze_integrated(
 )
 }
 \arguments{
-\item{analysis}{Object to use.}
+\item{analysis}{A Seurat object to use consisting of multiple assays.}
 
-\item{sample}{Sample name.}
+\item{sample}{Sample name. Default "integrated".}
 
 \item{step}{Steps range from 6 to 11, following the steps from previous function \code{integrate},
 with each number making the function start at one of the following steps :
@@ -70,7 +70,8 @@ Keep empty to skip mitochondrial detection. Default ""}
 
 \item{min_cells}{All genes having a lower number of cells expressing it will be filtered out. Default 0}
 
-\item{min_mt}{All cells having a lower percentage of mitochondria will be filtered out. Default 0}
+\item{min_mt}{All cells having a lower percentage of mitochondria will be filtered out. If no organism or
+mitochondrial genes list is offered, this argument will be ignored. Default 0}
 
 \item{max_genes}{All cells having a higher number of genes expressed will be filtered out. Default Inf}
 
@@ -78,7 +79,8 @@ Keep empty to skip mitochondrial detection. Default ""}
 
 \item{max_cells}{All genes having a higher number of cells expressing it will be filtered out. Default Inf}
 
-\item{max_mt}{All cells having a higher percentage of mitochondria will be filtered out. Default Inf}
+\item{max_mt}{All cells having a higher percentage of mitochondria will be filtered out. If no organism or
+mitochondrial genes list is offered, this argument will be ignored. Default Inf}
 
 \item{nfeatures_normalize}{Number of variable genes to select for scaling. Default 2000}
 
@@ -115,5 +117,5 @@ report creation will be skipped. Default FALSE}
 An analysis object.
 }
 \description{
-Analyze a seurat object and sort expressed genes on cells
+Analyze and report the Seurat Single Cell pipeline.
 }

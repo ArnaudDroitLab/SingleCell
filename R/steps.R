@@ -282,6 +282,7 @@ clustering <- function(analysis, sample = "", method = "Seurat", res_clustree = 
 #'
 #' @return an analysis object.
 #' @importFrom ggplot2 ggsave
+#' @importFrom Seurat NoLegend
 #' @export
 #'
 #' @examples
@@ -300,7 +301,7 @@ umap <- function(analysis, sample = "", method = "Seurat", n_neighbors = 30, plo
       list_plot[["sample"]] <- plot_seurat_dim(analysis, reduction = "umap", colour_by = "orig.ident")
       list_plot[["clusters"]] <- plot_seurat_dim(analysis, reduction = "umap", colour_by = plot_clustering)
       list_plot[["clusters_numbers"]] <- Seurat::LabelClusters(list_plot[["clusters"]], id = plot_clustering,
-                                                               color = "black", box = TRUE) + NoLegend()
+                                                               color = "black", box = TRUE) + Seurat::NoLegend()
       list_plot[["nCount"]] <- plot_seurat_dim(analysis, reduction = "umap", colour_by = "nCount_RNA")
       
       if (checkmate::testFileExists(file.path(plots_dir, paste0(sample, "_mitochondria_filter_plot.png")))) {
