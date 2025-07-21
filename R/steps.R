@@ -133,11 +133,18 @@ normalize_data <- function(analysis, method = "Seurat", assay = "RNA", nfeatures
   checkmate::assert_vector(features, null.ok = TRUE)
   if (method == "Seurat") {
     check_assay(analysis, assay)
-    if (assay == "integrated") {
-      print("Data were already normalized during integration. Skipping this step.")
-      analysis <- seurat_scale(analysis, assay, features)
+    if (step == "normalization") {
+      if (assay == "integrated") {
+        print("Data were already normalized during integration. Skipping this step.")
+        analysis <- seurat_features(analysis, assay, nfeatures, selection_method)
+        analysis <- seurat_scale(analysis, assay, features)
+      } else {
+        print("Data were not normalized during integration. Performing normalization.")
+        analysis <- seurat_normalize(analysis, assay)
+        analysis <- seurat_features(analysis, assay, nfeatures, selection_method)
+        analysis <- seurat_scale(analysis, assay, features)
+      }
     } else {
-      print("Data were not normalized during integration. Performing normalization.")
       analysis <- seurat_normalize(analysis, assay)
       analysis <- seurat_features(analysis, assay, nfeatures, selection_method)
       analysis <- seurat_scale(analysis, assay, features)
