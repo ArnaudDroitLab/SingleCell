@@ -319,7 +319,7 @@ plot_seurat_violin <- function(seurat, features, group.by = "orig.ident", assay 
 #' @export
 #'
 #' @examples
-plot_label_umap <- function(seurat, assays = "RNA", slot = "data", colour_by = "orig.ident", label.size = 4, pt.size = 0.5, color_palette_ordered = NULL) {
+plot_label_umap <- function(seurat, assay = "RNA", slot = "data", colour_by = "orig.ident", label.size = 4, pt.size = 0.5, color_palette_ordered = NULL) {
   
   check_assay(seurat, assay)
   check_reduction(seurat, "umap")
