@@ -175,6 +175,7 @@ integrate <- function(samples,
                                              assay = assay,
                                              npcs = npcs_pca,
                                              plots_dir = plots_dir)})
+    step <- "integrating"
   }
   checkmate::assert_list(analysis_list, types = method, len = length(samples))
   
