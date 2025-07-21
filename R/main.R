@@ -323,6 +323,9 @@ analyze_integrated <- function(analysis,
   checkmate::assert_logical(finding_DEG)
   checkmate::assert_string(skip, null.ok = TRUE)
   
+  print(paste0("DEBUG: save_path = ", save_path))
+  print(dir.exists(save_path))
+  
   if (save_path != "") {
     
     if (!dir.exists(save_path)) {
@@ -330,11 +333,12 @@ analyze_integrated <- function(analysis,
     }
     
     checkmate::assert_directory(save_path)
-    plots_dir <- file.path(save_path, "plots")
+    
+    plots_dir <- file.path(save_path, "plots", recursive = TRUE)
     if (!dir.exists(plots_dir)) {
       dir.create(plots_dir)
     }
-    results_dir <- file.path(save_path, "results")
+    results_dir <- file.path(save_path, "results", recursive = TRUE)
     if (!dir.exists(results_dir)) {
       dir.create(results_dir)
     }
