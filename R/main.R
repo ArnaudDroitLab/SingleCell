@@ -354,7 +354,7 @@ analyze_integrated <- function(analysis,
     cat("Is character when step =", is.character(step), "\n")
   }
   
-  if (!is.null(step) && is.character(step) && step == "normalizing") {
+  if (!is.null(step) && as.character(step) == "normalizing") {
     analysis <- normalize_data(analysis,
                                method = method,
                                assay = assay,
