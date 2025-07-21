@@ -161,7 +161,8 @@ integrate <- function(samples,
                                                         method = method,
                                                         assay = assay,
                                                         nfeatures = nfeatures_normalize,
-                                                        selection_method = selection_method_normalize)})
+                                                        selection_method = selection_method_normalize, 
+                                                        step = step)})
     step <- "PCA_list"
   }
   checkmate::assert_list(analysis_list, types = method, len = length(samples))
