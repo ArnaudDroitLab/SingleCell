@@ -135,7 +135,7 @@ normalize_data <- function(analysis, method = "Seurat", assay = "RNA", nfeatures
   if (method == "Seurat") {
     check_assay(analysis, assay)
     if (step == "normalization") {
-      print(paste0("Step is normalization"))
+      print(paste0("Step is: ", step))
       if (perform_normalization) {
         print(paste0("Data were not normalized during integration. Performing normalization."))
         analysis <- seurat_normalize(analysis, assay)
@@ -147,7 +147,7 @@ normalize_data <- function(analysis, method = "Seurat", assay = "RNA", nfeatures
         analysis <- seurat_scale(analysis, assay, features)
       }
     } else {
-      print(past0("Step is normalization_list"))
+      print(paste0("Step is: ", step))
       analysis <- seurat_normalize(analysis, assay)
       analysis <- seurat_features(analysis, assay, nfeatures, selection_method)
       analysis <- seurat_scale(analysis, assay, features)
