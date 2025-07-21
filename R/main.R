@@ -133,7 +133,7 @@ integrate <- function(samples,
   }
   checkmate::assert_list(analysis_list, types = method, len = length(samples))
   
-  if (step == "fitlering_list") {
+  if (step == "filtering_list") {
     analysis_list <- lapply(1:length(samples),
                             function(x) {filter_data(analysis_list[[x]],
                                                      samples[x],
