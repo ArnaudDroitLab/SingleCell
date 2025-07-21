@@ -196,7 +196,18 @@ integrate <- function(samples,
   
   make_integration_report(samples = samples, report_path = save_path, report_name = "integration.Rmd", plots_relative_path = "plots", data_relative_path = "results", force = force_report)
   
-  return(analysis)
+  if (perform_clusterisation) {
+    analysis <- SingleCell::analyze_integrated(analysis, sample = "integrated", step = "normalizing", perform_normalization = FALSE, 
+                                               force_report = TRUE, file_name = "integrated_clusterisation.rds", 
+                                               organism = organism, assay = "integrated", finding_DEG = FALSE, save_path = "integration")
+    
+    return(analysis)
+    
+  } else {
+    
+    return(analysis)
+    
+  }
 }
 
 
@@ -292,7 +303,6 @@ analyze_integrated <- function(analysis,
   checkmate::assert_class(analysis, method)
   checkmate::assert_string(assay)
   checkmate::assert_string(save_path)
-  if (save_path != "") {checkmate::assert_directory(save_path)}
   
   checkmate::assert_string(organism)
   checkmate::assert_character(mitochondrial_genes, null.ok = TRUE)
@@ -320,8 +330,6 @@ analyze_integrated <- function(analysis,
   print(paste0("bonjour: save_path = ", save_path))
   
   if (save_path != "") {
-
-    checkmate::assert_directory(save_path)
     
     plots_dir <- file.path(save_path, "plots", recursive = TRUE)
     if (!dir.exists(plots_dir)) {
@@ -336,13 +344,12 @@ analyze_integrated <- function(analysis,
     results_dir <- ""
   }
   
+  checkmate::assert_directory(results_dir)
+  checkmate::assert_directory(plots_dir)
+  
   if (step == "filtering") {
-    if (skip == "filtering") {
-      
-      step <- "normalizing"
-      
-    } else {
-      analysis <- filter_data(analysis,
+    
+    analysis <- filter_data(analysis,
                               sample,
                               method = method,
                               assay = assay,
@@ -359,8 +366,7 @@ analyze_integrated <- function(analysis,
                               plots_dir = plots_dir,
                               results_dir = results_dir)
       checkmate::assert_class(analysis, method) 
-    }
-    
+
     step <- "normalizing"
   }
   
