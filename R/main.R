@@ -236,7 +236,7 @@ integrate <- function(samples,
 #' @param force_report Whether to overwrite the report if it already exists. If this is FALSE, and a file `analysis.Rmd` already exists,
 #' report creation will be skipped. Default FALSE
 #' @param variable The column name that is going to be used for extracting the cluster number per barcode. Default "seurat_clusters"
-#' @param force_DE Whether to force the DE to be recomputed if a DE file already exists. Default FALSE
+#' @param finding_DEG Whether to force the DE to be recomputed if a DE file already exists. Default FALSE
 #' @param skip Which steps to skip, keep empty to do all the steps. Default c()
 #'
 #' @return An analysis object.
@@ -307,7 +307,7 @@ analyze_integrated <- function(analysis,
   
   checkmate::assert_vector(resolutions_clustree, min.len = 1)
   checkmate::assert_number(resolution_clustering, lower = 0)
-  checkmate::assert_logical(force_DE)
+  checkmate::assert_logical(finding_DEG)
   checkmate::assert_string(skip)
   
   if (save_path != "") {

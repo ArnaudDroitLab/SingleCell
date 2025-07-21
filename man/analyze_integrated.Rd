@@ -7,7 +7,7 @@
 analyze_integrated(
   analysis,
   sample = "integrated",
-  step = 6,
+  step = "filtering",
   method = "Seurat",
   assay = "RNA",
   save_path = ".",
@@ -89,7 +89,7 @@ mitochondrial genes list is offered, this argument will be ignored. Default Inf}
 \item{k.param_neighbors}{Number of neighbors to use when computing UMAP. Default 20.}
 
 \item{resolutions_clustree}{Which resolutions to compute and run the clustree on.
-If this parameter is NULL, clustree will be skipped. Clustree is an optional part of step 10. Default c(1:10/10, 5:8/4)}
+If this parameter is NULL, clustree will be skipped. Clustree is an optional part of step finding_clusters. Default c(1:10/10, 5:8/4)}
 
 \item{resolution_clustering}{Which final resolution to keep (can be a resolution not in \code{resolutions_clustree}).
 Typically resolutions range between 0.1 and 2. Default 1}
