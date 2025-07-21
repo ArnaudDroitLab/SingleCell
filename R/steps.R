@@ -134,7 +134,7 @@ normalize_data <- function(analysis, method = "Seurat", assay = "RNA", nfeatures
   checkmate::assert_vector(features, null.ok = TRUE)
   if (method == "Seurat") {
     check_assay(analysis, assay)
-    if (step == "normalization") {
+    if (step == "normalizing") {
       print(paste0("Step is: ", step))
       if (perform_normalization) {
         print(paste0("Data were not normalized during integration. Performing normalization."))
