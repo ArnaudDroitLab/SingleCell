@@ -309,7 +309,6 @@ seurat_clustering <- function(seurat, resolution = 1, prefix = "RNA_snn") {
 #'
 #' @return Seurat object with UMAP.
 #' @importFrom Seurat RunUMAP
-#' @importFrom Seurat FindAllMarkers
 #' @export
 seurat_umap <- function(seurat, n.neighbors = 30, dims = 1:20) {
   checkmate::assert_class(seurat, "Seurat")

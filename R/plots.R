@@ -292,8 +292,95 @@ plot_seurat_violin <- function(seurat, features, group.by = "orig.ident", assay 
 
 }
 
+#' Put labels on UMAPs using centroids and ggrepel.
+#'
+#' @param seurat 
+#' @param assays 
+#' @param slot 
+#' @param colour_by 
+#' @param label.size 
+#' @param pt.size 
+#' @param width 
+#' @param height 
+#' @param path 
+#' @param project_name 
+#' @param color_palette_ordered 
+#'
+#' @return
+#' @importFrom ggrepel geom_label_repel
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 aes
+#' @importFrom ggplot2 geom_point
+#' @importFrom ggplot2 theme_bw
+#' @importFrom ggplot2 labs
+#' @importFrom ggplot2 theme
+#' @importFrom ggplot2 scale_color_manual
+#' @importFrom ggplot2 scale_fill_manual
+#' @export
+#'
+#' @examples
+plot_label_umap <- function(seurat, assays = "RNA", slot = "data", colour_by = "orig.ident", label.size = 4, pt.size = 0.5, color_palette_ordered = NULL) {
+  
+  check_assay(seurat, assay)
+  check_reduction(seurat, "umap")
+  checkmate::assert_string(colour_by)
+  checkmate::assert_string(slot)
+  
+  df <- data.frame(umap1 = seurat@reductions[["umap"]]@cell.embeddings[,1],
+                   umap2 = seurat@reductions[["umap"]]@cell.embeddings[,2],
+                   color = seurat@meta.data[[colour_by]])
+  
+  centers <- aggregate(cbind(UMAP_1 = df[,1], UMAP_2 = df[,2]),
+                       by = list(group = df$color),
+                       FUN = mean)
+  
+  if (!is.null(color_palette_ordered)) {
+    color_values <- generate_gradient_palette(seurat, color_palette_ordered, n_colors_out = 100, n_clusters = colour_by)
+    centers$fill_color <- color_values
+    centers$text_color <- get_text_contrast_color(centers$fill_color)
+  } else {
+    centers$text_color <- "black"
+  }
+  
+  p <- ggplot2::ggplot(df, ggplot2::aes(x = umap1, 
+                               y = umap2, 
+                               color = color)) +
+    ggplot2::geom_point(size = pt.size, alpha = 0.8) +
+    ggplot2::theme_bw() +
+    ggplot2::labs(color = colour_by) +
+    ggplot2::theme(legend.position = "none") + 
+    ggrepel::geom_label_repel(data = centers, 
+                              ggplot2::aes(x = UMAP_1, y = UMAP_2, fill = group, label = group),
+                              size = label.size, 
+                              color = centers$text_color)
+  
+  if (!is.null(color_palette_ordered)) {
+    p <- p + ggplot2::scale_color_manual(values = color_values) + 
+      ggplot2::scale_fill_manual(values = color_values)
+  }
+
+  return(p)
+}
 
 
+get_text_contrast_color <- function(hex_color) {
+  rgb <- grDevices::col2rgb(hex_color) 
+  yiq <- (299 * rgb[1, ] + 587 * rgb[2, ] + 114 * rgb[3, ]) / 1000
+  ifelse(yiq >= 128, "black", "white")
+}
+
+generate_gradient_palette <- function(seurat, color_palette_ordered, n_colors_out = 100, n_clusters = "orig.ident") {
+  
+  gradient_func <- colorRampPalette(color_palette_ordered)
+  full_gradient <- gradient_func(n_colors_out)
+  
+  n_extract <- length(unique(feleke@meta.data[[n_clusters]]))
+  
+  idx <- round(seq(1, n_colors_out, length.out = n_extract))
+  selected_colors <- full_gradient[idx]
+  
+  return(selected_colors)
+}
 
 
 

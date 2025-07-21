@@ -300,13 +300,13 @@ umap <- function(analysis, sample = "", method = "Seurat", n_neighbors = 30, plo
       list_plot <- list()
       list_plot[["sample"]] <- plot_seurat_dim(analysis, reduction = "umap", colour_by = "orig.ident")
       list_plot[["clusters"]] <- plot_seurat_dim(analysis, reduction = "umap", colour_by = plot_clustering)
-      list_plot[["clusters_numbers"]] <- Seurat::LabelClusters(list_plot[["clusters"]], id = plot_clustering,
-                                                               color = "black", box = TRUE) + Seurat::NoLegend()
+      list_plot[["clusters_numbers"]] <- plot_label_umap(analysis, colour_by = plot_clustering)
       list_plot[["nCount"]] <- plot_seurat_dim(analysis, reduction = "umap", colour_by = "nCount_RNA")
       
       if (checkmate::testFileExists(file.path(plots_dir, paste0(sample, "_mitochondria_filter_plot.png")))) {
         list_plot[["mitochondria"]] <- plot_seurat_dim(analysis, reduction = "umap", colour_by = "percent_mt")
       } else {print("Mitochondria file does not exist")}
+      
       for (i in names(list_plot)) {
         if (i != "clusters") {
           ggplot2::ggsave(paste(sample, i,  "umap_plot.png", sep = "_"), plot = list_plot[[i]],
