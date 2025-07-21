@@ -225,7 +225,7 @@ integrate <- function(samples,
 #' @param selection_method_normalize What method to use for features selection during scaling. Default "vst"
 #' @param npcs_pca Number of principal components to compute in the PCA. Default 50
 #' @param resolutions_clustree Which resolutions to compute and run the clustree on.
-#' If this parameter is NULL, clustree will be skipped. Clustree is an optional part of step 10. Default c(1:10/10, 5:8/4)
+#' If this parameter is NULL, clustree will be skipped. Clustree is an optional part of step finding_clusters. Default c(1:10/10, 5:8/4)
 #' @param resolution_clustering Which final resolution to keep (can be a resolution not in `resolutions_clustree`).
 #' Typically resolutions range between 0.1 and 2. Default 1
 #' @param k.param_neighbors Number of neighbors to use when computing UMAP. Default 20.
@@ -247,7 +247,7 @@ integrate <- function(samples,
 #' @importFrom magrittr %>%
 analyze_integrated <- function(analysis,
                                sample = "integrated",
-                               step = 6,
+                               step = "filtering",
                                method = "Seurat",
                                assay = "RNA",
                                save_path = ".",

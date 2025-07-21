@@ -8,7 +8,7 @@ integrate(
   samples,
   path_to_count = "",
   analysis_list = list(),
-  step = 1,
+  step = "loading_data",
   from = "Cellranger",
   method = "Seurat",
   assay = "RNA",
@@ -44,9 +44,9 @@ detect the structure in each directory to find the matrix, using the \code{from}
 \item{analysis_list}{Function need either that if step is 2 to 5 or \code{analysis_list} if step is 1.
 A list of all the objects used for the integration. Default list()}
 
-\item{step}{Steps range from 1 to 5, with each number making the function start at one of the following steps :
-1 : \verb{load data}, 2 : \verb{filter data}, 3 : \verb{normalize data}, 4 : \verb{compute pca}, 5 : \code{integrate}. Choosing 1 will do the entire process,
-while 5 will only do the integration and assume that every previous step needed has already been done by the user. Default 1}
+\item{step}{Steps ranging from \code{loading_data} to \code{integrating}. The following steps are : \code{loading_data}, \code{filtering}, \code{normalizing}, \code{PCA}, and \code{integrating}.
+Choosing \code{loading_data} will do the entire process, while \code{integrating} will only do the integration and assume that every previous step
+needed has already been done by the user. Default 1}
 
 \item{from}{From which tools the count matrix comes from. Currently supports : Cellranger. Default "Cellranger"}
 

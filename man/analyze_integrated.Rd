@@ -34,7 +34,7 @@ analyze_integrated(
   de_pvalue = 0.05,
   force_report = FALSE,
   variable = "seurat_clusters",
-  force_DE = FALSE,
+  finding_DEG = FALSE,
   skip = c()
 )
 }
@@ -43,11 +43,9 @@ analyze_integrated(
 
 \item{sample}{Sample name. Default "integrated".}
 
-\item{step}{Steps range from 6 to 11, following the steps from previous function \code{integrate},
-with each number making the function start at one of the following steps :
-6 : \verb{filter data}, 7 : \verb{normalize data}, 8 : \verb{compute pca}, 9 : \verb{find neighbors}, 10 : \verb{find clusters}, 11 : \verb{compute UMAP}.
-Choosing 6 will do the entire process, while 5 will only do the umap and assume that every previous step needed has already been done by the user.
-Default 6}
+\item{step}{Steps ranging from \code{filtering} to \code{UMAP}. The following steps are : \code{filtering}, \code{normalizing}, \code{PCA}, \code{finding_neighbors}, \code{finding_clusters}, and \code{UMAP}.
+Choosing \code{filtering} will do the entire process, while \code{integrating} will only do the integration and assume that every previous step
+needed has already been done by the user. Default "filtering"}
 
 \item{method}{The analysis method used through the analysis, as well as the objects type in \code{analysis_list}.
 Currently supports : Seurat. Default "Seurat"}
@@ -109,9 +107,9 @@ report creation will be skipped. Default FALSE}
 
 \item{variable}{The column name that is going to be used for extracting the cluster number per barcode. Default "seurat_clusters"}
 
-\item{force_DE}{Whether to force the DE to be recomputed if a DE file already exists. Default FALSE}
-
 \item{skip}{Which steps to skip, keep empty to do all the steps. Default c()}
+
+\item{force_DE}{Whether to force the DE to be recomputed if a DE file already exists. Default FALSE}
 }
 \value{
 An analysis object.
