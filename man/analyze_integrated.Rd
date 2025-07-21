@@ -23,6 +23,7 @@ analyze_integrated(
   max_cells = Inf,
   max_mt = 20,
   nfeatures_normalize = 2000,
+  perform_normalization = TRUE,
   selection_method_normalize = "vst",
   npcs_pca = 50,
   k.param_neighbors = 20,

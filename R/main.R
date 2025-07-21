@@ -223,6 +223,7 @@ integrate <- function(samples,
 #' @param max_mt All cells having a higher percentage of mitochondria will be filtered out. If no organism or
 #' mitochondrial genes list is offered, this argument will be ignored. Default Inf
 #' @param nfeatures_normalize Number of variable genes to select for scaling. Default 2000
+#' @param perform_normalization If normalisation should be performed at this stage of the analysis. Default TRUE. 
 #' @param selection_method_normalize What method to use for features selection during scaling. Default "vst"
 #' @param npcs_pca Number of principal components to compute in the PCA. Default 50
 #' @param resolutions_clustree Which resolutions to compute and run the clustree on.

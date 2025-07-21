@@ -10,7 +10,8 @@ normalize_data(
   assay = "RNA",
   nfeatures = 2000,
   selection_method = "vst",
-  features = NULL
+  features = NULL,
+  perform_normalization = FALSE
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ normalize_data(
 \item{selection_method}{What method to use for features selection. Default vst}
 
 \item{features}{Vector of features to scale. Keep NULL to scale only variable features. Default NULL}
+
+\item{perform_normalization}{If normalization should be perform. If integration was performed prior, this should be FALSE. If this feature is runned after integration, this would automatically by FALSE.}
 }
 \value{
 An analysis object of type method normalized.
