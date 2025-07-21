@@ -331,7 +331,7 @@ analyze_integrated <- function(analysis,
   
   if (save_path != "") {
     
-    plots_dir <- file.path(save_path, "plots"
+    plots_dir <- file.path(save_path, "plots")
     if (!dir.exists(plots_dir)) {
       dir.create(plots_dir, recursive = TRUE)
     }
