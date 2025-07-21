@@ -11,7 +11,8 @@ normalize_data(
   nfeatures = 2000,
   selection_method = "vst",
   features = NULL,
-  perform_normalization = FALSE
+  perform_normalization = FALSE,
+  step = "loading_data"
 )
 }
 \arguments{
