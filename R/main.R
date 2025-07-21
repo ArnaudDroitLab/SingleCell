@@ -121,8 +121,6 @@ integrate <- function(samples,
     results_dir <- ""
   }
   
-  
-  
   if (step == "loading_data") {
     analysis_list <- lapply(samples, function(x) {load_data(path_to_count,
                                                             x,
@@ -199,7 +197,7 @@ integrate <- function(samples,
   if (perform_clusterisation) {
     analysis <- SingleCell::analyze_integrated(analysis, sample = "integrated", step = "normalizing", perform_normalization = FALSE, 
                                                force_report = TRUE, file_name = "integrated_clusterisation.rds", 
-                                               organism = organism, assay = "integrated", finding_DEG = FALSE, save_path = "integration")
+                                               organism = organism, assay = "integrated", finding_DEG = FALSE, save_path = "analyze_integrated")
     
     return(analysis)
     
@@ -326,8 +324,6 @@ analyze_integrated <- function(analysis,
   checkmate::assert_number(resolution_clustering, lower = 0)
   checkmate::assert_logical(finding_DEG)
   checkmate::assert_string(skip, null.ok = TRUE)
-  
-  print(paste0("bonjour: save_path = ", save_path))
   
   if (save_path != "") {
     
