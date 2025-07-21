@@ -240,7 +240,7 @@ neighbors <- function(analysis, method = "Seurat", k.param = 20) {
 #'
 #' @return An analysis object of type method with clusters.
 #' @importFrom ggplot2 ggsave
-#' @importFrom ggraph guide_edge_colourbar
+#' @import ggraph 
 #' @export
 clustering <- function(analysis, sample = "", method = "Seurat", res_clustree = c(), resolution = 1, plots_dir = "") {
   checkmate::assert_string(method)
