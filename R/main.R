@@ -8,9 +8,9 @@
 #' detect the structure in each directory to find the matrix, using the `from` parameter. Default ""
 #' @param analysis_list Function need either that if step is 2 to 5 or `analysis_list` if step is 1.
 #' A list of all the objects used for the integration. Default list()
-#' @param step Steps range from 1 to 5, with each number making the function start at one of the following steps :
-#' 1 : `load data`, 2 : `filter data`, 3 : `normalize data`, 4 : `compute pca`, 5 : `integrate`. Choosing 1 will do the entire process,
-#' while 5 will only do the integration and assume that every previous step needed has already been done by the user. Default 1
+#' @param step Steps ranging from `loading_data` to `integrating`. The following steps are : `loading_data`, `filtering`, `normalizing`, `PCA`, and `integrating`. 
+#' Choosing `loading_data` will do the entire process, while `integrating` will only do the integration and assume that every previous step 
+#' needed has already been done by the user. Default 1
 #' @param from From which tools the count matrix comes from. Currently supports : Cellranger. Default "Cellranger"
 #' @param method The analysis method used through the analysis, as well as the objects type in `analysis_list`.
 #' Currently supports : Seurat. Default "Seurat"
@@ -48,7 +48,7 @@
 integrate <- function(samples,
                       path_to_count = "",
                       analysis_list = list(),
-                      step = 1,
+                      step = "loading_data",
                       from = "Cellranger",
                       method = "Seurat",
                       assay = "RNA",
@@ -74,14 +74,15 @@ integrate <- function(samples,
                       k.filter = 100) {
   
   checkmate::assert_character(samples, min.len = 2)
-  checkmate::assert_int(step, lower = 1, upper = 5)
+  checkmate::assert_string(step)
+  if (!step %in% c("loading_data", "filtering_list", "normalizing_list", "PCA_list", "integrated")) {stop("The step chosen is not in the given list of steps for integration.")}
   checkmate::assert_string(path_to_count)
-  if (path_to_count == "" & step == 1) {stop("Path_to_count is mandatory when using step 1.")}
+  if (path_to_count == "" & step == "loading_data") {stop("Path_to_count is mandatory when using step loading_data.")}
   if (path_to_count != "") {checkmate::assert_directory(path_to_count)}
   if (!from %in% c("Cellranger")) {stop(paste0(from, " is an unsupported matrix detection method."))}
   checkmate::assert_character(method)
   if (!method %in% c("Seurat")) {stop(paste0(method, " is an unsupported analysis method."))}
-  if (step >= 2) {checkmate::assert_list(analysis_list, types = method, null.ok = FALSE, len = length(samples))}
+  if (step >= "filtering") {checkmate::assert_list(analysis_list, types = method, null.ok = FALSE, len = length(samples))}
   checkmate::assert_string(assay)
   checkmate::assert_string(save_path)
   
@@ -120,7 +121,7 @@ integrate <- function(samples,
   
   
   
-  if (step<=1) {
+  if (step == "loading_data") {
     analysis_list <- lapply(samples, function(x) {load_data(path_to_count,
                                                             x,
                                                             from = from,
@@ -130,7 +131,7 @@ integrate <- function(samples,
   }
   checkmate::assert_list(analysis_list, types = method, len = length(samples))
   
-  if (step<=2) {
+  if (step == "fitlering_list") {
     analysis_list <- lapply(1:length(samples),
                             function(x) {filter_data(analysis_list[[x]],
                                                      samples[x],
@@ -148,20 +149,22 @@ integrate <- function(samples,
                                                      max_mt = max_mt,
                                                      plots_dir = plots_dir,
                                                      results_dir = results_dir)})
+    step <- "normalizing_list"
   }
   checkmate::assert_list(analysis_list, types = method, len = length(samples))
   
-  if (step<=3) {
+  if (step == "normalizing_list") {
     analysis_list <- lapply(1:length(samples),
                             function(x) {normalize_data(analysis_list[[x]],
                                                         method = method,
                                                         assay = assay,
                                                         nfeatures = nfeatures_normalize,
                                                         selection_method = selection_method_normalize)})
+    step <- "PCA_list"
   }
   checkmate::assert_list(analysis_list, types = method, len = length(samples))
   
-  if (step<=4) {
+  if (step == "PCA_list") {
     analysis_list <- lapply(1:length(samples),
                             function(x) {pca(analysis_list[[x]],
                                              samples[x],
@@ -172,12 +175,13 @@ integrate <- function(samples,
   }
   checkmate::assert_list(analysis_list, types = method, len = length(samples))
   
-  if (step<=5) {
+  if (step == "integrating") {
     analysis <- integrate_data(analysis_list,
                                method = method,
                                nfeatures = nfeatures_integration,
                                assay = assay, 
                                k.weight = k.weight, k.filter = k.filter)
+    step <- "filtering"
   }
   checkmate::assert_list(analysis_list, types = method, len = length(samples))
   
@@ -195,11 +199,9 @@ integrate <- function(samples,
 #'
 #' @param analysis A Seurat object to use consisting of multiple assays.
 #' @param sample Sample name. Default "integrated".
-#' @param step Steps range from 6 to 11, following the steps from previous function `integrate`,
-#' with each number making the function start at one of the following steps :
-#' 6 : `filter data`, 7 : `normalize data`, 8 : `compute pca`, 9 : `find neighbors`, 10 : `find clusters`, 11 : `compute UMAP`.
-#' Choosing 6 will do the entire process, while 5 will only do the umap and assume that every previous step needed has already been done by the user.
-#' Default 6
+#' @param step Steps ranging from `filtering` to `UMAP`. The following steps are : `filtering`, `normalizing`, `PCA`, `finding_neighbors`, `finding_clusters`, and `UMAP`. 
+#' Choosing `filtering` will do the entire process, while `integrating` will only do the integration and assume that every previous step 
+#' needed has already been done by the user. Default "filtering"
 #' @param method The analysis method used through the analysis, as well as the objects type in `analysis_list`.
 #' Currently supports : Seurat. Default "Seurat"
 #' @param assay Which to use for all functions asking for it. Default "RNA"
@@ -272,10 +274,12 @@ analyze_integrated <- function(analysis,
                                de_pvalue = 0.05,
                                force_report = FALSE,
                                variable = "seurat_clusters",
-                               force_DE = FALSE,
+                               finding_DEG = FALSE,
                                skip = c()) {
   
-  checkmate::assert_int(step, lower = 6, upper = Inf)
+  checkmate::assert_string(step)
+  if (!step %in% c("filtering", "normalizing", "PCA", "finding_neighbors", "finding_clusters", "UMAP")) {stop("The step chosen is not in the given list of steps for clusterisation.")}
+  
   checkmate::assert_string(method)
   if (!method %in% c("Seurat")) {stop(paste0(method, " is an unsupported analysis method."))}
   checkmate::assert_class(analysis, method)
@@ -304,7 +308,7 @@ analyze_integrated <- function(analysis,
   checkmate::assert_vector(resolutions_clustree, min.len = 1)
   checkmate::assert_number(resolution_clustering, lower = 0)
   checkmate::assert_logical(force_DE)
-  checkmate::assert_numeric(skip, unique = TRUE, finite = TRUE, upper = 12, null.ok = TRUE)
+  checkmate::assert_string(skip)
   
   if (save_path != "") {
     checkmate::assert_directory(save_path)
@@ -321,7 +325,7 @@ analyze_integrated <- function(analysis,
     results_dir <- ""
   }
   
-  if (step<=6 & ! 6 %in% skip) {
+  if (step == "filtering") {
     analysis <- filter_data(analysis,
                             sample,
                             method = method,
@@ -338,19 +342,23 @@ analyze_integrated <- function(analysis,
                             max_mt = max_mt,
                             plots_dir = plots_dir,
                             results_dir = results_dir)
-    checkmate::assert_class(analysis, method) # Pretty clear on that point
+    checkmate::assert_class(analysis, method) 
+    
+    step <- "normalizing"
   }
   
-  if (step<=7 & ! 7 %in% skip) {
+  if (step == "normalizing") {
     analysis <- normalize_data(analysis,
                                method = method,
                                assay = assay,
                                nfeatures = nfeatures_normalize,
                                selection_method = selection_method_normalize)
     checkmate::assert_class(analysis, method)
+    
+    step <- "PCA"
   }
   
-  if (step<=8 & ! 8 %in% skip) {
+  if (step == "PCA") {
     analysis <- pca(analysis,
                     sample,
                     method = method,
@@ -359,16 +367,19 @@ analyze_integrated <- function(analysis,
                     plots_dir = plots_dir)
     checkmate::assert_class(analysis, method)
     
+    step <- "finding_neighbors"
   }
   
-  if (step<=9 & ! 9 %in% skip) {
+  if (step == "finding_neighbors") {
     analysis <- neighbors(analysis,
                           method = method,
                           k.param = k.param_neighbors)
-    checkmate::assert_class(analysis, method) # I don't understand this part
+    checkmate::assert_class(analysis, method)
+    
+    step <- "finding_clusters"
   }
   
-  if (step<=10 & ! 10 %in% skip) {
+  if (step == "finding_clusters") {
     analysis <- clustering(analysis,
                            sample = sample,
                            method = method,
@@ -376,9 +387,11 @@ analyze_integrated <- function(analysis,
                            resolution = resolution_clustering,
                            plots_dir = plots_dir)
     checkmate::assert_class(analysis, method)
+    
+    step <- "UMAP"
   }
   
-  if (step<=11 & ! 11 %in% skip) {
+  if (step == "UMAP") {
     analysis <- umap(analysis,
                      sample = sample,
                      method = method,
@@ -387,7 +400,7 @@ analyze_integrated <- function(analysis,
                      plot_clustering = paste0("RNA_snn_res.", resolution_clustering))
   }
   
-  if (step<=12 & ! 12 %in% skip) {
+  if (finding_DEG) {
     de_genes <- find_all_DE(analysis,
                             sample = sample,
                             method = method,
@@ -395,8 +408,7 @@ analyze_integrated <- function(analysis,
                             logfc_threshold = de_logfc,
                             pvalue_threshold = de_pvalue,
                             results_dir = results_dir,
-                            variable = variable,
-                            force_DE = force_DE)
+                            variable = variable)
   }
   
   if (save_path != "") {
