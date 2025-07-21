@@ -40,6 +40,7 @@
 #' report creation will be skipped. Default FALSE
 #' @param k.filter How many neighbors (k) to use when filtering anchors
 #' @param k.weight Number of neighbors to consider when weighting anchors
+#' @param perform_clusterisation If you want to perform the second part of the analysis (clusterisation)
 #'
 #' @return an analysis object containing the integrated data.
 #' @export
@@ -71,7 +72,8 @@ integrate <- function(samples,
                       nfeatures_integration = 5000,
                       force_report = FALSE, 
                       k.weight = 100, 
-                      k.filter = 100) {
+                      k.filter = 100, 
+                      perform_clusterisation = TRUE) {
   
   checkmate::assert_character(samples, min.len = 2)
   checkmate::assert_string(step)
@@ -160,7 +162,6 @@ integrate <- function(samples,
                                                         assay = assay,
                                                         nfeatures = nfeatures_normalize,
                                                         selection_method = selection_method_normalize)})
-    perform_normalization <- FALSE
     step <- "PCA_list"
   }
   checkmate::assert_list(analysis_list, types = method, len = length(samples))
@@ -192,7 +193,14 @@ integrate <- function(samples,
   }
   
   make_integration_report(samples = samples, report_path = save_path, report_name = "integration.Rmd", plots_relative_path = "plots", data_relative_path = "results", force = force_report)
-  return(analysis)
+  
+  if (perform_clusterisation) {
+    analyis <- SingleCell::analyze_integrated(analysis, sample = "integrated", step = "normalizing", file_name = , perform_normalization = FALSE, force_report = TRUE, file_name = "integrated_clusterisation", 
+                                              organism = organism, assay = "integrated", finding_DEG = FALSE, save_path = "integration")
+    return(analysis)
+  } else {
+    return(analysis)
+  }
 }
 
 
@@ -329,23 +337,29 @@ analyze_integrated <- function(analysis,
   }
   
   if (step == "filtering") {
-    analysis <- filter_data(analysis,
-                            sample,
-                            method = method,
-                            assay = assay,
-                            organism = organism,
-                            mitochondrial_genes = mitochondrial_genes,
-                            min_genes = min_genes,
-                            min_counts = min_counts,
-                            min_cells = min_cells,
-                            min_mt = min_mt,
-                            max_genes = max_genes,
-                            max_counts=max_counts,
-                            max_cells = max_cells,
-                            max_mt = max_mt,
-                            plots_dir = plots_dir,
-                            results_dir = results_dir)
-    checkmate::assert_class(analysis, method) 
+    if (skip == "filtering") {
+      
+      step <- "normalizing"
+      
+    } else {
+      analysis <- filter_data(analysis,
+                              sample,
+                              method = method,
+                              assay = assay,
+                              organism = organism,
+                              mitochondrial_genes = mitochondrial_genes,
+                              min_genes = min_genes,
+                              min_counts = min_counts,
+                              min_cells = min_cells,
+                              min_mt = min_mt,
+                              max_genes = max_genes,
+                              max_counts=max_counts,
+                              max_cells = max_cells,
+                              max_mt = max_mt,
+                              plots_dir = plots_dir,
+                              results_dir = results_dir)
+      checkmate::assert_class(analysis, method) 
+    }
     
     step <- "normalizing"
   }
