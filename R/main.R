@@ -324,7 +324,6 @@ analyze_integrated <- function(analysis,
   checkmate::assert_string(skip, null.ok = TRUE)
   
   print(paste0("DEBUG: save_path = ", save_path))
-  print(dir.exists(save_path))
   
   if (save_path != "") {
     
