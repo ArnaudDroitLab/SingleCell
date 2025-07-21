@@ -197,7 +197,7 @@ integrate <- function(samples,
   make_integration_report(samples = samples, report_path = save_path, report_name = "integration.Rmd", plots_relative_path = "plots", data_relative_path = "results", force = force_report)
   
   if (perform_clusterisation) {
-    analyis <- SingleCell::analyze_integrated(analysis, sample = "integrated", step = "normalizing", file_name = "analysis.rds", perform_normalization = FALSE, force_report = TRUE, file_name = "integrated_clusterisation", 
+    analyis <- SingleCell::analyze_integrated(analysis, sample = "integrated", step = "normalizing", perform_normalization = FALSE, force_report = TRUE, file_name = "integrated_clusterisation.rds", 
                                               organism = organism, assay = "integrated", finding_DEG = FALSE, save_path = "integration")
     return(analysis)
   } else {
