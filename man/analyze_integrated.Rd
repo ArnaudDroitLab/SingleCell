@@ -107,9 +107,9 @@ report creation will be skipped. Default FALSE}
 
 \item{variable}{The column name that is going to be used for extracting the cluster number per barcode. Default "seurat_clusters"}
 
-\item{skip}{Which steps to skip, keep empty to do all the steps. Default c()}
+\item{finding_DEG}{Whether to force the DE to be recomputed if a DE file already exists. Default FALSE}
 
-\item{force_DE}{Whether to force the DE to be recomputed if a DE file already exists. Default FALSE}
+\item{skip}{Which steps to skip, keep empty to do all the steps. Default c()}
 }
 \value{
 An analysis object.

@@ -275,7 +275,7 @@ analyze_integrated <- function(analysis,
                                force_report = FALSE,
                                variable = "seurat_clusters",
                                finding_DEG = FALSE,
-                               skip = c()) {
+                               skip = NULL) {
   
   checkmate::assert_string(step)
   if (!step %in% c("filtering", "normalizing", "PCA", "finding_neighbors", "finding_clusters", "UMAP")) {stop("The step chosen is not in the given list of steps for clusterisation.")}
@@ -308,7 +308,7 @@ analyze_integrated <- function(analysis,
   checkmate::assert_vector(resolutions_clustree, min.len = 1)
   checkmate::assert_number(resolution_clustering, lower = 0)
   checkmate::assert_logical(finding_DEG)
-  checkmate::assert_string(skip)
+  checkmate::assert_string(skip, null.ok = TRUE)
   
   if (save_path != "") {
     checkmate::assert_directory(save_path)
