@@ -324,6 +324,11 @@ analyze_integrated <- function(analysis,
   checkmate::assert_string(skip, null.ok = TRUE)
   
   if (save_path != "") {
+    
+    if (!dir.exists(save_path)) {
+      dir.create(save_path, recursive = TRUE)
+    }
+    
     checkmate::assert_directory(save_path)
     plots_dir <- file.path(save_path, "plots")
     if (!dir.exists(plots_dir)) {
