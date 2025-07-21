@@ -127,7 +127,7 @@ filter_data <- function(analysis, sample = "", method = "Seurat", assay = "RNA",
 #' @return An analysis object of type method normalized.
 #' @export
 normalize_data <- function(analysis, method = "Seurat", assay = "RNA", nfeatures = 2000,
-                           selection_method = "vst", features = NULL, perform_normalization = FALSE) {
+                           selection_method = "vst", features = NULL, perform_normalization = FALSE, step = "loading_data") {
   checkmate::assert_string(method)
   checkmate::assert_class(analysis, method)
   checkmate::assert_int(nfeatures, lower = 0)

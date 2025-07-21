@@ -329,8 +329,6 @@ analyze_integrated <- function(analysis,
   }
   
   if (!is.null(step) && is.character(step) && step == "filtering") {
-    cat("Before filter_data, step =", step, "\n")
-    cat("Is character when step =", is.character(step), "\n")
     analysis <- filter_data(analysis,
                             sample,
                             method = method,
@@ -350,17 +348,16 @@ analyze_integrated <- function(analysis,
     checkmate::assert_class(analysis, method) 
     
     step <- "normalizing"
-    cat("After filter_data, step =", step, "\n")
-    cat("Is character when step =", is.character(step), "\n")
   }
   
-  if (!is.null(step) && as.character(step) == "normalizing") {
+  if (step == "normalizing") {
     analysis <- normalize_data(analysis,
                                method = method,
                                assay = assay,
                                nfeatures = nfeatures_normalize,
                                selection_method = selection_method_normalize, 
-                               perform_normalization = perform_normalization)
+                               perform_normalization = perform_normalization, 
+                               step = step)
     checkmate::assert_class(analysis, method)
     
     step <- "PCA"
