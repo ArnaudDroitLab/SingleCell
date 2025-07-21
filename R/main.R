@@ -160,6 +160,7 @@ integrate <- function(samples,
                                                         assay = assay,
                                                         nfeatures = nfeatures_normalize,
                                                         selection_method = selection_method_normalize)})
+    perform_normalization <- FALSE
     step <- "PCA_list"
   }
   checkmate::assert_list(analysis_list, types = method, len = length(samples))
@@ -263,6 +264,7 @@ analyze_integrated <- function(analysis,
                                max_cells = Inf,
                                max_mt = 20,
                                nfeatures_normalize = 2000,
+                               perform_normalization = TRUE,
                                selection_method_normalize = "vst",
                                npcs_pca = 50,
                                k.param_neighbors = 20,
@@ -352,7 +354,8 @@ analyze_integrated <- function(analysis,
                                method = method,
                                assay = assay,
                                nfeatures = nfeatures_normalize,
-                               selection_method = selection_method_normalize)
+                               selection_method = selection_method_normalize, 
+                               perform_normalization = perform_normalization)
     checkmate::assert_class(analysis, method)
     
     step <- "PCA"

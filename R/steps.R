@@ -122,11 +122,12 @@ filter_data <- function(analysis, sample = "", method = "Seurat", assay = "RNA",
 #' @param nfeatures Number of variable genes to select. Default 2000
 #' @param selection_method What method to use for features selection. Default vst
 #' @param features Vector of features to scale. Keep NULL to scale only variable features. Default NULL
+#' @param perform_normalization If normalization should be perform. If integration was performed prior, this should be FALSE. If this feature is runned after integration, this would automatically by FALSE. 
 #'
 #' @return An analysis object of type method normalized.
 #' @export
 normalize_data <- function(analysis, method = "Seurat", assay = "RNA", nfeatures = 2000,
-                           selection_method = "vst", features = NULL) {
+                           selection_method = "vst", features = NULL, perform_normalization = FALSE) {
   checkmate::assert_string(method)
   checkmate::assert_class(analysis, method)
   checkmate::assert_int(nfeatures, lower = 0)
@@ -134,13 +135,13 @@ normalize_data <- function(analysis, method = "Seurat", assay = "RNA", nfeatures
   if (method == "Seurat") {
     check_assay(analysis, assay)
     if (step == "normalization") {
-      if (assay == "integrated") {
-        print("Data were already normalized during integration. Skipping this step.")
+      if (perform_normalization) {
+        print("Data were not normalized during integration. Performing normalization.")
+        analysis <- seurat_normalize(analysis, assay)
         analysis <- seurat_features(analysis, assay, nfeatures, selection_method)
         analysis <- seurat_scale(analysis, assay, features)
       } else {
-        print("Data were not normalized during integration. Performing normalization.")
-        analysis <- seurat_normalize(analysis, assay)
+        print("Data were already normalized during integration. Skipping this step.")
         analysis <- seurat_features(analysis, assay, nfeatures, selection_method)
         analysis <- seurat_scale(analysis, assay, features)
       }
