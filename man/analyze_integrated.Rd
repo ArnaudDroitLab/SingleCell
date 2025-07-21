@@ -83,6 +83,8 @@ mitochondrial genes list is offered, this argument will be ignored. Default Inf}
 
 \item{nfeatures_normalize}{Number of variable genes to select for scaling. Default 2000}
 
+\item{perform_normalization}{If normalisation should be performed at this stage of the analysis. Default TRUE.}
+
 \item{selection_method_normalize}{What method to use for features selection during scaling. Default "vst"}
 
 \item{npcs_pca}{Number of principal components to compute in the PCA. Default 50}

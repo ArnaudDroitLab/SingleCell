@@ -328,7 +328,7 @@ analyze_integrated <- function(analysis,
     results_dir <- ""
   }
   
-  if (step == "filtering") {
+  if (!is.null(step) && is.character(step) && step == "filtering") {
     analysis <- filter_data(analysis,
                             sample,
                             method = method,
@@ -350,7 +350,7 @@ analyze_integrated <- function(analysis,
     step <- "normalizing"
   }
   
-  if (step == "normalizing") {
+  if (!is.null(step) && is.character(step) && step == "normalizing") {
     analysis <- normalize_data(analysis,
                                method = method,
                                assay = assay,
@@ -362,7 +362,7 @@ analyze_integrated <- function(analysis,
     step <- "PCA"
   }
   
-  if (step == "PCA") {
+  if (!is.null(step) && is.character(step) && step == "PCA") {
     analysis <- pca(analysis,
                     sample,
                     method = method,
@@ -374,7 +374,7 @@ analyze_integrated <- function(analysis,
     step <- "finding_neighbors"
   }
   
-  if (step == "finding_neighbors") {
+  if (!is.null(step) && is.character(step) && step == "finding_neighbors") {
     analysis <- neighbors(analysis,
                           method = method,
                           k.param = k.param_neighbors)
@@ -383,7 +383,7 @@ analyze_integrated <- function(analysis,
     step <- "finding_clusters"
   }
   
-  if (step == "finding_clusters") {
+  if (!is.null(step) && is.character(step) && step == "finding_clusters") {
     analysis <- clustering(analysis,
                            sample = sample,
                            method = method,
@@ -395,7 +395,7 @@ analyze_integrated <- function(analysis,
     step <- "UMAP"
   }
   
-  if (step == "UMAP") {
+  if (!is.null(step) && is.character(step) && step == "UMAP") {
     analysis <- umap(analysis,
                      sample = sample,
                      method = method,
