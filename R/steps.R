@@ -134,6 +134,7 @@ normalize_data <- function(analysis, method = "Seurat", assay = "RNA", nfeatures
   if (method == "Seurat") {
     check_assay(analysis, assay)
     if (assay == "integrated") {
+      print("Data were already normalized during integration. Skipping this step.")
       analysis <- seurat_scale(analysis, assay, features)
     } else {
       analysis <- seurat_normalize(analysis, assay)

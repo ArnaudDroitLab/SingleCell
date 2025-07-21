@@ -35,7 +35,7 @@ analyze_integrated(
   force_report = FALSE,
   variable = "seurat_clusters",
   finding_DEG = FALSE,
-  skip = c()
+  skip = NULL
 )
 }
 \arguments{
