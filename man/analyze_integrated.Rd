@@ -11,7 +11,7 @@ analyze_integrated(
   method = "Seurat",
   assay = "RNA",
   save_path = ".",
-  file_name = "analysis.rds",
+  file_name = "analysis",
   organism = "",
   mitochondrial_genes = c(),
   min_genes = 100,

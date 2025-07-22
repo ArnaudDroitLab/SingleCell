@@ -13,7 +13,7 @@ integrate(
   method = "Seurat",
   assay = "RNA",
   save_path = ".",
-  file_name = "integrated.rds",
+  file_name = "integrated",
   make_report = TRUE,
   organism = "",
   mitochondrial_genes = c(),
