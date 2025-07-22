@@ -54,7 +54,7 @@ integrate <- function(samples,
                       method = "Seurat",
                       assay = "RNA",
                       save_path = ".",
-                      file_name = "integrated.rds",
+                      file_name = "integrated",
                       make_report = TRUE,
                       organism = "",
                       mitochondrial_genes = c(),
@@ -188,15 +188,19 @@ integrate <- function(samples,
   checkmate::assert_list(analysis_list, types = method, len = length(samples))
   
   if (results_dir != "" & file_name != "") {
-    file_path = file.path(results_dir, file_name)
+    file_name_rds <- paste0(file_name, ".rds")
+    file_path = file.path(results_dir, file_name_rds)
     saveRDS(analysis, file = file_path)
   }
   
-  make_integration_report(samples = samples, report_path = save_path, report_name = "integration.Rmd", plots_relative_path = "plots", data_relative_path = "results", force = force_report)
+  report_name <- paste0(file_name, ".Rmd")
+  make_integration_report(samples = samples, report_path = save_path, report_name = report_name, plots_relative_path = "plots", data_relative_path = "results", force = force_report)
   
   if (perform_clusterisation) {
-    analysis <- SingleCell::analyze_integrated(analysis, sample = "integrated", step = "normalizing", perform_normalization = FALSE, 
-                                               force_report = TRUE, file_name = "integrated_clusterisation.rds", 
+    
+    file_name <- paste0(file_name, "clusterisation.rds")
+    analysis <- SingleCell::analyze_integrated(analysis, assay = "integrated", sample = "integrated", step = "normalizing", perform_normalization = FALSE, 
+                                               force_report = TRUE, file_name = file_name, 
                                                organism = organism, assay = "integrated", finding_DEG = FALSE, save_path = "analyze_integrated")
     
     return(analysis)
