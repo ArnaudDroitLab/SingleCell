@@ -198,8 +198,8 @@ integrate <- function(samples,
   
   if (perform_clusterisation) {
     
-    file_name <- paste0(file_name, "clusterisation.rds")
-    analysis <- SingleCell::analyze_integrated(analysis, assay = "integrated", sample = "integrated", step = "normalizing", perform_normalization = FALSE, 
+    file_name <- paste0(file_name, "_clusterisation_part")
+    analysis <- SingleCell::analyze_integrated(analysis, sample = "integrated", step = "normalizing", perform_normalization = FALSE, 
                                                force_report = TRUE, file_name = file_name, 
                                                organism = organism, assay = "integrated", finding_DEG = FALSE, save_path = "analyze_integrated")
     
