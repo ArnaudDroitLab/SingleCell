@@ -84,7 +84,7 @@ integrate <- function(samples,
   if (!from %in% c("Cellranger")) {stop(paste0(from, " is an unsupported matrix detection method."))}
   checkmate::assert_character(method)
   if (!method %in% c("Seurat")) {stop(paste0(method, " is an unsupported analysis method."))}
-  if (step >= "filtering") {checkmate::assert_list(analysis_list, types = method, null.ok = FALSE, len = length(samples))}
+  if (step == "filtering_list") {checkmate::assert_list(analysis_list, types = method, null.ok = FALSE, len = length(samples))}
   checkmate::assert_string(assay)
   checkmate::assert_string(save_path)
   
@@ -266,7 +266,7 @@ analyze_integrated <- function(analysis,
                                method = "Seurat",
                                assay = "RNA",
                                save_path = ".",
-                               file_name = "analysis.rds",
+                               file_name = "analysis",
                                organism = "",
                                mitochondrial_genes = c(),
                                min_genes = 100,
@@ -433,10 +433,13 @@ analyze_integrated <- function(analysis,
   }
   
   if (save_path != "") {
-    file_path = file.path(results_dir, file_name)
+    file_name_rds = paste0(file_name, ".rds")
+    file_path = file.path(results_dir, file_name_rds)
     saveRDS(analysis, file = file_path)
   }
-  make_analysis_report(sample = sample, report_path = save_path, report_name = "analysis.Rmd", plots_relative_path = "plots", data_relative_path = "results", force = force_report)
+  
+  report_name <- paste0(file_name, ".Rmd")
+  make_analysis_report(sample = sample, report_path = save_path, report_name = report_name, plots_relative_path = "plots", data_relative_path = "results", force = force_report)
   
   return(analysis)
 }
