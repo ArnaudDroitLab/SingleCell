@@ -201,7 +201,7 @@ integrate <- function(samples,
     file_name <- paste0(file_name, "_clusterisation_part")
     analysis <- SingleCell::analyze_integrated(analysis, sample = "integrated", step = "normalizing", perform_normalization = FALSE, 
                                                force_report = TRUE, file_name = file_name, 
-                                               organism = organism, assay = "integrated", finding_DEG = FALSE, save_path = "analyze_integrated")
+                                               organism = organism, assay = "integrated", finding_DEG = FALSE)
     
     return(analysis)
     
