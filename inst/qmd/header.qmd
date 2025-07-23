@@ -22,7 +22,7 @@ format:
     toc-location: left
     self-contained: true
     cards: true
-    css: .report/style.css
+    css: ".report/style.css"
     linkcolor: "#9DD3E4"
 callout-icon: false
 include-after-body:

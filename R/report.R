@@ -344,7 +344,7 @@ make_integrate_report_qmd <- function(analysis, samples, report_steps = report_s
     for (sample in samples) {
       cat("## ", sample, "\n\n", file = report, sep = "", append = TRUE)
       cat("![**Figure ", fig_num, "**: Filtering statistics for ", sample, ".](", plots_relative_path, "/", sample, "_complete_filter_plot.png)\n\n:::{.callout-note collaspe='true'}\nYou can find the figure here : `", plots_relative_path, "/", sample, "_complete_filter_plot.png`\n:::\n\n", file = report, sep = "", append = TRUE)
-      cat("```{r, warning=FALSE}\n\ntable <- read.csv('", data_relative_path, "/", sample, "_filtering_stats.csv')\n\nDT::datatable(\n\ttable,\n\trownames = FALSE,\n\textensions = 'Buttons',\n\toptions = list(\n\t\tdom = 'Bfrtip',\n\t\tbuttons = list(\n\t\t\tlist(\n\t\t\t\textend = 'colvis'\n\t\t\t)\n\t\t)\n\t),\n\tcaption = htmltools::tags$caption(\n\t\tstyle = 'caption-side: top; text-align: center;', \n\t\thtmltools::tags$b('Table ", table_num, ":'), 'Cell counts and proportions.'\n\t)\n)\n\n```\n\n", file = report, sep = "", append = TRUE)
+      cat("```{r, warning=FALSE}\n\ntable <- read.csv('", data_relative_path, "/", sample, "_filtering_stats.csv')\n\nDT::datatable(\n\ttable,\n\trownames = FALSE,\n\textensions = 'Buttons',\n\toptions = list(\n\t\tdom = 'Bfrtip',\n\t\tbuttons = list(\n\t\t\tlist(\n\t\t\t\textend = 'colvis'\n\t\t\t)\n\t\t)\n\t),\n\tcaption = htmltools::tags$caption(\n\t\tstyle = 'caption-side: top; text-align: center;', \n\t\thtmltools::tags$b('Table ", table_num, ":'), 'Cell filtrated and proportions after filtration for ", sample,".'\n\t)\n)\n\n```\n\n", file = report, sep = "", append = TRUE)
       fig_num <- fig_num + 1
       table_num <- table_num + 1
     }
@@ -382,6 +382,7 @@ make_integrate_report_qmd <- function(analysis, samples, report_steps = report_s
   cat("## Conclusion\n\n", file = report, sep = "", append = TRUE)
   cat("We have successfully integrate the different samples for ", file_name, ". We can now assign cell types to identified clusters based on a list of markers.", file = report, sep = "", append = TRUE)
   
+  quarto::quarto_render(report)
 }
 
 #' Title
@@ -421,7 +422,7 @@ make_analysis_report_qmd <- function(analysis, sample, report_path, file_name, r
   if (report_steps[[1]]) {
     cat("### Filtering\n\n", file = report, sep = "", append = TRUE)
     cat("![**Figure ", fig_num, "**: Filtering statistics for ", sample, ".](", plots_relative_path, "/", sample, "_complete_filter_plot.png)\n\n:::{.callout-note collaspe='true'}\nYou can find the figure here : `", plots_relative_path, "/", sample, "_complete_filter_plot.png`\n:::\n\n", file = report, sep = "", append = TRUE)
-    cat("```{r, warning=FALSE}\n\ntable <- read.csv('", data_relative_path, "/", sample, "_filtering_stats.csv')\n\nDT::datatable(\n\ttable,\n\trownames = FALSE,\n\textensions = 'Buttons',\n\toptions = list(\n\t\tdom = 'Bfrtip',\n\t\tbuttons = list(\n\t\t\tlist(\n\t\t\t\textend = 'colvis'\n\t\t\t)\n\t\t)\n\t),\n\tcaption = htmltools::tags$caption(\n\t\tstyle = 'caption-side: top; text-align: center;', \n\t\thtmltools::tags$b('Table ", table_num, ":'), 'Cell counts and proportions.'\n\t)\n)\n\n```\n\n", file = report, sep = "", append = TRUE)
+    cat("```{r, warning=FALSE}\n\ntable <- read.csv('", data_relative_path, "/", sample, "_filtering_stats.csv')\n\nDT::datatable(\n\ttable,\n\trownames = FALSE,\n\textensions = 'Buttons',\n\toptions = list(\n\t\tdom = 'Bfrtip',\n\t\tbuttons = list(\n\t\t\tlist(\n\t\t\t\textend = 'colvis'\n\t\t\t)\n\t\t)\n\t),\n\tcaption = htmltools::tags$caption(\n\t\tstyle = 'caption-side: top; text-align: center;', \n\t\thtmltools::tags$b('Table ", table_num, ":'), 'Cell filtrated and proportions after filtration for ", sample,".'\n\t)\n)\n\n```\n\n", file = report, sep = "", append = TRUE)
     fig_num <- fig_num + 1
     table_num <- table_num + 1
   }
