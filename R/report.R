@@ -386,7 +386,7 @@ make_analysis_report_qmd <- function(analysis, sample, report_path, file_name, r
   }
   
   ## PCA part
-  if (report_step[[2]]) {
+  if (report_steps[[2]]) {
     cat("## PCA diagnosis\n\n", file = report, sep = "", append = TRUE)
     cat("::: panel-tabset\n\n", file = report, sep = "", append = TRUE)
     cat("## Elbow plot\n\n", file = report, sep = "", append = TRUE)
