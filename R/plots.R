@@ -154,7 +154,7 @@ plot_seurat_dim <- function(seurat, reduction = "pca", colour_by = "orig.ident",
       p <- p + ggplot2::scale_colour_manual(values = "#6B5FAC")
     } else {
       color_palette_UMAP <- c("#FA73E2", "#6B5FAC", "#000023", "#332DA3", "#237BFF", "#92CDF9", "#22aa99")
-      color_values <- generate_gradient_palette(analysis, color_palette_UMAP, n_colors_out = 100, n_clusters = colour_by)
+      color_values <- generate_gradient_palette(seurat, color_palette_UMAP, n_colors_out = 100, n_clusters = colour_by)
       p <- p + ggplot2::scale_colour_manual(values = color_values)
     }
     
