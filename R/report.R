@@ -346,6 +346,43 @@ make_analysis_report <- function(sample, report_path, report_name, plots_relativ
 
 #' Title
 #'
+#' @param name 
+#' @param report_part 
+#' @param force 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+initialize_report_qmd <- function(name, report_part = ".", force = FALSE) {
+  
+  checkmate::assert_string(name, pattern = "^[a-zA-Z0-9\\-_.]+$")
+  checkmate::assert_directory_exists(report_path)
+  checkmate::assert_logical(force, len = 1)
+  
+  template_path <- system.file("qmd/header.qmd", package = "SingleCell")
+  internal_files <- system.file("qmd/.report", package = "SingleCell")
+  
+  internal_path <- file.path(report_path, "_report")
+  
+  if (!dir.exists(internal_path)) {
+    dir.create(internal_path)
+  }
+  
+  report <- file.path(report_path, name)
+  
+  if (file.exists(report) & force) {
+    warning(report, " already exists, overwriting it.")
+  } else if (file.exists(report) & !force) {
+    stop(report, " already exists. Set `force` to TRUE if you want to overwrite it.")
+  }
+  
+  file.copy(template_path, to = report, overwrite = force)
+  file.copy(internal_files, to = report_path, overwrite = FALSE, recursive = TRUE)
+}
+
+#' Title
+#'
 #' @param analysis 
 #' @param sample 
 #' @param report_path 
@@ -365,7 +402,7 @@ make_analysis_report_qmd <- function(analysis, sample, report_path, file_name, r
   report_name <- paste0(file_name, ".qmd")
   report <- file.path(report_path, report_name)
   
-  initialize_report(report_name, report_path, force = force)
+  initialize_report_qmd(report_name, report_path, force = force)
   
   lines <- readLines(report)
   lines[2] <- paste0("title : \"", file_name, "\"")

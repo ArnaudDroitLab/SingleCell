@@ -1,0 +1,639 @@
+/* ################################ Les titres des sections ################################ */
+
+h1, h2, h3, h4, h5, h6, legend {
+  font-family: "DejaVu Sans", sans-serif !important;
+  color: #1A468F;
+}
+
+p.subtitle.lead, 
+.description {
+  font-family: "DejaVu Sans", sans-serif !important;
+  color: white !important;
+}
+
+/* ################################ Les titres de l'en-tête + couleur de l'entête ################################ */
+
+#title-block-banner {
+  background-color: #1A468F;
+  foreground-color: white;
+  color: #1A468F;
+}
+
+#nav {
+  background-color: #1A468F;
+}
+
+.header-panel {
+  background-color: #1A468F;
+}
+
+/* ################################ Bas de page ################################ */
+
+footer {
+  background-color: #1A468F;
+  color: white;
+}
+
+
+/* ################################ Structure de l'en-tête ################################ */
+
+#quarto-margin-sidebar {
+  display: none !important;
+}
+
+#quarto-content.page-columns {
+  display: grid;
+  grid-template-columns: 15% 80% 5%; 
+}
+
+.quarto-title-meta {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  max-width: 1500px !important;  
+  min-width: 600px !important;
+  padding-left: 1rem !important;
+  padding-right: 2rem !important;
+  font-size: 1.1rem !important;
+  box-sizing: border-box !important;
+  font-family: "DejaVu Sans", sans-serif !important;
+  grid-template-columns: 50% 50% !important;
+  color: #333333 !important;
+}
+
+.quarto-title-meta-heading {
+  font-family: "DejaVu Sans", sans-serif !important;
+  font-size: 1.1rem !important;
+  grid-template-columns: 50% 50% !important;
+  color: #1A468F !important;
+  font-weight: bold !important;
+}
+
+/* Caractéristiques de la table des matières à gauche */
+#quarto-sidebar-toc-left {
+  grid-column: 1;
+  grid-row: 1;
+  position: sticky;
+  top: 0;
+  height: 100%;
+  overflow-y: auto;
+  padding-left: 10%;
+}
+
+/* Caractéristiques du main content */
+#quarto-document-content {
+  font-family: "DejaVu Sans", sans-serif !important;
+  color: #333333 !important;
+  grid-column: 2;  
+  padding-left: 1rem;
+  padding-right: 2rem;
+  max-width: 1250px !important;
+  min-width: 700px !important;
+  margin-right: auto;
+  text-align: justify !important;
+}
+
+.quarto-title-banner {
+  display: grid !important;
+  grid-template-columns: 15% 85% !important;
+  position: relative;
+  overflow: visible !important;
+}
+
+.quarto-title-banner::before {
+  content: "";
+  display: block;
+  background-image: url(logo.png);
+  background-repeat: no-repeat;
+  background-size: contain;  /* Mieux que % */
+  background-position: center;
+  width: 100%;
+  aspect-ratio: 1 / 1;        /* Garde le rond peu importe l'écran */
+  max-width: 100px;           /* Empêche d’être trop gros sur grands écrans */
+  margin: 0 auto;             /* Centre horizontalement */
+}
+
+.quarto-title {
+  grid-column: 2 !important;
+  padding-left: 1rem;
+  padding-right: 2rem;
+}
+
+/* ################################ Liens hypertextes dans la section softwares ################################ */
+
+/* Couleurs pour les liens html (softwares) */
+a {
+  color: #33a4f5; 
+  text-decoration: none;
+}
+
+/* Couleurs pour les liens html quand tu survoles (softwares) */
+a:hover {
+  color: #026dba;
+  text-decoration: underline;
+}
+
+/* ################################ Liens hypertextes dans la section bas de page spécifiquement ################################ */
+
+.footer-information a {
+  color: #33a4f5; 
+  text-decoration: none;
+}
+
+.footer-information a:hover {
+  color: #96d6ff; 
+  text-decoration: none;
+}
+
+.footer-information {
+  color: white; 
+  margin: 0px 0px 5px;
+}
+
+/* ################################ Tailles de tous les graphiques (incluant les intéractifs) ################################ */
+
+/* Setter les tailles de figures Volcanos */
+
+img.volcano {
+  height: 480px !important;
+  width: 672px !important;
+  margin: 0px 0px 8.5px;
+  max-width: 100% !important;
+}
+
+.volcano .girafe svg {
+  height: 480px !important;
+  width: 672px !important;
+  margin: 0px 0px 8.5px;
+  max-width: 100% !important;
+}
+
+/* Setter les tailles de figures PCA */
+
+img.PCA {
+  height: 480px !important;
+  width: 672px !important;
+  margin: 0px 0px 8.5px;
+  max-width: 100% !important;
+}
+
+.PCA svg {
+  height: 480px !important;
+  width: 672px !important;
+  margin: 0px 0px 8.5px;
+  max-width: 100% !important;
+}
+
+/* Setter les tailles de figures barplots */
+
+.barplots svg {
+  height: 800px !important;
+  width: 1250px !important;
+  margin: 0px 0px 8.5px;
+  max-width: 100% !important;
+}
+
+/* Setter les tailles de figures heatmaps */
+
+img.heatmap {
+  height: 900px !important;
+  width: 1400px !important;
+  margin: 0px 0px 8.5px;
+  max-width: 100% !important;
+}
+
+/* Setter les tailles de figures boxplots */
+
+img.boxplot {
+  height: auto !important;
+  width: 672px !important;
+  margin: 0px 0px 8.5px;
+  max-width: 100% !important;
+}
+
+/* Setter les tailles de figures barplot horizontal deseq2 */
+
+.horizontal-deseq svg {
+  height: 715px !important;
+  width: 1000px !important;
+  margin: 0px 0px 8.5px;
+  max-width: 100% !important;
+}
+
+/* Setter les tailles de figures gostplot !!intéractifs!! */
+
+.cell-output-display > .gostplotting {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1100px !important;
+  min-width: 700px !important;
+  height: 440px !important;
+}
+
+/* Setter les tailles de figures autres */
+
+img.graph {
+  height: 480px !important;
+  width: 672px !important;
+  margin: 0px 0px 8.5px;
+  max-width: 100% !important;
+}
+
+.graph svg {
+  height: 480px !important;
+  width: 672px !important;
+  margin: 0px 0px 8.5px;
+  max-width: 100% !important;
+}
+
+/* Setter les tailles de figures autres */
+
+.other-figures img {
+  height: 480px !important;
+  width: 672px !important;
+  margin: 0px 0px 8.5px;
+  max-width: 100% !important;
+}
+
+.other-figures figcaption {
+  text-align: center;
+  font-family: "DejaVu Sans", sans-serif !important;
+  color: #333333 !important;
+}
+
+/* ################################ Ajuster les tabsets ################################ */
+
+/* Taille des tabsets */
+
+.panel-tabset {
+  max-width: 1155px !important;   
+  min-width: 550px !important;
+  height: auto !important;     
+  margin: 2rem auto;   
+}
+
+.nav-tabs .nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border: 0.1px solid #DEDEDF !important;
+  margin-right: 0.125em;
+  margin-left: 0.125em;
+  margin-bottom: 0.080em;
+  border-radius: 5px 5px 0 0;
+  word-wrap: break-word;
+  text-align: center;
+}
+
+.nav-tabs .nav-link.active {
+  border: 1.3px solid #333333 !important; 
+}
+
+.nav-tabs .nav-link:hover {
+  border: 1.3px solid #a9a9a9 !important; 
+}
+
+/* Couleurs du texte des onglets des tabsets */
+
+.panel-tabset .nav-link {
+  font-family: "DejaVu Sans", sans-serif !important;
+  font-size: 1rem !important;
+  color: #333333 !important; 
+  background-color: white !important;
+}
+
+.panel-tabset .nav-link.active {
+  font-family: "DejaVu Sans", sans-serif !important;
+  font-size: 1rem !important;
+  background-color: white !important;
+  color: #33a4f5 !important;
+}
+
+.panel-tabset .nav-link:hover {
+  font-family: "DejaVu Sans", sans-serif !important;
+  font-size: 1rem !important;
+  background-color: white !important;
+  color: #026dba !important;
+}
+
+.panel-tabset .nav-link {
+  transition: none !important;
+}
+
+/* Standardisation des onglets des tabsets */ 
+
+.nav-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: left; 
+  width: 100% !important;
+  box-sizing: border-box;
+}
+
+.nav-tabs > li {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 183px !important;
+  max-width: 385px !important;
+  flex: 0 0 33.33% !important;
+  min-height: 44.5px !important;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* ################################ Ajuster le font des graphiques intéractifs ################################ */
+
+/* Le font des graphiques doit etre egal. ca l'est pas avec la conversion avec ggiraph et quarto */
+.volcano svg text {
+  font-family: "DejaVu Sans", sans-serif !important;
+}
+
+.PCA svg text {
+  fill: #333333 !important;
+  font-family: "DejaVu Sans", sans-serif !important;
+}
+
+.horizontal-deseq svg text {
+  fill: #333333 !important;
+  font-family: "DejaVu Sans", sans-serif !important;
+}
+
+.barplots svg text {
+  fill: #333333 !important;
+  font-family: "DejaVu Sans", sans-serif !important;
+}
+
+
+/* ################################ Les captions pour les figures et les tableaux ################################ */
+
+/* Mettre les captions des figures centrées */
+
+.figure-title, figcaption {
+  text-align: center !important;
+  font-family: "DejaVu Sans", sans-serif !important;
+  font-size: 1rem !important;         
+  color: #333333 !important;
+  margin: 0px 0px 0px 0px !important; 
+}
+
+/* Mettre les captions des tableaux centrées */
+
+caption {
+  text-align: center !important;
+  font-family: "DejaVu Sans", sans-serif !important;
+  font-size: 1rem !important;         
+  color: #333333 !important;
+  margin: 0px 0px 0px 0px !important; 
+}
+
+/* ################################ Insérer des callout-note ################################ */
+
+/* Changer la couleur de fond et le texte des callout-note */
+.callout.callout-note {
+  border-left: 4px solid #6B5FAC !important;
+}
+
+.callout.callout-note .callout-header {
+  background-color: #ECEBF4 !important; /* Couleur du background*/
+}
+
+/* Changer la couleur de fond et le texte des callout-tip */
+.callout.callout-tip {
+  border-left: 4px solid #21A3BF !important;
+}
+
+.callout.callout-tip .callout-header {
+  background-color: #EBF8FB !important; /* Couleur du background*/
+}
+
+/* Changer la couleur de fond et le texte des callout-warning */
+.callout.callout-warning {
+  border-left: 4px solid #DC3030 !important;
+}
+
+.callout.callout-warning .callout-header {
+  background-color: #FBE9E9 !important; /* Couleur du background*/
+}
+
+/* Changer la couleur de fond et le texte des callout-important */
+.callout.callout-important {
+  border-left: 4px solid #5D9FFF !important;
+}
+
+.callout.callout-important .callout-header {
+  background-color: #E7F1FF !important; /* Couleur du background*/
+}
+
+/* Changer la couleur de fond et le texte des callout-caution */
+.callout.callout-caution {
+  border-left: 4px solid #AF30AB !important;
+}
+
+.callout.callout-caution .callout-header {
+  background-color: #FCF2FC !important; /* Couleur du background*/
+}
+
+/* ################################ Insérer du code ################################ */
+
+/* Pour les blocs de code */
+.reference-collapse pre code {
+  background-color: #FCF2FC !important;
+  color: #92278F !important;
+  font-family: Consolas, monospace;
+  padding: 10px;
+  border-radius: 8px;
+  display: block;
+  overflow-x: auto;
+}
+
+/* ################################ Insérer du code pour la session info spécifiquement ################################ */
+
+/* Changer spécifiquement les codes pour le session info */
+.session-info pre code {
+  background-color: white !important;  
+  color: #333333 !important;              
+  font-family: Consolas, monospace;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+/* ################################  Table des matières (TOC) ################################ */
+
+/* Changer le titre du toc */
+#quarto-sidebar-toc-left #toc-title {
+  font-family: "DejaVu Sans", sans-serif !important;
+  font-size: 1.3rem !important;
+  background-color: white !important;
+  color: #1A468F !important; 
+  margin-bottom: 0.5rem !important;
+  font-weight: bold !important;
+}
+
+
+/* Changer le contenu du toc */
+#quarto-sidebar-toc-left .nav-link {
+  font-family: "DejaVu Sans", sans-serif !important;
+  font-size: 1.1rem !important;
+  color: #333333 !important; 
+  background-color: white !important;
+}
+
+#quarto-sidebar-toc-left .nav-link:hover,
+#quarto-sidebar-toc-left .nav-link.active {
+  font-family: "DejaVu Sans", sans-serif !important;
+  font-size: 1.1rem !important;
+  background-color: white !important;
+  color: #33a4f5 !important;
+  font-weight: bold !important;
+}
+
+#quarto-sidebar-toc-left .nav-link {
+  transition: none !important;
+}
+
+/* ################################ Figures zoomées ################################ */
+
+/* Pour les graphiques zoomés  */
+.trimming {
+  width: 1000px !important;
+  height: 454px !important;
+}
+
+/* ################################ Tableaux ################################ */
+
+/* Couche grise sur les DT tables */
+table.dataTable tbody tr:hover {
+  background-color: #e0f3ff !important; 
+  color: #333333 !important;
+}
+
+/* Style par défaut des boutons de pagination */
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+  background-color: white;  
+  background-image: none !important;
+  color: #333333;
+  padding: 4px 10px;
+  margin: 2px;
+  border-radius: 4px;
+  transition: all 0.2s ease-in-out;
+  box-shadow: none !important;       
+  outline: none !important;  
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover,
+.dataTables_wrapper .dataTables_paginate .paginate_button:focus,
+.dataTables_wrapper .dataTables_paginate .paginate_button:active {
+  background-color: #e0f3ff !important;
+  background-image: none !important;
+  color: #333333 !important;
+  border: 1px solid black !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Bouton actif (celui de la page actuelle) */
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+  background-color: #33a4f5;
+  color: #333333 !important;
+  border: 1px solid black;
+  font-weight: bold !important;
+  box-shadow: none !important;       
+  outline: none !important;
+}
+
+/* Au survol du bouton actif */
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover,
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:focus,
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:active {
+  background-color: #e0f3ff !important;
+  color: #333333 !important;
+  border: 1px solid black !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Au survol du bouton de column visibiliy */
+.dt-button {
+  font-family: "DejaVu Sans", sans-serif !important; 
+  font-size: 14px; 
+  color: #333333;
+}
+
+.dt-button:focus,
+.dt-button:active {
+  outline: none !important;
+  box-shadow: none !important;
+  background-image: none !important;
+}
+
+div.dt-buttons .dt-button:focus,
+div.dt-buttons .dt-button:active {
+  outline: none !important;
+  box-shadow: none !important;
+  background-image: none !important;
+}
+
+/* Les flèches en haut du tableau */
+table.dataTable thead .sorting::after,
+table.dataTable thead .sorting_asc::after,
+table.dataTable thead .sorting_desc::after {
+  color: #33a4f5 !important;
+}
+
+table.dataTable thead th.sorting:after,
+table.dataTable thead th.sorting_asc:after,
+table.dataTable thead th.sorting_desc:after {
+  color: #33a4f5 !important;
+}
+      
+table.dataTable thead .sorting::before,
+table.dataTable thead .sorting_asc::before,
+table.dataTable thead .sorting_desc::before {
+  color: #33a4f5 !important;
+}
+table.dataTable thead th.sorting:before,
+table.dataTable thead th.sorting_asc:before,
+table.dataTable thead th.sorting_desc:before {
+  color: #33a4f5 !important;
+}
+
+/* ################################ Garbage non définit ################################ */
+
+#main .nav-pills > li.active > a,
+#main .nav-pills > li.active > a:hover,
+#main .nav-pills > li.active > a:focus {
+background-color: #22983B;
+  }
+
+#main .nav-pills > li > a:hover {
+background-color: #22983B;
+  }
+  
+
+#nav-top span.glyphicon {
+color: #22983B;
+  }
+
+#table-of-contents header {
+color: #22983B;
+  }
+
+#table-of-contents h2 {
+background-color: #22983B;
+  }
+
+#main a {
+background-image: linear-gradient(180deg,#d64a70,#d64a70);
+                                  color: #c7254e;
+                                    }
+                                    
+#a:hover {
+  color: #3d1308;
+}
+
+#a:visited {
+  color: #3d1308;
+}
