@@ -282,8 +282,8 @@ clustering <- function(analysis, sample = "", method = "Seurat", res_clustree = 
       if (checkmate::check_directory_exists(plots_dir) == TRUE) {
         clustree_plot <- plot_seurat_clustree(analysis, prefix = "RNA_snn_res.")
         ggplot2::ggsave(paste(sample, "clustree.png", sep = "_"), plot = clustree_plot,
-                        device = "png", path = plots_dir, dpi = 200, width = 1125,
-                        height = 1500, units = "px", limitsize = FALSE)
+                        device = "png", path = plots_dir, dpi = 200, width = 1500,
+                        height = 2000, units = "px", limitsize = FALSE)
       }
     }
     analysis <- seurat_clustering(analysis, resolution = resolution)

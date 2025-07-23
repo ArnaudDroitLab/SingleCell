@@ -45,7 +45,7 @@ plot_filter <- function(df, x_name = "x", y_name = "y", low = 0, high = Inf) {
     ggplot2::geom_jitter(size = 0.2, color = ggplot2::alpha("black", 0.4), fill = ggplot2::alpha("black", 0.4)) +
     ggplot2::theme_bw() +
     ggplot2::theme(axis.title.x=ggplot2::element_blank()) + 
-    ggplot2::scale_color_manual(values = "#237BFF")
+    ggplot2::scale_fill_manual(values = "#237BFF")
   
   low = max(low, min(0, min(df[[y_name]])))
   high = min(high, max(df[[y_name]]) + 1)
