@@ -199,8 +199,7 @@ integrate <- function(samples,
     saveRDS(analysis, file = file_path)
   }
   
-  report_name <- paste0(file_name, ".Rmd")
-  make_integration_report(samples = samples, report_path = save_path, report_name = report_name, plots_relative_path = "plots", data_relative_path = "results", force = force_report)
+  make_integrate_report_qmd(analysis, samples = samples, report_steps = report_steps, report_path = save_path, file_name = file_name, force = force_report)
   
   if (perform_clusterisation) {
     

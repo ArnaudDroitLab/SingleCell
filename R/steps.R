@@ -326,7 +326,7 @@ umap <- function(analysis, sample = "", method = "Seurat", n_neighbors = 30, plo
       list_plot <- list()
       list_plot[["sample"]] <- plot_seurat_dim(analysis, reduction = "umap", colour_by = "orig.ident")
       list_plot[["clusters"]] <- plot_seurat_dim(analysis, reduction = "umap", colour_by = plot_clustering)
-      list_plot[["clusters_numbers"]] <- plot_label_umap(analysis, colour_by = plot_clustering)
+      list_plot[["clusters_numbers"]] <- plot_label_umap(analysis, colour_by = plot_clustering, pt.size = 1.5)
       list_plot[["nCount"]] <- plot_seurat_dim(analysis, reduction = "umap", colour_by = "nCount_RNA")
       
       if ("percent_mt" %in% colnames(analysis@meta.data)) {

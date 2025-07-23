@@ -54,59 +54,6 @@ plot_filter <- function(df, x_name = "x", y_name = "y", low = 0, high = Inf) {
   return(p)
 }
 
-#' Barplots that represent the filtering statistics for the seurat filtration
-#'
-#' @param df Data frame as the output by seurat_filter that has the filtering statistics
-#' @param x_name The first column that needs to be work with for the first barplot. Default "Genes"
-#' @param y_name The second column that needs to be work with for the second barplot. Default "Cells"
-#'
-#' @return Barplots as a ggplot object
-#' @importFrom ggplot2 ggplot
-#' @importFrom ggplot2 geom_bar
-#' @importFrom ggplot2 aes
-#' @importFrom ggplot2 geom_text
-#' @importFrom ggplot2 scale_x_discrete
-#' @importFrom ggplot2 theme_bw
-#' @export
-#'
-#' @examples
-
-plot_filtering_stats <- function(df, x_name = "Genes", y_name = "Cells") {
-  
-  checkmate::assert_data_frame(df)
-  
-  
-  if (!x_name %in% colnames(df)) {
-    stop(paste0("First column is missing from the data frame."))
-  }
-  
-  if (!y_name %in% colnames(df)) {
-    stop(paste0("Second column is missing from the data frame."))
-  }
-  
-  
-  if (df[[x_name]][1] - df[[x_name]][2] != df[[x_name]][3]) {stop("Filtration cannot add features.")}
-  if (df[[y_name]][1] - df[[y_name]][2] != df[[y_name]][3]) {stop("Filtration cannot add features.")}
-  
-  if (isFALSE(identical(rownames(df), c("Before", "After", "Filtered_out", "Percentage")))) {
-    stop(paste0("Dataframe should be ordered like this = 'Before', 'After', 'Filtered_out'."))
-  }
-  
-  p <- ggplot2::ggplot(data = df, aes(x = row.names(df), .data[[x_name]])) +
-    ggplot2::geom_bar(stat = "identity", color = "#D44C7E", fill = "#F39BBC", width = 0.8) +
-    ggplot2::geom_text(ggplot2::aes(label = .data[[x_name]]), vjust = 1.5, size = 3) +
-    ggplot2::scale_x_discrete(name = "", limits = c("Before", "After", "Filtered_out"),
-                              labels = c("Before", "After", "Filtered")) +
-    ggplot2::theme_bw()
-  q <- ggplot2::ggplot(data = df, aes(x = row.names(df), .data[[y_name]])) +
-    ggplot2::geom_bar(stat = "identity", color = "#FFC107", fill = "#FFE493", width = 0.8) +
-    ggplot2::geom_text(ggplot2::aes(label = .data[[y_name]]), vjust = 1.5, size = 3) +
-    ggplot2::scale_x_discrete(name = "", limits = c("Before", "After", "Filtered_out"),
-                              labels = c("Before", "After", "Filtered")) +
-    ggplot2::theme_bw()
-  return(p + q)
-}
-
 #' Make the Elbow plot of a dimension reduction
 #'
 #' The elbow plot is the standard deviation in y axis and the component number in x axis.

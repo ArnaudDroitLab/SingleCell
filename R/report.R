@@ -265,85 +265,6 @@ make_integration_report <- function(samples, report_path, report_name = "integra
 
 }
 
-
-#' Make the integration report, with the files to include hardcoded inside.
-#'
-#' @param sample List of samples to include in the report.
-#' @param report_path Path to where the report should be located.
-#' @param report_name Name to give to the report file.
-#' @param plots_relative_path Path to the plots directory, relative to the `report_path`.
-#' Must be a subdirectory in `report_path`. Default "plots"
-#' @param data_relative_path Path to the csv dataframes directory, relative to the `report_path`.
-#' Must be a subdirectory in `report_path`. Default "results"
-#' @param title The title of the report. Default to "Analysis report"
-#' @param force Set to true if you want to overwrite the report that could already exists. Default FALSE
-#'
-#' @return Path to the report as a string.
-
-#' @export
-#'
-#' @examples
-make_analysis_report <- function(sample, report_path, report_name, plots_relative_path = "plots", data_relative_path = "results", title = "Analysis report", force = FALSE) {
-
-  # Every file will be sample_name.ext, you should report here name.ext, sample_ will be automatically added. Currently only accepts .csv and .png
-  steps_files <- list(Filtering = list(plots = c("count_filter_plot.png", "feature_filter_plot.png", "mitochondria_filter_plot.png"), 
-                                       df = c("filtering_stats.csv")),
-                      PCA = list(plots = c("Elbow_pca_plot.png", "PCA_pca_plot.png")),
-                      "Clustering tree" = list(plots = "clustree.png"),
-                      UMAP = list(plots = c("sample_umap_plot.png", "clusters_numbers_umap_plot.png", 
-                                            "mitochondria_umap_plot.png", "nCount_umap_plot.png")),
-                      DE = list(df = c("top10_DE.csv", "summary_per_clusters.csv")))
-  report <- file.path(report_path, report_name)
-  if (file.exists(report)) {
-    if (force) {
-      warning("Report ", report, " already exists, overwriting it.")
-    } else {
-      warning("Report ", report, " already exists, skipping report creation.")
-      return(FALSE)
-    }
-  }
-
-  initialize_report(report_name, report_path, force = force)
-
-  for (step in names(steps_files)) {
-    add_title_report(report, step, 1)
-    textfile <- file.path(".report", paste0("integration_", step, ".txt"))
-    if (file.exists(file.path(report_path, textfile))) {
-      add_textfile_report(report, textfile)
-    }
-    for (type in names(steps_files[[step]])) {
-      filepaths <- steps_files[[step]][[type]]
-      if (length(filepaths) == 0) {
-        next
-      }
-
-      if (type == "plots") {
-        filepaths <- lapply(filepaths, function(x) file.path(plots_relative_path, paste0(sample, "_", x)))
-        filepaths <- filepaths[file.exists(file.path(report_path, filepaths))]
-        if (step %in% c("Clustering tree", "UMAP")) {
-          add_images_knit_report(report, filepaths, ncol = 1)
-        } 
-        else {
-          add_images_knit_report(report, filepaths, ncol = if (length(filepaths)%%3 == 0) 3 else 2)
-        }
-
-      } else if (type == "df") {
-        filepaths <- lapply(filepaths, function(x) file.path(data_relative_path, paste0(sample, "_", x)))
-        filepaths <- filepaths[file.exists(file.path(report_path, filepaths))]
-        if (step == "DE") {
-          for (df in filepaths) {add_df_report_no_rownames(report, df)}
-        } else {
-          for (df in filepaths) {add_df_report(report, df)}
-        }
-
-      }
-    }
-  }
-  build_report(report, title)
-  return(report)
-
-}
-
 #' Title
 #'
 #' @param name 
@@ -384,6 +305,88 @@ initialize_report_qmd <- function(name, report_path = ".", force = FALSE) {
 #' Title
 #'
 #' @param analysis 
+#' @param samples 
+#' @param report_steps 
+#' @param plots_relative_path 
+#' @param report_path 
+#' @param file_name 
+#' @param data_relative_path 
+#' @param force 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+make_integrate_report_qmd <- function(analysis, samples, report_steps = report_steps, plots_relative_path = "plots", report_path = ".", file_name = "integrated", 
+                                      data_relative_path = "results", force = FALSE) {
+  
+  report_name <- paste0(file_name, ".qmd")
+  report <- file.path(report_path, report_name)
+  
+  initialize_report_qmd(report_name, report_path, force = force)
+  
+  lines <- readLines(report)
+  lines[2] <- paste0("title : \"", file_name, "\"")
+  lines[3] <- paste0("subtitle: \"Integration report\"")
+  lines[60] <- paste0("The goal of this report is to portrait the statistical insights of the single-cell RNA-seq analysis to better diagnose the SingleCell::integrate function that was use on the given Seurat objects. ")
+  writeLines(lines, report)
+  
+  fig_num <- 1
+  table_num <- 1
+  cat("## Results\n\n", file = report, sep = "", append = TRUE)
+  
+  ## Filtering part
+  
+  if (report_steps[[1]]) {
+    cat("### Filtering\n\n", file = report, sep = "", append = TRUE)
+    cat("::: panel-tabset\n\n", file = report, sep = "", append = TRUE)
+    
+    for (sample in samples) {
+      cat("## ", sample, "\n\n", file = report, sep = "", append = TRUE)
+      cat("![**Figure ", fig_num, "**: Filtering statistics for ", sample, ".](", plots_relative_path, "/", sample, "_complete_filter_plot.png)\n\n:::{.callout-note collaspe='true'}\nYou can find the figure here : `", plots_relative_path, "/", sample, "_complete_filter_plot.png`\n:::\n\n", file = report, sep = "", append = TRUE)
+      cat("```{r, warning=FALSE}\n\ntable <- read.csv('", data_relative_path, "/", sample, "_filtering_stats.csv')\n\nDT::datatable(\n\ttable,\n\trownames = FALSE,\n\textensions = 'Buttons',\n\toptions = list(\n\t\tdom = 'Bfrtip',\n\t\tbuttons = list(\n\t\t\tlist(\n\t\t\t\textend = 'colvis'\n\t\t\t)\n\t\t)\n\t),\n\tcaption = htmltools::tags$caption(\n\t\tstyle = 'caption-side: top; text-align: center;', \n\t\thtmltools::tags$b('Table ", table_num, ":'), 'Cell counts and proportions.'\n\t)\n)\n\n```\n\n", file = report, sep = "", append = TRUE)
+      fig_num <- fig_num + 1
+      table_num <- table_num + 1
+    }
+    
+    cat(":::\n\n", file = report, sep = "", append = TRUE)
+  }
+  
+  if (report_steps[[2]]) {
+    
+    cat("### Elbow plots\n\n", file = report, sep = "", append = TRUE)
+    cat("::: panel-tabset\n\n", file = report, sep = "", append = TRUE)
+    
+    for (sample in samples) {
+      cat("## ", sample, "\n\n", file = report, sep = "", append = TRUE)
+      cat("![**Figure ", fig_num, "**: Elbow plot for choosing dimensions for UMAPs and FindNeighbors in ", sample, ".](", plots_relative_path, "/", sample, "_Elbow_pca_plot.png)\n\n:::{.callout-note collaspe='true'}\nYou can find the figure here : `", plots_relative_path, "/", sample, "_Elbow_pca_plot.png`\n:::\n\n", file = report, sep = "", append = TRUE)
+      fig_num <- fig_num + 1
+    }
+    
+    cat(":::\n\n", file = report, sep = "", append = TRUE)
+    
+    cat("### PCA plots\n\n", file = report, sep = "", append = TRUE)
+    
+    cat("::: panel-tabset\n\n", file = report, sep = "", append = TRUE)
+    
+    for (sample in samples) {
+      cat("## ", sample, "\n\n", file = report, sep = "", append = TRUE)
+      cat("![**Figure ", fig_num, "**: PCA plot of ", sample, ".](", plots_relative_path, "/", sample, "_PCA_pca_plot.png)\n\n:::{.callout-note collaspe='true'}\nYou can find the figure here : `", plots_relative_path, "/", sample, "_PCA_pca_plot.png`\n:::\n\n", file = report, sep = "", append = TRUE)
+      fig_num <- fig_num + 1
+    }
+    
+    cat(":::\n\n", file = report, sep = "", append = TRUE)
+  }
+  
+  ## Conclusion part
+  cat("## Conclusion\n\n", file = report, sep = "", append = TRUE)
+  cat("We have successfully integrate the different samples for ", file_name, ". We can now assign cell types to identified clusters based on a list of markers.", file = report, sep = "", append = TRUE)
+  
+}
+
+#' Title
+#'
+#' @param analysis 
 #' @param sample 
 #' @param report_path 
 #' @param file_name 
@@ -411,18 +414,21 @@ make_analysis_report_qmd <- function(analysis, sample, report_path, file_name, r
   writeLines(lines, report)
   
   fig_num <- 1
+  table_num <- 1
   cat("## Results\n\n", file = report, sep = "", append = TRUE)
   
   ## Filtering part
   if (report_steps[[1]]) {
-    cat("## Filtering\n\n", file = report, sep = "", append = TRUE)
+    cat("### Filtering\n\n", file = report, sep = "", append = TRUE)
     cat("![**Figure ", fig_num, "**: Filtering statistics for ", sample, ".](", plots_relative_path, "/", sample, "_complete_filter_plot.png)\n\n:::{.callout-note collaspe='true'}\nYou can find the figure here : `", plots_relative_path, "/", sample, "_complete_filter_plot.png`\n:::\n\n", file = report, sep = "", append = TRUE)
+    cat("```{r, warning=FALSE}\n\ntable <- read.csv('", data_relative_path, "/", sample, "_filtering_stats.csv')\n\nDT::datatable(\n\ttable,\n\trownames = FALSE,\n\textensions = 'Buttons',\n\toptions = list(\n\t\tdom = 'Bfrtip',\n\t\tbuttons = list(\n\t\t\tlist(\n\t\t\t\textend = 'colvis'\n\t\t\t)\n\t\t)\n\t),\n\tcaption = htmltools::tags$caption(\n\t\tstyle = 'caption-side: top; text-align: center;', \n\t\thtmltools::tags$b('Table ", table_num, ":'), 'Cell counts and proportions.'\n\t)\n)\n\n```\n\n", file = report, sep = "", append = TRUE)
     fig_num <- fig_num + 1
+    table_num <- table_num + 1
   }
   
   ## PCA part
   if (report_steps[[2]]) {
-    cat("## PCA diagnosis\n\n", file = report, sep = "", append = TRUE)
+    cat("### PCA diagnosis\n\n", file = report, sep = "", append = TRUE)
     cat("::: panel-tabset\n\n", file = report, sep = "", append = TRUE)
     cat("## Elbow plot\n\n", file = report, sep = "", append = TRUE)
     cat("![**Figure ", fig_num, "**: Elbow plot for choosing dimensions for UMAPs and FindNeighbors in ", sample, ".](", plots_relative_path, "/", sample, "_Elbow_pca_plot.png)\n\n:::{.callout-note collaspe='true'}\nYou can find the figure here : `", plots_relative_path, "/", sample, "_Elbow_pca_plot.png`\n:::\n\n", file = report, sep = "", append = TRUE)
@@ -435,14 +441,14 @@ make_analysis_report_qmd <- function(analysis, sample, report_path, file_name, r
   
   ## Finding clusters part
   if (report_steps[[3]]) {
-    cat("## Finding clusters\n\n", file = report, sep = "", append = TRUE)
+    cat("### Finding clusters\n\n", file = report, sep = "", append = TRUE)
     cat("![**Figure ", fig_num, "**: All clusters for ", sample, " based on different resolutions.](", plots_relative_path, "/", sample, "_clustree.png)\n\n:::{.callout-note collaspe='true'}\nYou can find the figure here : `", plots_relative_path, "/", sample, "_clustree.png`\n:::\n\n", file = report, sep = "", append = TRUE)
     fig_num <- fig_num + 1
   }
   
   ## UMAPs part
   if (report_steps[[4]]) {
-    cat("## UMAPs\n\n", file = report, sep = "", append = TRUE)
+    cat("### UMAPs\n\n", file = report, sep = "", append = TRUE)
     cat("::: panel-tabset\n\n", file = report, sep = "", append = TRUE)
     
     if (length(unique(analysis@meta.data$orig.ident)) == 1) {
@@ -479,5 +485,6 @@ make_analysis_report_qmd <- function(analysis, sample, report_path, file_name, r
     cat("We have successfully analyze the different samples for ", sample, ". We can now assign cell types to identified clusters based on a list of markers.", file = report, sep = "", append = TRUE)
   }
   
+  quarto::quarto_render(report)
 }
 
