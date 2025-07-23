@@ -44,13 +44,14 @@ plot_filter <- function(df, x_name = "x", y_name = "y", low = 0, high = Inf) {
     ggplot2::geom_violin() +
     ggplot2::geom_jitter(size = 0.2, color = ggplot2::alpha("black", 0.4), fill = ggplot2::alpha("black", 0.4)) +
     ggplot2::theme_bw() +
-    ggplot2::theme(axis.title.x=ggplot2::element_blank())
+    ggplot2::theme(axis.title.x=ggplot2::element_blank()) + 
+    ggplot2::scale_color_manual(values = "#237BFF")
   
   low = max(low, min(0, min(df[[y_name]])))
   high = min(high, max(df[[y_name]]) + 1)
   
-  p <- p + ggplot2::geom_hline(yintercept=low, linetype="dashed", color = "red")
-  p <- p + ggplot2::geom_hline(yintercept=high, linetype="dashed", color = "red")
+  p <- p + ggplot2::geom_hline(yintercept=low, linetype="dashed", color = "#002f76")
+  p <- p + ggplot2::geom_hline(yintercept=high, linetype="dashed", color = "#002f76")
   return(p)
 }
 
@@ -83,7 +84,7 @@ plot_seurat_elbow <- function(seurat, reduction = "pca", npc = 50, k.param.neigh
   df <- data.frame("Standard_Deviation" = seurat@reductions[[reduction]]@stdev[1:npc], PC = 1:npc)
   p <- ggplot2::ggplot(df, ggplot2::aes(x = .data[["PC"]], y = .data[["Standard_Deviation"]])) +
     ggplot2::geom_point() + ggplot2::scale_y_continuous("Standard Deviation") +
-    ggplot2::theme_bw() + ggplot2::geom_vline(aes(xintercept = k.param.neighbors), colour = "steelblue3")
+    ggplot2::theme_bw() + ggplot2::geom_vline(aes(xintercept = k.param.neighbors), colour = "#002f76")
   return(p)
 }
 
@@ -129,7 +130,7 @@ plot_seurat_dim <- function(seurat, reduction = "pca", colour_by = "orig.ident",
     p <- ggplot2::ggplot(df, ggplot2::aes(x = .data[[x]], y = .data[[y]])) +
       ggplot2::geom_point(aes(colour = .data[[colour_by]])) +
       ggplot2::theme_bw() +
-      ggplot2::scale_colour_gradient(high = "#429DEF", low = "#ECECEC") +
+      ggplot2::scale_colour_gradient(high = "#009784", low = "#d6fffa") +
       ggplot2::labs(color = paste0("log2(RNA count)")) +
       ggplot2::theme(legend.position = "top")
   } else if (colour_by == "percent_mt") {
@@ -137,7 +138,7 @@ plot_seurat_dim <- function(seurat, reduction = "pca", colour_by = "orig.ident",
     p <- ggplot2::ggplot(df, ggplot2::aes(x = .data[[x]], y = .data[[y]])) +
       ggplot2::geom_point(aes(colour = .data[[colour_by]])) +
       ggplot2::theme_bw() +
-      ggplot2::scale_colour_gradient(high = "#F39243", low = "#ECECEC") +
+      ggplot2::scale_colour_gradient(high = "#990099", low = "#ffe9ff") +
       ggplot2::labs(color = "Mitochondrial percentage") +
       ggplot2::theme(legend.position = "top")
   } else {
@@ -147,7 +148,16 @@ plot_seurat_dim <- function(seurat, reduction = "pca", colour_by = "orig.ident",
       ggplot2::theme_bw() +
       ggplot2::theme(legend.position = "top", legend.key = element_rect(fill = "white", colour = "black")) +
       ggplot2::guides(color = ggplot2::guide_legend(title = NULL)) +
-      ggplot2::theme(legend.position = "top")
+      ggplot2::theme(legend.position = "top") 
+    
+    if (length(unique(df$colour_by)) == 1) {
+      p <- p + ggplot2::scale_colour_manual(values = "#6B5FAC")
+    } else {
+      color_palette_UMAP <- c("#FA73E2", "#6B5FAC", "#000023", "#332DA3", "#237BFF", "#92CDF9", "#22aa99")
+      color_values <- generate_gradient_palette(analysis, color_palette_UMAP, n_colors_out = 100, n_clusters = colour_by)
+      p <- p + ggplot2::scale_colour_manual(values = color_values)
+    }
+    
   }
   return(p)
 }

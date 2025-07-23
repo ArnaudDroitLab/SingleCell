@@ -94,8 +94,8 @@ filter_data <- function(analysis, sample = "", method = "Seurat", assay = "RNA",
       # pdf(filename, onefile = TRUE)
       for (i in names(list_plot)) {
         ggplot2::ggsave(paste(sample, i,  "filter_plot.png", sep = "_"), plot = list_plot[[i]],
-                        device = "png", path = plots_dir, dpi = 200, width = 500 + 300*length(unique(df_plot$samples)), # 800 px width is ok for 1 sample
-                        height = 1200, units = "px", limitsize = FALSE)
+                        device = "png", path = plots_dir, dpi = 200, width = 375 + 225*length(unique(df_plot$samples)), # 800 px width is ok for 1 sample
+                        height = 900, units = "px", limitsize = FALSE)
         # print(list_plot[[i]])
       }
       # dev.off()
@@ -109,13 +109,13 @@ filter_data <- function(analysis, sample = "", method = "Seurat", assay = "RNA",
     if (length(list_plot) == 2) {
       plot_filter_complete <- ggpubr::ggarrange(list_plot[["count"]], list_plot[["feature"]], common.legend = TRUE, ncol = 2, legend = "right")
       ggplot2::ggsave(paste(sample, "complete_filter_plot.png", sep = "_"), plot_filter_complete,
-                      device = "png", path = plots_dir, dpi = 200, width = 500 + 300*2, 
-                      height = 1200, units = "px", limitsize = FALSE)
+                      device = "png", path = plots_dir, dpi = 200, width = 825, 
+                      height = 900, units = "px", limitsize = FALSE)
     } else if (length(list_plot) == 3) {
       plot_filter_complete <- ggpubr::ggarrange(list_plot[["count"]], list_plot[["feature"]], list_plot[["mitochondria"]], common.legend = TRUE, ncol = 3, legend = "right")
       ggplot2::ggsave(paste(sample, "complete_filter_plot.png", sep = "_"), plot_filter_complete,
-                      device = "png", path = plots_dir, dpi = 200, width = 500 + 300*3, 
-                      height = 1200, units = "px", limitsize = FALSE)
+                      device = "png", path = plots_dir, dpi = 200, width = 1050, 
+                      height = 900, units = "px", limitsize = FALSE)
     } else {
       warning(paste0("There are no filter plots?"))
     }
@@ -198,8 +198,8 @@ pca <- function(analysis, sample = "", method = "Seurat", assay = "RNA", npcs = 
     if (checkmate::check_directory_exists(plots_dir) == TRUE) {
       for (i in names(list_plot)) {
         ggplot2::ggsave(paste(sample, i,  "pca_plot.png", sep = "_"), plot = list_plot[[i]],
-                        device = "png", path = plots_dir, dpi = 200, width = 1500,
-                        height = 1200, units = "px", limitsize = FALSE)
+                        device = "png", path = plots_dir, dpi = 200, width = 1125,
+                        height = 900, units = "px", limitsize = FALSE)
       }
     }
   } else {
@@ -282,8 +282,8 @@ clustering <- function(analysis, sample = "", method = "Seurat", res_clustree = 
       if (checkmate::check_directory_exists(plots_dir) == TRUE) {
         clustree_plot <- plot_seurat_clustree(analysis, prefix = "RNA_snn_res.")
         ggplot2::ggsave(paste(sample, "clustree.png", sep = "_"), plot = clustree_plot,
-                        device = "png", path = plots_dir, dpi = 200, width = 1500,
-                        height = 2000, units = "px", limitsize = FALSE)
+                        device = "png", path = plots_dir, dpi = 200, width = 1125,
+                        height = 1500, units = "px", limitsize = FALSE)
       }
     }
     analysis <- seurat_clustering(analysis, resolution = resolution)
