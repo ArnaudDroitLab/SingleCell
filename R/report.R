@@ -354,9 +354,10 @@ make_analysis_report <- function(sample, report_path, report_name, plots_relativ
 #' @export
 #'
 #' @examples
-initialize_report_qmd <- function(name, report_part = ".", force = FALSE) {
+initialize_report_qmd <- function(name, report_path = ".", force = FALSE) {
   
   checkmate::assert_string(name, pattern = "^[a-zA-Z0-9\\-_.]+$")
+  checkmate::assert_directory_exists(report_path)
   checkmate::assert_logical(force, len = 1)
   
   template_path <- system.file("qmd/header.qmd", package = "SingleCell")
