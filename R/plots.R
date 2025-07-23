@@ -154,7 +154,7 @@ plot_seurat_dim <- function(seurat, reduction = "pca", colour_by = "orig.ident",
       p <- p + ggplot2::scale_colour_manual(values = "#6B5FAC")
     } else {
       color_palette_UMAP <- c("#FA73E2", "#6B5FAC", "#000023", "#332DA3", "#237BFF", "#92CDF9", "#22aa99")
-      color_values <- generate_gradient_palette(seurat, color_palette_UMAP, n_colors_out = 100, n_clusters = colour_by)
+      color_values <- generate_gradient_palette(seurat, color_palette_UMAP, n_colors_out = 100, n_clusters = unique(df$colour_by))
       p <- p + ggplot2::scale_colour_manual(values = color_values)
     }
     
@@ -331,7 +331,7 @@ generate_gradient_palette <- function(seurat, color_palette_ordered, n_colors_ou
   gradient_func <- colorRampPalette(color_palette_ordered)
   full_gradient <- gradient_func(n_colors_out)
   
-  n_extract <- length(unique(feleke@meta.data[[n_clusters]]))
+  n_extract <- length(unique(seurat@meta.data[[n_clusters]]))
   
   idx <- round(seq(1, n_colors_out, length.out = n_extract))
   selected_colors <- full_gradient[idx]
