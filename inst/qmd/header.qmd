@@ -1,6 +1,7 @@
 ---
 title: ""
-subtitle: "Cell assignation report"
+subtitle: ""
+description: "Single-cell RNA-seq"
 author: 
   - name: "[Vincent Gélinas, M.Sc.](https://compbio.ca/team/)"
   - name: "[Charles Joly Beauparlant, Ph.D](https://compbio.ca/teams/charles-joly-beauparlant/)"
@@ -8,7 +9,6 @@ date: last-modified
 date-format: "DD-MM-YYYY"
 title-block-banner: "#1A468F"
 title-block-banner-color: "white"
-description: "UMAPs, dotplots, and violin plots"
 last-modified:
 backgroundcolor: "white"
 execute:
@@ -22,7 +22,7 @@ format:
     toc-location: left
     self-contained: true
     cards: true
-    css: _report/adlab_html.css
+    css: .report/style.css
     linkcolor: "#9DD3E4"
 callout-icon: false
 include-after-body:
@@ -57,9 +57,7 @@ suppressMessages(library(gprofiler2))
 
 ## Introduction
 
-The goal of this report is to portrait the different gene expressions from a given gene list with graphical insights. 
-
-These figures can help differentiate cell types between each other with clear gene expression patterns. 
+The goal of this report is to portrait the statistical insights of the single-cell RNA-seq analysis to better diagnose the SingleCell::analyze_integrated function that was use on the given Seurat object. 
 
 ## Methods
 
@@ -242,7 +240,5 @@ loaded via a namespace (and not attached):
 ```
 :::
 
-## Markers
 
-This a list of all the gene markers used in this report, and the cell type associated with: 
 

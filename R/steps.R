@@ -48,6 +48,7 @@ load_data <- function(path_to_count, sample, from = "Cellranger", to = "Seurat")
 #'
 #' @return An object of the analysis type filtered.
 #' @importFrom ggplot2 ggsave
+#' @importFrom ggpubr ggarrange
 #' @export
 filter_data <- function(analysis, sample = "", method = "Seurat", assay = "RNA", organism = "",
                         mitochondrial_genes = c(), min_genes = 100, min_counts = 100,
@@ -87,6 +88,7 @@ filter_data <- function(analysis, sample = "", method = "Seurat", assay = "RNA",
       list_plot[["mitochondria"]] <- plot_filter(df_plot, x_name = "samples", y_name = "percent_mitochondria",
                                                  low = min_mt, high = max_mt)
     }
+    
     if (checkmate::check_directory_exists(plots_dir) == TRUE) {
       filename = file.path(plots_dir, paste0(sample, "_filter_plots.pdf"))
       # pdf(filename, onefile = TRUE)
@@ -103,6 +105,21 @@ filter_data <- function(analysis, sample = "", method = "Seurat", assay = "RNA",
         print(list_plot[[i]])
       }
     }
+    
+    if (length(list_plot) == 2) {
+      plot_filter_complete <- ggpubr::ggarrange(list_plot[["count"]], list_plot[["feature"]], common.legend = TRUE, ncol = 2, legend = "right")
+      ggplot2::ggsave(paste(sample, "complete_filter_plot.png", sep = "_"), plot_filter_complete,
+                      device = "png", path = plots_dir, dpi = 200, width = 500 + 300*2, 
+                      height = 1200, units = "px", limitsize = FALSE)
+    } else if (length(list_plot) == 3) {
+      plot_filter_complete <- ggpubr::ggarrange(list_plot[["count"]], list_plot[["feature"]], list_plot[["mitochondria"]], common.legend = TRUE, ncol = 3, legend = "right")
+      ggplot2::ggsave(paste(sample, "complete_filter_plot.png", sep = "_"), plot_filter_complete,
+                      device = "png", path = plots_dir, dpi = 200, width = 500 + 300*3, 
+                      height = 1200, units = "px", limitsize = FALSE)
+    } else {
+      warning(paste0("There are no filter plots?"))
+    }
+    
     # print(results_dir)
     analysis <- seurat_filter(sample = sample, seurat = analysis, assay = assay, min_genes = min_genes, min_counts = min_counts,
                               min_cells = min_cells, min_mt = min_mt, max_genes = max_genes,

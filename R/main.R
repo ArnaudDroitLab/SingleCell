@@ -121,6 +121,10 @@ integrate <- function(samples,
     results_dir <- ""
   }
   
+  report_steps <- list()
+  report_steps[["filtering_list"]] <- FALSE
+  report_steps[["PCA_list"]] <- FALSE
+  
   if (step == "loading_data") {
     analysis_list <- lapply(samples, function(x) {load_data(path_to_count,
                                                             x,
@@ -150,6 +154,7 @@ integrate <- function(samples,
                                                      plots_dir = plots_dir,
                                                      results_dir = results_dir)})
     step <- "normalizing_list"
+    report_steps[["filtering_list"]] <- TRUE
   }
   checkmate::assert_list(analysis_list, types = method, len = length(samples))
   
@@ -174,6 +179,7 @@ integrate <- function(samples,
                                              npcs = npcs_pca,
                                              plots_dir = plots_dir)})
     step <- "integrating"
+    report_steps[["PCA_list"]] <- TRUE
   }
   checkmate::assert_list(analysis_list, types = method, len = length(samples))
   
@@ -347,6 +353,13 @@ analyze_integrated <- function(analysis,
   checkmate::assert_directory(results_dir)
   checkmate::assert_directory(plots_dir)
   
+  
+  report_steps <- list()
+  report_steps[["filtering"]] <- FALSE
+  report_steps[["PCA"]] <- FALSE
+  report_steps[["finding_clusters"]] <- FALSE
+  report_steps[["UMAP"]] <- FALSE
+  
   if (step == "filtering") {
     
     analysis <- filter_data(analysis,
@@ -368,6 +381,7 @@ analyze_integrated <- function(analysis,
       checkmate::assert_class(analysis, method) 
 
     step <- "normalizing"
+    report_steps[["filtering"]] <- TRUE
   }
   
   if (step == "normalizing") {
@@ -393,6 +407,7 @@ analyze_integrated <- function(analysis,
     checkmate::assert_class(analysis, method)
     
     step <- "finding_neighbors"
+    report_steps[["PCA"]] <- TRUE
   }
   
   if (step == "finding_neighbors") {
@@ -414,6 +429,7 @@ analyze_integrated <- function(analysis,
     checkmate::assert_class(analysis, method)
     
     step <- "UMAP"
+    report_steps[["finding_clusters"]] <- TRUE
   }
   
   if (step == "UMAP") {
@@ -423,6 +439,8 @@ analyze_integrated <- function(analysis,
                      n_neighbors = n_neighbors,
                      plots_dir = plots_dir,
                      plot_clustering = paste0("RNA_snn_res.", resolution_clustering))
+    
+    report_steps[["UMAP"]] <- TRUE
   }
   
   if (finding_DEG) {
@@ -442,8 +460,7 @@ analyze_integrated <- function(analysis,
     saveRDS(analysis, file = file_path)
   }
   
-  report_name <- paste0(file_name, ".Rmd")
-  make_analysis_report(sample = sample, report_path = save_path, report_name = report_name, plots_relative_path = "plots", data_relative_path = "results", force = force_report)
+  make_analysis_report_qmd(analysis = analysis, sample = sample, report_path = save_path, file_name = file_name, report_steps = report_steps, plots_relative_path = "plots", data_relative_path = "results", force = force_report)
   
   return(analysis)
 }

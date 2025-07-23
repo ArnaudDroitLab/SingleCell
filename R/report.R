@@ -344,3 +344,105 @@ make_analysis_report <- function(sample, report_path, report_name, plots_relativ
 
 }
 
+#' Title
+#'
+#' @param analysis 
+#' @param sample 
+#' @param report_path 
+#' @param file_name 
+#' @param report_steps 
+#' @param plots_relative_path 
+#' @param data_relative_path 
+#' @param force 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+make_analysis_report_qmd <- function(analysis, sample, report_path, file_name, report_steps, 
+                                     plots_relative_path = "plots", data_relative_path = "results", force = FALSE) {
+  
+  report_name <- paste0(file_name, ".qmd")
+  report <- file.path(report_path, report_name)
+  
+  initialize_report(report_name, report_path, force = force)
+  
+  lines <- readLines(report)
+  lines[2] <- paste0("title : \"", file_name, "\"")
+  lines[3] <- paste0("subtitle: \"Analyze integrated report for clusterisation\"")
+  lines[60] <- paste0("The goal of this report is to portrait the statistical insights 
+                      of the single-cell RNA-seq analysis to better diagnose the 
+                      SingleCell::analyze_integrated function that was use on the given Seurat object. ")
+  writeLines(lines, report)
+  
+  fig_num <- 1
+  cat("## Results\n\n", file = report, sep = "", append = TRUE)
+  
+  ## Filtering part
+  if (report_steps[[1]]) {
+    cat("## Filtering\n\n", file = report, sep = "", append = TRUE)
+    cat("[**Figure ", fig_num, "**: Filtering statistics for ", sample, ".](", plots_relative_path, "/", sample, "_complete_filter_plot.png)\n\n:::{.callout-note collaspe='true'}\nYou can find the figure here : `", plots_relative_path, "/", sample, "_complete_filter_plot.png`\n:::\n\n", file = report, sep = "", append = TRUE)
+    fig_num <- fig_num + 1
+  }
+  
+  ## PCA part
+  if (report_step[[2]]) {
+    cat("## PCA diagnosis\n\n", file = report, sep = "", append = TRUE)
+    cat("::: panel-tabset\n\n", file = report, sep = "", append = TRUE)
+    cat("## Elbow plot\n\n", file = report, sep = "", append = TRUE)
+    cat("[**Figure ", fig_num, "**: Elbow plot for choosing dimensions for UMAPs and FindNeighbors in ", sample, ".](", plots_relative_path, "/", sample, "_Elbow_pca_plot.png)\n\n:::{.callout-note collaspe='true'}\nYou can find the figure here : `", plots_relative_path, "/", sample, "_Elbow_pca_plot.png`\n:::\n\n", file = report, sep = "", append = TRUE)
+    fig_num <- fig_num + 1
+    cat("## PCA plot\n\n", file = report, sep = "", append = TRUE)
+    cat("[**Figure ", fig_num, "**: PCA plot of ", sample, ".](", plots_relative_path, "/", sample, "_PCA_pca_plot.png)\n\n:::{.callout-note collaspe='true'}\nYou can find the figure here : `", plots_relative_path, "/", sample, "_PCA_pca_plot.png`\n:::\n\n", file = report, sep = "", append = TRUE)
+    cat(":::\n\n", file = report, sep = "", append = TRUE)
+    fig_num <- fig_num + 1
+  }
+  
+  ## Finding clusters part
+  if (report_steps[[3]]) {
+    cat("## Finding clusters\n\n", file = report, sep = "", append = TRUE)
+    cat("[**Figure ", fig_num, "**: All clusters for ", sample, " based on different resolutions.](", plots_relative_path, "/", sample, "_clustree.png)\n\n:::{.callout-note collaspe='true'}\nYou can find the figure here : `", plots_relative_path, "/", sample, "_clustree.png`\n:::\n\n", file = report, sep = "", append = TRUE)
+    fig_num <- fig_num + 1
+  }
+  
+  ## UMAPs part
+  if (report_steps[[4]]) {
+    cat("## UMAPs\n\n", file = report, sep = "", append = TRUE)
+    cat("::: panel-tabset\n\n", file = report, sep = "", append = TRUE)
+    
+    if (length(unique(analysis@meta.data$orig.ident)) == 1) {
+      cat("## Sample identification\n\n", file = report, sep = "", append = TRUE)
+      cat("[**Figure ", fig_num, "**: UMAP based on the optimized number of dimensions of showing the sample for ", sample, ".](", plots_relative_path, "/", sample, "_sample_umap_plot.png)\n\n:::{.callout-note collaspe='true'}\nYou can find the figure here : `", plots_relative_path, "/", sample, "_sample_umap_plot.png`\n:::\n\n", file = report, sep = "", append = TRUE)
+    } else {
+      cat("## Samples identification\n\n", file = report, sep = "", append = TRUE)
+      cat("[**Figure ", fig_num, "**: UMAP based on the optimized number of dimensions of showing the samples for ", sample, ".](", plots_relative_path, "/", sample, "_sample_umap_plot.png)\n\n:::{.callout-note collaspe='true'}\nYou can find the figure here : `", plots_relative_path, "/", sample, "_sample_umap_plot.png`\n:::\n\n", file = report, sep = "", append = TRUE)
+    }
+    fig_num <- fig_num + 1
+    
+    cat("## Base clusters\n\n", file = report, sep = "", append = TRUE)
+    cat("[**Figure ", fig_num, "**: UMAP categorizing the different clusters for ", sample, ". These base clusters are from `seurat_clusters` meta.data column.](", plots_relative_path, "/", sample, "_clusters_numbers_umap_plot.png)\n\n:::{.callout-note collaspe='true'}\nYou can find the figure here : `", plots_relative_path, "/", sample, "_clusters_numbers_umap_plot.png`\n:::\n\n", file = report, sep = "", append = TRUE)
+    fig_num <- fig_num + 1
+    
+    cat("## Number of features\n\n", file = report, sep = "", append = TRUE)
+    cat("[**Figure ", fig_num, "**: UMAP portaying the number of read counts per cells in ", sample, " scaled in log2. These results are based on the `nCount_RNA` column in the meta.data.](", plots_relative_path, "/", sample, "_nCount_umap_plot.png)\n\n:::{.callout-note collaspe='true'}\nYou can find the figure here : `", plots_relative_path, "/", sample, "_nCount_umap_plot.png`\n:::\n\n", file = report, sep = "", append = TRUE)
+    fig_num <- fig_num + 1
+    
+    if ("percent_mt" %in% colnames(analysis@meta.data)) {
+      cat("## Percentage of mitochondria\n\n", file = report, sep = "", append = TRUE)
+      cat("[**Figure ", fig_num, "**: UMAP portaying the mitochondria content per cells in ", sample, " in percentage. These results are based on the `percent_mt` column in the meta.data.](", plots_relative_path, "/", sample, "_mitochondria_umap_plot.png)\n\n:::{.callout-note collaspe='true'}\nYou can find the figure here : `", plots_relative_path, "/", sample, "_mitochondria_umap_plot.png`\n:::\n\n", file = report, sep = "", append = TRUE)
+      fig_num <- fig_num + 1
+    }
+    
+    cat(":::\n\n", file = report, sep = "", append = TRUE)
+  }
+  
+  ## Conclusion part
+  cat("## Conclusion\n\n", file = report, sep = "", append = TRUE)
+  if (length(unique(analysis@meta.data$orig.ident)) == 1) {
+    cat("## We have successfully analyze the sample for ", sample, ". We can now assign cell types to identified clusters based on a list of markers.", file = report, sep = "", append = TRUE)
+  } else {
+    cat("## We have successfully analyze the different samples for ", sample, ". We can now assign cell types to identified clusters based on a list of markers.", file = report, sep = "", append = TRUE)
+  }
+  
+}
+
