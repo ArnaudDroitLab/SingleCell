@@ -184,7 +184,7 @@ normalize_data <- function(analysis, method = "Seurat", assay = "RNA", nfeatures
 #' @return An analysis object of type method with PCA.
 #' @importFrom ggplot2 ggsave
 #' @export
-pca <- function(analysis, sample = "", method = "Seurat", assay = "RNA", npcs = 50, plots_dir = "") {
+pca <- function(analysis, sample = "", method = "Seurat", assay = "RNA", npcs = 50, plots_dir = "", variance = 0.8) {
   checkmate::assert_string(method)
   checkmate::assert_string(sample)
   checkmate::assert_class(analysis, method)
@@ -192,8 +192,11 @@ pca <- function(analysis, sample = "", method = "Seurat", assay = "RNA", npcs = 
   if (method == "Seurat") {
     check_assay(analysis, assay)
     analysis <- seurat_pca(analysis, assay = assay, npcs = npcs)
+    
+    dims <- seurat_get_dim(analysis, reduction = "pca", npcs = npcs, variance = variance)
+    
     list_plot <- list()
-    list_plot[["Elbow"]] <- plot_seurat_elbow(analysis, reduction = "pca", npc = npcs)
+    list_plot[["Elbow"]] <- plot_seurat_elbow(analysis, reduction = "pca", npc = npcs, k.param.neighbors = dims)
     list_plot[["PCA"]] <- plot_seurat_dim(analysis, reduction = "pca", colour_by = "orig.ident")
     if (checkmate::check_directory_exists(plots_dir) == TRUE) {
       for (i in names(list_plot)) {
@@ -241,12 +244,13 @@ integrate_data <- function(analysis_list, method = "Seurat", nfeatures = 5000, a
 #'
 #' @return An analysis object of type method with neighbors.
 #' @export
-neighbors <- function(analysis, method = "Seurat", k.param = 20) {
+neighbors <- function(analysis, method = "Seurat", k.param = 20, npcs = 50, variance = 0.8) {
   checkmate::assert_string(method)
   checkmate::assert_class(analysis, method)
   checkmate::assert_int(k.param)
   if (method == "Seurat") {
-    analysis <- seurat_neighbors(analysis, k.param = k.param)
+    dims <- seurat_get_dim(analysis, reduction = "pca", npcs = npcs, variance = variance)
+    analysis <- seurat_neighbors(analysis, k.param = k.param, dims = dims)
   } else {
     stop(paste0(method, " is an unsupported method."))
   }
@@ -312,7 +316,7 @@ clustering <- function(analysis, sample = "", method = "Seurat", res_clustree = 
 #' @export
 #'
 #' @examples
-umap <- function(analysis, sample = "", method = "Seurat", n_neighbors = 30, plot_clustering = "RNA_snn_res.1", plots_dir = "") {
+umap <- function(analysis, sample = "", method = "Seurat", n_neighbors = 30, plot_clustering = "RNA_snn_res.1", plots_dir = "", npcs = 50, variance = variance) {
   checkmate::assert_string(method)
   checkmate::assert_class(analysis, method)
   checkmate::assert_string(sample)
@@ -321,7 +325,8 @@ umap <- function(analysis, sample = "", method = "Seurat", n_neighbors = 30, plo
   if (plots_dir != "") {checkmate::assert_directory(plots_dir)}
   
   if (method == "Seurat") {
-    analysis <- seurat_umap(analysis, n.neighbors = n_neighbors)
+    dims <- seurat_get_dim(analysis, reduction = "pca", npcs = npcs, variance = variance)
+    analysis <- seurat_umap(analysis, n.neighbors = n_neighbors, dims = dims)
     if (checkmate::check_directory_exists(plots_dir) == TRUE) {
       list_plot <- list()
       list_plot[["sample"]] <- plot_seurat_dim(analysis, reduction = "umap", colour_by = "orig.ident")

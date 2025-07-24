@@ -41,6 +41,7 @@
 #' @param k.filter How many neighbors (k) to use when filtering anchors
 #' @param k.weight Number of neighbors to consider when weighting anchors
 #' @param perform_clusterisation If you want to perform the second part of the analysis (clusterisation)
+#' @param variance
 #'
 #' @return an analysis object containing the integrated data.
 #' @export
@@ -73,7 +74,8 @@ integrate <- function(samples,
                       force_report = FALSE, 
                       k.weight = 100, 
                       k.filter = 100, 
-                      perform_clusterisation = TRUE) {
+                      perform_clusterisation = TRUE, 
+                      variance = 0.8) {
   
   checkmate::assert_character(samples, min.len = 2)
   checkmate::assert_string(step)
@@ -177,7 +179,8 @@ integrate <- function(samples,
                                              method = method,
                                              assay = assay,
                                              npcs = npcs_pca,
-                                             plots_dir = plots_dir)})
+                                             plots_dir = plots_dir, 
+                                             variance = variance)})
     step <- "integrating"
     report_steps[["PCA_list"]] <- TRUE
   }
@@ -262,6 +265,7 @@ integrate <- function(samples,
 #' @param variable The column name that is going to be used for extracting the cluster number per barcode. Default "seurat_clusters"
 #' @param finding_DEG Whether to force the DE to be recomputed if a DE file already exists. Default FALSE
 #' @param skip Which steps to skip, keep empty to do all the steps. Default c()
+#' @param variance 
 #'
 #' @return An analysis object.
 #' @export
@@ -300,7 +304,8 @@ analyze_integrated <- function(analysis,
                                force_report = FALSE,
                                variable = "seurat_clusters",
                                finding_DEG = FALSE,
-                               skip = NULL) {
+                               skip = NULL, 
+                               variance = 0.8) {
   
   checkmate::assert_string(step)
   if (!step %in% c("filtering", "normalizing", "PCA", "finding_neighbors", "finding_clusters", "UMAP")) {stop("The step chosen is not in the given list of steps for clusterisation.")}
@@ -402,7 +407,8 @@ analyze_integrated <- function(analysis,
                     method = method,
                     assay = assay,
                     npcs = npcs_pca,
-                    plots_dir = plots_dir)
+                    plots_dir = plots_dir, 
+                    variance = variance)
     checkmate::assert_class(analysis, method)
     
     step <- "finding_neighbors"
@@ -412,7 +418,9 @@ analyze_integrated <- function(analysis,
   if (step == "finding_neighbors") {
     analysis <- neighbors(analysis,
                           method = method,
-                          k.param = k.param_neighbors)
+                          k.param = k.param_neighbors, 
+                          npcs = npcs_pca, 
+                          variance = variance)
     checkmate::assert_class(analysis, method)
     
     step <- "finding_clusters"
@@ -437,7 +445,9 @@ analyze_integrated <- function(analysis,
                      method = method,
                      n_neighbors = n_neighbors,
                      plots_dir = plots_dir,
-                     plot_clustering = paste0("RNA_snn_res.", resolution_clustering))
+                     plot_clustering = paste0("RNA_snn_res.", resolution_clustering), 
+                     npcs = npcs_pca, 
+                     variance = variance)
     
     report_steps[["UMAP"]] <- TRUE
   }

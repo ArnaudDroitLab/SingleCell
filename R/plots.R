@@ -83,8 +83,10 @@ plot_seurat_elbow <- function(seurat, reduction = "pca", npc = 50, k.param.neigh
   
   df <- data.frame("Standard_Deviation" = seurat@reductions[[reduction]]@stdev[1:npc], PC = 1:npc)
   p <- ggplot2::ggplot(df, ggplot2::aes(x = .data[["PC"]], y = .data[["Standard_Deviation"]])) +
-    ggplot2::geom_point() + ggplot2::scale_y_continuous("Standard Deviation") +
-    ggplot2::theme_bw() + ggplot2::geom_vline(aes(xintercept = k.param.neighbors), colour = "#002f76")
+    ggplot2::geom_point() + 
+    ggplot2::scale_y_continuous("Standard Deviation") +
+    ggplot2::theme_bw() + 
+    ggplot2::geom_vline(aes(xintercept = k.param.neighbors), colour = "#002f76")
   return(p)
 }
 

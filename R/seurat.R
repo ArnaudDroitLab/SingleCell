@@ -277,10 +277,11 @@ seurat_integrate <- function(seurat_list, nfeatures = 5000, assay = "RNA", k.fil
 #' @return A Seurat object with KNN.
 #' @importFrom Seurat FindNeighbors
 #' @export
-seurat_neighbors <- function(seurat, k.param = 20) {
+seurat_neighbors <- function(seurat, k.param = 20, dims = 20) {
   checkmate::assert_class(seurat, "Seurat")
   checkmate::assert_int(k.param, lower = 2)
-  seurat <- Seurat::FindNeighbors(seurat, k.param = k.param, graph.name = "RNA_snn")
+  checkmate::assert_int(dims)
+  seurat <- Seurat::FindNeighbors(seurat, k.param = k.param, graph.name = "RNA_snn", dims = 1:dims)
   return(seurat)
 }
 
@@ -310,10 +311,10 @@ seurat_clustering <- function(seurat, resolution = 1, prefix = "RNA_snn") {
 #' @return Seurat object with UMAP.
 #' @importFrom Seurat RunUMAP
 #' @export
-seurat_umap <- function(seurat, n.neighbors = 30, dims = 1:20) {
+seurat_umap <- function(seurat, n.neighbors = 30, dims = 20) {
   checkmate::assert_class(seurat, "Seurat")
   checkmate::assert_double(n.neighbors, lower = 0)
-  seurat <- Seurat::RunUMAP(seurat, n.neighbors = n.neighbors, n.components = 2, dims = dims)
+  seurat <- Seurat::RunUMAP(seurat, n.neighbors = n.neighbors, n.components = 2, dims = 1:dims)
   return(seurat)
 }
 
@@ -352,7 +353,24 @@ seurat_all_DE <- function(seurat, sample = "", assay = "RNA", slot = "data", met
 }
 
 
-
+#' Title
+#'
+#' @param seurat 
+#' @param reduction 
+#' @param npcs 
+#' @param variance 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+seurat_get_dim <- function(seurat, reduction = "pca", npcs = 50, variance = 0.8) {
+  df <- data.frame("Standard_Deviation" = seurat@reductions[[reduction]]@stdev[1:npcs], PC = 1:npcs)
+  var_explained <- (df$Standard_Deviation^2) / sum(df$Standard_Deviation^2)
+  cum_var <- cumsum(var_explained)
+  dims <- which(cum_var >= variance)[1]
+  return(dims)
+}
 
 
 
