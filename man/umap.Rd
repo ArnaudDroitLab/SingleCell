@@ -10,7 +10,9 @@ umap(
   method = "Seurat",
   n_neighbors = 30,
   plot_clustering = "RNA_snn_res.1",
-  plots_dir = ""
+  plots_dir = "",
+  npcs = 50,
+  variance = variance
 )
 }
 \arguments{

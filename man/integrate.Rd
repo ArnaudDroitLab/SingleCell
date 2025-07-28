@@ -32,7 +32,8 @@ integrate(
   force_report = FALSE,
   k.weight = 100,
   k.filter = 100,
-  perform_clusterisation = TRUE
+  perform_clusterisation = TRUE,
+  variance = 0.8
 )
 }
 \arguments{
@@ -102,6 +103,8 @@ report creation will be skipped. Default FALSE}
 \item{k.filter}{How many neighbors (k) to use when filtering anchors}
 
 \item{perform_clusterisation}{If you want to perform the second part of the analysis (clusterisation)}
+
+\item{variance}{}
 }
 \value{
 an analysis object containing the integrated data.

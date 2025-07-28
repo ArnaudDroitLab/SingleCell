@@ -4,7 +4,7 @@
 \alias{neighbors}
 \title{Compute neighbors}
 \usage{
-neighbors(analysis, method = "Seurat", k.param = 20)
+neighbors(analysis, method = "Seurat", k.param = 20, npcs = 50, variance = 0.8)
 }
 \arguments{
 \item{analysis}{The analysis object.}

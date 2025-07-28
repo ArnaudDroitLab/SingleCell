@@ -10,7 +10,8 @@ pca(
   method = "Seurat",
   assay = "RNA",
   npcs = 50,
-  plots_dir = ""
+  plots_dir = "",
+  variance = 0.8
 )
 }
 \arguments{

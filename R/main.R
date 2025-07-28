@@ -75,7 +75,7 @@ integrate <- function(samples,
                       k.weight = 100, 
                       k.filter = 100, 
                       perform_clusterisation = TRUE, 
-                      variance = 0.8) {
+                      variance = 0.7) {
   
   checkmate::assert_character(samples, min.len = 2)
   checkmate::assert_string(step)
@@ -305,7 +305,7 @@ analyze_integrated <- function(analysis,
                                variable = "seurat_clusters",
                                finding_DEG = FALSE,
                                skip = NULL, 
-                               variance = 0.8) {
+                               variance = 0.7) {
   
   checkmate::assert_string(step)
   if (!step %in% c("filtering", "normalizing", "PCA", "finding_neighbors", "finding_clusters", "UMAP")) {stop("The step chosen is not in the given list of steps for clusterisation.")}

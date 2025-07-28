@@ -4,7 +4,7 @@
 \alias{seurat_umap}
 \title{Compute the UMAP using RunUMAP from Seurat}
 \usage{
-seurat_umap(seurat, n.neighbors = 30, dims = 1:20)
+seurat_umap(seurat, n.neighbors = 30, dims = 20)
 }
 \arguments{
 \item{seurat}{The Seurat object.}

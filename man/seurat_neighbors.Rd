@@ -4,7 +4,7 @@
 \alias{seurat_neighbors}
 \title{Compute the KNN graph using FindNeighbors from Seurat}
 \usage{
-seurat_neighbors(seurat, k.param = 20)
+seurat_neighbors(seurat, k.param = 20, dims = 20)
 }
 \arguments{
 \item{seurat}{The Seurat object.}

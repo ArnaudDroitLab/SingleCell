@@ -36,7 +36,8 @@ analyze_integrated(
   force_report = FALSE,
   variable = "seurat_clusters",
   finding_DEG = FALSE,
-  skip = NULL
+  skip = NULL,
+  variance = 0.8
 )
 }
 \arguments{
@@ -113,6 +114,8 @@ report creation will be skipped. Default FALSE}
 \item{finding_DEG}{Whether to force the DE to be recomputed if a DE file already exists. Default FALSE}
 
 \item{skip}{Which steps to skip, keep empty to do all the steps. Default c()}
+
+\item{variance}{}
 }
 \value{
 An analysis object.
