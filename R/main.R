@@ -8,9 +8,14 @@
 #' detect the structure in each directory to find the matrix, using the `from` parameter. Default ""
 #' @param analysis_list Function need either that if step is 2 to 5 or `analysis_list` if step is 1.
 #' A list of all the objects used for the integration. Default list()
-#' @param step Steps ranging from `loading_data` to `integrating`. The following steps are : `loading_data`, `filtering`, `normalizing`, `PCA`, and `integrating`. 
+#' @param step Steps ranging from `filtering_list` to `integrating`. The following steps are : `filtering_list`, `normalizing_list`, `PCA_list`, and `integrating`. 
 #' Choosing `loading_data` will do the entire process, while `integrating` will only do the integration and assume that every previous step 
-#' needed has already been done by the user. Default 1
+#' needed has already been done by the user. Default `filtering_list`.  
+#' @param loading_data Load multiple data from 10X (the usual raw data) into one seurat object.
+#' You can run `SingleCell:load_data` for a single sample from 10X to convert it to Seurat individually to contemplate how it works. 
+#' To load your data, you must have a repository in input splitted into two parameters, `path_to_count`, and `sample`. As an example, if your sample, named, `sandwhich`, is in
+#' the repository `peanut_butter`, you must place your data in `peanut_butter/sandwhich/`. You data should be comprised of three files : `matrix.mtx.gz`, `barcodes.tsv.gz`, 
+#' and `features.tsv.gz`. Your files should be gzipped. 
 #' @param from From which tools the count matrix comes from. Currently supports : Cellranger. Default "Cellranger"
 #' @param method The analysis method used through the analysis, as well as the objects type in `analysis_list`.
 #' Currently supports : Seurat. Default "Seurat"
@@ -50,7 +55,8 @@
 integrate <- function(samples,
                       path_to_count = "",
                       analysis_list = list(),
-                      step = "loading_data",
+                      step = "filtering_list",
+                      loading_data = FALSE,
                       from = "Cellranger",
                       method = "Seurat",
                       assay = "RNA",
@@ -79,9 +85,9 @@ integrate <- function(samples,
   
   checkmate::assert_character(samples, min.len = 2)
   checkmate::assert_string(step)
-  if (!step %in% c("loading_data", "filtering_list", "normalizing_list", "PCA_list", "integrated")) {stop("The step chosen is not in the given list of steps for integration.")}
+  if (!step %in% c("filtering_list", "normalizing_list", "PCA_list", "integrated")) {stop("The step chosen is not in the given list of steps for integration.")}
   checkmate::assert_string(path_to_count)
-  if (path_to_count == "" & step == "loading_data") {stop("Path_to_count is mandatory when using step loading_data.")}
+  if (path_to_count == "" & loading_data) {stop("Path_to_count is mandatory when using step loading_data.")}
   if (path_to_count != "") {checkmate::assert_directory(path_to_count)}
   if (!from %in% c("Cellranger")) {stop(paste0(from, " is an unsupported matrix detection method."))}
   checkmate::assert_character(method)
@@ -127,7 +133,7 @@ integrate <- function(samples,
   report_steps[["filtering_list"]] <- FALSE
   report_steps[["PCA_list"]] <- FALSE
   
-  if (step == "loading_data") {
+  if (loading_data) {
     analysis_list <- lapply(samples, function(x) {load_data(path_to_count,
                                                             x,
                                                             from = from,

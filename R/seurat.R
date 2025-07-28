@@ -54,10 +54,18 @@ seurat_load_10x <- function(path_to_matrix, project = "seurat") {
   checkmate::assert_directory_exists(path_to_matrix)
   checkmate::assert_string(project)
 
-  mtx <- Seurat::Read10X(path_to_matrix)
+  mtx <- Seurat::Read10X(path_to_matrix) ## Your data should not be named, only your files, and should be in gz format. 
   seurat <- Seurat::CreateSeuratObject(counts = mtx, project = project)
 
   return(seurat)
+}
+
+seurat_load_data_instruction <- function(path_to_count, sample) {
+  checkmate::assert_directory_exists(path_to_matrix)
+  checkmate::assert_string(sample)
+  
+  print(paste0("To load your data, you must have a repository in input splitted into two parameters, path_to_count, and sample"))
+  
 }
 
 #' Get the mitochondrial percentage per cell from a list of genes in a Seurat object.

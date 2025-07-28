@@ -15,9 +15,10 @@ load_data <- function(path_to_count, sample, from = "Cellranger", to = "Seurat")
   checkmate::assert_string(sample)
   checkmate::assert_string(from)
   checkmate::assert_string(to)
+  
   if (from == "Cellranger" & to == "Seurat") {
-    path_to_matrix = file.path(path_to_count, sample, "outs", "filtered_feature_bc_matrix")
-    analysis = seurat_load_10x(path_to_matrix, project=sample)
+    path_to_matrix = file.path(path_to_count, sample)
+    analysis = seurat_load_10x(path_to_matrix, project = sample)
   } else {
     stop(paste0("Unsupported conversion from ", from, " to ", to, "."))
   }
@@ -25,7 +26,7 @@ load_data <- function(path_to_count, sample, from = "Cellranger", to = "Seurat")
   checkmate::assert_class(analysis, to)
   return(analysis)
 }
-
+  
 #' Filter out genes and cells outside the min and max limits for several parameters.
 #'
 #' @param analysis The analysis object.
