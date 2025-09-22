@@ -482,6 +482,19 @@ analyze_integrated <- function(analysis,
 
 
 
+#' Title
+#'
+#' @param analysis 
+#' @param save_path 
+#' @param file_name 
+#' @param organism 
+#' @param mitochondrial_genes 
+#' @param force_report 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 diagnosis <- function(analysis, save_path = ".",file_name = "analysis", organism = "human", mitochondrial_genes = c(), force_report = FALSE) {
   
   # Checking inputs
