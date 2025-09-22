@@ -509,7 +509,7 @@ diagnosis <- function(analysis, save_path = ".",file_name = "analysis", organism
   
   # Checking the assays (names)
 
-  assay_presence <- assays_presence(analysis, file_name = file_name, table_dir = table = dir)
+  assay_presence <- assays_presence(analysis, file_name = file_name, table_dir = results_dir)
 
   # Compute fake mt for the principle
   analysis <- seurat_compute_mt(analysis, organism, mitochondrial_genes)
