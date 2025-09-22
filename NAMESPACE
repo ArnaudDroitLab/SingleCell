@@ -2,6 +2,7 @@
 
 export(analyze_integrated)
 export(clustering)
+export(diagnosis)
 export(filter_data)
 export(find_all_DE)
 export(get_demo_seurat_object)

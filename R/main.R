@@ -525,7 +525,7 @@ diagnosis <- function(analysis, save_path = ".",file_name = "analysis", organism
   assay_presence <- assays_presence(analysis, file_name = file_name, table_dir = results_dir)
 
   # Compute fake mt for the principle
-  analysis <- seurat_compute_mt(analysis, organism, mitochondrial_genes)
+  analysis <- seurat_compute_mt(analysis, assay = "RNA", organism = organism, mitochondrial_genes = mitochondrial_genes)
   
   # Creating the tables for meta data columns
   # Creating the figures for meta data columns
