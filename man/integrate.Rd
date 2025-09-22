@@ -8,7 +8,8 @@ integrate(
   samples,
   path_to_count = "",
   analysis_list = list(),
-  step = "loading_data",
+  step = "filtering_list",
+  loading_data = FALSE,
   from = "Cellranger",
   method = "Seurat",
   assay = "RNA",
@@ -33,7 +34,7 @@ integrate(
   k.weight = 100,
   k.filter = 100,
   perform_clusterisation = TRUE,
-  variance = 0.8
+  variance = 0.7
 )
 }
 \arguments{
@@ -46,9 +47,15 @@ detect the structure in each directory to find the matrix, using the \code{from}
 \item{analysis_list}{Function need either that if step is 2 to 5 or \code{analysis_list} if step is 1.
 A list of all the objects used for the integration. Default list()}
 
-\item{step}{Steps ranging from \code{loading_data} to \code{integrating}. The following steps are : \code{loading_data}, \code{filtering}, \code{normalizing}, \code{PCA}, and \code{integrating}.
+\item{step}{Steps ranging from \code{filtering_list} to \code{integrating}. The following steps are : \code{filtering_list}, \code{normalizing_list}, \code{PCA_list}, and \code{integrating}.
 Choosing \code{loading_data} will do the entire process, while \code{integrating} will only do the integration and assume that every previous step
-needed has already been done by the user. Default 1}
+needed has already been done by the user. Default \code{filtering_list}.}
+
+\item{loading_data}{Load multiple data from 10X (the usual raw data) into one seurat object.
+You can run \code{SingleCell:load_data} for a single sample from 10X to convert it to Seurat individually to contemplate how it works.
+To load your data, you must have a repository in input splitted into two parameters, \code{path_to_count}, and \code{sample}. As an example, if your sample, named, \code{sandwhich}, is in
+the repository \code{peanut_butter}, you must place your data in \verb{peanut_butter/sandwhich/}. You data should be comprised of three files : \code{matrix.mtx.gz}, \code{barcodes.tsv.gz},
+and \code{features.tsv.gz}. Your files should be gzipped. Default \code{FALSE}.}
 
 \item{from}{From which tools the count matrix comes from. Currently supports : Cellranger. Default "Cellranger"}
 

@@ -37,7 +37,7 @@ analyze_integrated(
   variable = "seurat_clusters",
   finding_DEG = FALSE,
   skip = NULL,
-  variance = 0.8
+  variance = 0.7
 )
 }
 \arguments{
