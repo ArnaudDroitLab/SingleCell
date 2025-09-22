@@ -579,7 +579,7 @@ reduction_presence <- function(analysis, file_name = "analysis", plots_dir = "")
   return(reduction_presence)
 }
 
-assays_presence(analysis, file_name = "analysis", table_dir = "") {
+assays_presence <- function(analysis, file_name = "analysis", table_dir = "") {
   
   if (is.null(names(analysis@assays))) {
     stop("Why is there no data in your Seurat object?")
