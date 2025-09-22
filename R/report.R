@@ -226,7 +226,7 @@ make_diagnosis_report_qmd <- function(analysis,
                                       report_path, file_name, report_steps, 
                                       plots_relative_path = "plots", data_relative_path = "results", force = FALSE) {
   
-  report_name <- paste0(file_name, ".qmd")
+  report_name <- paste0(file_name, "diagnosis.qmd")
   report <- file.path(report_path, report_name)
   
   initialize_report_qmd(report_name, report_path, force = force)
@@ -249,7 +249,7 @@ make_diagnosis_report_qmd <- function(analysis,
   
   for (assay in combined_frame_assay$names) {
     cat(paste0("#### ", assay,"\n\n"), file = report, sep = "", append = TRUE)
-    cat("```{r, warning=FALSE}\n\ntable <- read.csv('", data_relative_path, "/", assay, "_", analysis,"_assay_check.csv')\n\nDT::datatable(\n\ttable,\n\trownames = FALSE,\n\textensions = 'Buttons',\n\toptions = list(\n\t\tdom = 'Bfrtip',\n\t\tbuttons = list(\n\t\t\tlist(\n\t\t\t\textend = 'colvis'\n\t\t\t)\n\t\t)\n\t),\n\tcaption = htmltools::tags$caption(\n\t\tstyle = 'caption-side: top; text-align: center;', \n\t\thtmltools::tags$b('Table ", table_num, ":'), 'First fifth rows and columns of the assay", assay,".'\n\t)\n)\n\n```\n\n", file = report, sep = "", append = TRUE)
+    cat("```{r, warning=FALSE}\n\ntable <- read.csv('", data_relative_path, "/", assay, "_", file_name,"_assay_check.csv')\n\nDT::datatable(\n\ttable,\n\trownames = FALSE,\n\textensions = 'Buttons',\n\toptions = list(\n\t\tdom = 'Bfrtip',\n\t\tbuttons = list(\n\t\t\tlist(\n\t\t\t\textend = 'colvis'\n\t\t\t)\n\t\t)\n\t),\n\tcaption = htmltools::tags$caption(\n\t\tstyle = 'caption-side: top; text-align: center;', \n\t\thtmltools::tags$b('Table ", table_num, ":'), 'First fifth rows and columns of the assay", assay,".'\n\t)\n)\n\n```\n\n", file = report, sep = "", append = TRUE)
     table_num <- table_num + 1
   }
   
@@ -285,7 +285,7 @@ make_diagnosis_report_qmd <- function(analysis,
     for (reductions in combined_frame_reduction$names) {
       
       cat(paste0("## ", reductions,"\n\n"), file = report, sep = "", append = TRUE)
-      cat(paste0("![**Figure ", fig_num, "**: ", reductions, " for ", analysis, ".](", plots_relative_path, "/", reductions, "_", analysis,"_reduction_check.png)\n\n:::{.callout-note collapse='true'}\nYou can find the figure here : `", plots_relative_path, "/", reductions, "_", analysis, "_reduction_check.png`\n:::\n\n"), file = report, sep = "", append = TRUE)
+      cat(paste0("![**Figure ", fig_num, "**: ", reductions, " for ", file_name, ".](", plots_relative_path, "/", reductions, "_", file_name,"_reduction_check.png)\n\n:::{.callout-note collapse='true'}\nYou can find the figure here : `", plots_relative_path, "/", reductions, "_", file_name, "_reduction_check.png`\n:::\n\n"), file = report, sep = "", append = TRUE)
       fig_num <- fig_num + 1
     }
     
@@ -307,7 +307,7 @@ make_diagnosis_report_qmd <- function(analysis,
     for (column in combined_frame_metadata$names) {
       
       cat(paste0("## ", column,"\n\n"), file = report, sep = "", append = TRUE)
-      cat(paste0("![**Figure ", fig_num, "**: ", column, " for ", analysis, ".](", plots_relative_path, "/", analysis, "_", column,"_summary.png)\n\n:::{.callout-note collapse='true'}\nYou can find the figure here : `", plots_relative_path, "/", analysis, "_", column,"_summary.png`\n:::\n\n"), file = report, sep = "", append = TRUE)
+      cat(paste0("![**Figure ", fig_num, "**: ", column, " for ", file_name, ".](", plots_relative_path, "/", file_name, "_", column,"_summary.png)\n\n:::{.callout-note collapse='true'}\nYou can find the figure here : `", plots_relative_path, "/", file_name, "_", column,"_summary.png`\n:::\n\n"), file = report, sep = "", append = TRUE)
       fig_num <- fig_num + 1
     }
     

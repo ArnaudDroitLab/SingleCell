@@ -495,7 +495,7 @@ analyze_integrated <- function(analysis,
 #' @export
 #'
 #' @examples
-diagnosis <- function(analysis, save_path = ".",file_name = "analysis", organism = "human", mitochondrial_genes = c(), force_report = FALSE) {
+diagnosis <- function(analysis, save_path = ".", file_name = "analysis", organism = "human", mitochondrial_genes = c(), force_report = FALSE) {
   
   # Checking inputs
   checkmate::assert_string(save_path)
@@ -521,7 +521,8 @@ diagnosis <- function(analysis, save_path = ".",file_name = "analysis", organism
   }
   
   # Checking the assays (names)
-
+  
+  print("Assays")
   assay_presence <- assays_presence(analysis, file_name = file_name, table_dir = results_dir)
 
   # Compute fake mt for the principle
@@ -530,15 +531,19 @@ diagnosis <- function(analysis, save_path = ".",file_name = "analysis", organism
   # Creating the tables for meta data columns
   # Creating the figures for meta data columns
   
+  print("Metadata")
   metadata_list <- metadata_features(analysis, file_name = file_name, results_dir = results_dir, plots_dir = plots_dir) 
   
   # Checking reductions (embeddings)
   
+  print("Reductions")
   reduction_presence <- reduction_presence(analysis, file_name = file_name, plots_dir = plots_dir) 
   
   # checking if normalisation was performed (data slot -- compare the data slot with the counts slot)
   
+  print("Normalization")
   normalized <- check_normalisation(analysis, assay = "RNA")
+  print("Scaling")
   scaled <- check_scaling(analysis, assay = "RNA")
   
   # Make a the combined list for the report
@@ -568,6 +573,7 @@ diagnosis <- function(analysis, save_path = ".",file_name = "analysis", organism
 
   # Make the diagnosis report
   
+  print("Report")
   make_diagnosis_report_qmd(analysis = analysis, report_path = save_path, file_name = file_name, report_steps = combined_frame, plots_relative_path = "plots", data_relative_path = "results", force = force_report)
 
 }

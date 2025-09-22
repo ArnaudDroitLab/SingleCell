@@ -501,7 +501,7 @@ metadata_features <- function(analysis, file_name = "analysis", results_dir = ""
         Value = as.numeric(table)
       )
       
-      table_name <- paste(file_name, "_", column, "_summary.csv", sep = "_")
+      table_name <- paste0(file_name, "_", column, "_summary.csv")
       table_name <- file.path(results_dir, table_name)
       write.csv(table, file = table_name)
       
@@ -517,7 +517,7 @@ metadata_features <- function(analysis, file_name = "analysis", results_dir = ""
       
       data <- table(analysis@meta.data[[column]])
       
-      table_name <- paste(file_name, "_", column, "_summary.csv", sep = "_")
+      table_name <- paste0(file_name, "_", column, "_summary.csv")
       table_name <- file.path(results_dir, table_name)
       write.csv(data, file = table_name)
       
