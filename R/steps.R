@@ -486,7 +486,119 @@ annotate_clusters <- function(analysis, sample = "", method = "manual", ..., gro
   }
 }
 
+metadata_features <- function(analysis, file_name = "analysis", results_dir = "", plots_dir = "") {
+  
+  metadata_list <- list()
+  
+  for (column in colnames(analysis@meta.data)) {
+    
+    if (is.numeric(analysis@meta.data[[column]]) || is.integer(analysis@meta.data[[column]])) {
+      
+      table <- summary(analysis@meta.data[[column]])
+      
+      table <- data.frame(
+        Statistic = names(table),
+        Value = as.numeric(table)
+      )
+      
+      table_name <- paste(file_name, "_", column, "_summary.csv", sep = "_")
+      table_name <- file.path(results_dir, table_name)
+      write.csv(table, file = table_name)
+      
+      p <- plot_histogram_summary_seurat(analysis, analyzed_column = column, color_choice = "turquoise4", bins_number = 50)
+      
+      ggplot2::ggsave(paste(file_name, column,  "summary.png", sep = "_"), plot = p,
+                      device = "png", path = plots_dir, dpi = 200, width = 1600,
+                      height = 700, units = "px")
+      
+      metadata_list[[column]] <- TRUE
+      
+    } else {
+      
+      data <- table(analysis@meta.data[[column]])
+      
+      table_name <- paste(file_name, "_", column, "_summary.csv", sep = "_")
+      table_name <- file.path(results_dir, table_name)
+      write.csv(data, file = table_name)
+      
+      p <- plot_barplot_summary_plot(analysis, analyzed_column = column)
+      
+      ggplot2::ggsave(paste(file_name, column,  "summary.png", sep = "_"), plot = p,
+                      device = "png", path = plots_dir, dpi = 200, width = 900,
+                      height = 700, units = "px")
+      
+      metadata_list[[column]] <- TRUE
+      
+    }
 
+  }
+  
+  return(metadata_list)
+  
+}
 
+reduction_presence <- function(analysis, file_name = "analysis", plots_dir = "") {
+  
+  reduction_presence <- list()
+  reduction_presence[["pca"]] <- FALSE
+  reduction_presence[["umap"]] <- FALSE
+  reduction_presence[["Other_reductions"]] <- FALSE
+  
+  if (is.null(names(analysis@reductions))) {
+    reduction_presence[["pca"]] <- FALSE
+    reduction_presence[["umap"]] <- FALSE
+    reduction_presence[["Other_reductions"]] <- FALSE
+  }
+  
+  for (reduce in names(analysis@reductions)) {
+    
+    if (reduce == "pca") {
+      
+      dimension <- length(analysis@reductions[[reduce]]@stdev)
+      p <- plot_seurat_dim(analysis, reduction = reduce, colour_by = "orig.ident")
+      file_name_final <- paste0(reduce, "_", file_name, "_reduction_check_", dimension,".png")
+      ggplot2::ggsave(file_name_final, plot = p, device = "png", path = plots_dir, dpi = 200, width = 1125,
+                      height = 900, units = "px", limitsize = FALSE)
+      reduction_presence[[reduce]] <- TRUE
+    
+    } else if (reduce == "umap") {
+      
+        p <- plot_seurat_dim(analysis, reduction = reduce, colour_by = "orig.ident")
+        file_name_final <- paste0(reduce, "_", file_name, "_reduction_check.png")
+        ggplot2::ggsave(file_name_final, plot = p, device = "png", path = plots_dir, dpi = 200, width = 1125,
+                        height = 900, units = "px", limitsize = FALSE)
+        reduction_presence[[reduce]] <- TRUE
+    
+    } else {
+      
+      reduction_presence[["Other_reductions"]] <- TRUE
+      
+      }
+    }
+  
+  return(reduction_presence)
+}
 
+assays_presence(analysis, file_name = "analysis", table_dir = "") {
+  
+  if (is.null(names(analysis@assays))) {
+    stop("Why is there no data in your Seurat object?")
+  }
+  
+  assay_presence <- list()
+  assay_presence[["RNA"]] <- FALSE
+  assay_presence[["integrated"]] <- FALSE
+  assay_presence[["Other_assays"]] <- FALSE
+  
+  
+  for (assay in names(analysis@assays)) {
+    
+    table <- get_assay_head(analysis, assay = assay)
+    table_name <- paste0(table_dir, "/", assay, "_", file_name, "_assay_check.csv")
+    
+    write.csv(table, table_name)
+  }
+ 
+  return(assay_presence) 
+}
 

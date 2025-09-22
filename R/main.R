@@ -15,7 +15,7 @@
 #' You can run `SingleCell:load_data` for a single sample from 10X to convert it to Seurat individually to contemplate how it works. 
 #' To load your data, you must have a repository in input splitted into two parameters, `path_to_count`, and `sample`. As an example, if your sample, named, `sandwhich`, is in
 #' the repository `peanut_butter`, you must place your data in `peanut_butter/sandwhich/`. You data should be comprised of three files : `matrix.mtx.gz`, `barcodes.tsv.gz`, 
-#' and `features.tsv.gz`. Your files should be gzipped. 
+#' and `features.tsv.gz`. Your files should be gzipped. Default `FALSE`. 
 #' @param from From which tools the count matrix comes from. Currently supports : Cellranger. Default "Cellranger"
 #' @param method The analysis method used through the analysis, as well as the objects type in `analysis_list`.
 #' Currently supports : Seurat. Default "Seurat"
@@ -478,4 +478,83 @@ analyze_integrated <- function(analysis,
   make_analysis_report_qmd(analysis = analysis, sample = sample, report_path = save_path, file_name = file_name, report_steps = report_steps, plots_relative_path = "plots", data_relative_path = "results", force = force_report)
   
   return(analysis)
+}
+
+
+
+diagnosis <- function(analysis, save_path = ".",file_name = "analysis", organism = "human", mitochondrial_genes = c(), force_report = FALSE) {
+  
+  # Checking inputs
+  checkmate::assert_string(save_path)
+  checkmate::assert_string(file_name)
+  checkmate::assert_string(organism)
+  checkmate::assert_character(mitochondrial_genes, null.ok = TRUE)
+  checkmate::assert_access(force_report)
+  
+  # Creating output files
+  if (save_path != "") {
+    
+  plots_dir <- file.path(save_path, "plots")
+    if (!dir.exists(plots_dir)) {
+      dir.create(plots_dir, recursive = TRUE)
+    }
+    results_dir <- file.path(save_path, "results")
+    if (!dir.exists(results_dir)) {
+      dir.create(results_dir, recursive = TRUE)
+    }
+  } else {
+    plots_dir <- ""
+    results_dir <- ""
+  }
+  
+  # Checking the assays (names)
+
+  assay_presence <- assays_presence(analysis, file_name = file_name, table_dir = table = dir)
+
+  # Compute fake mt for the principle
+  analysis <- seurat_compute_mt(analysis, organism, mitochondrial_genes)
+  
+  # Creating the tables for meta data columns
+  # Creating the figures for meta data columns
+  
+  metadata_list <- metadata_features(analysis, file_name = file_name, results_dir = results_dir, plots_dir = plots_dir) 
+  
+  # Checking reductions (embeddings)
+  
+  reduction_presence <- reduction_presence(analysis, file_name = file_name, plots_dir = plots_dir) 
+  
+  # checking if normalisation was performed (data slot -- compare the data slot with the counts slot)
+  
+  normalized <- check_normalisation(analysis, assay = "RNA")
+  scaled <- check_scaling(analysis, assay = "RNA")
+  
+  # Make a the combined list for the report
+
+  combined_list <- c(unlist(assay_presence), 
+                     "normalization" = normalized, 
+                     "scaling" = scaled, 
+                     unlist(reduction_presence), 
+                     unlist(metadata_list))
+  
+  combined_frame <- data.frame(
+    section = NA,
+    names = names(combined_list),
+    value = unname(combined_list)
+  )
+  
+  coordinated <- length(assay_presence)
+  combined_frame[["section"]][1:length(assay_presence)] <- "Assay"
+  coordinated <- coordinated + 1
+  combined_frame[["section"]][coordinated] <- "Normalization"
+  coordinated <- coordinated + 1
+  combined_frame[["section"]][coordinated] <- "Scaling"
+  coordinated <- coordinated + 1
+  combined_frame[["section"]][coordinated:coordinated + 2] <- "Reductions"
+  coordinated <- coordinated + 2
+  combined_frame[["section"]][coordinated:coordinated + length(metadata_list)] <- "MetaData"
+
+  # Make the diagnosis report
+  
+  make_diagnosis_report_qmd(analysis = analysis, report_path = save_path, file_name = file_name, report_steps = combined_frame, plots_relative_path = "plots", data_relative_path = "results", force = force_report)
+
 }

@@ -341,9 +341,53 @@ generate_gradient_palette <- function(seurat, color_palette_ordered, n_colors_ou
   return(selected_colors)
 }
 
+plot_histogram_summary_seurat <- function(seurat, analyzed_column = "orig.ident", color_choice = "turquoise4", bins_number = 50) {
+  
+  df <- data.frame(
+    n = seurat@meta.data[[analyzed_column]]
+  )
+  
+  table <- summary(seurat@meta.data[[analyzed_column]])
+  
+  table <- data.frame(
+    Statistic = names(table),
+    Value = as.numeric(table)
+  )
+  
+  p <- ggplot2::ggplot(df, ggplot2::aes(x = n)) + 
+    ggplot2::geom_histogram(bins = bins_number, color = color_choice, fill = "white") + 
+    ggplot2::labs(title = " ", 
+                  x = analyzed_column, 
+                  y = "count") + 
+    ggplot2::geom_vline(ggplot2::aes(xintercept=as.numeric(table$Value[4])), color = "black", linetype = "dashed", size = 0.4) + 
+    ggplot2::geom_vline(ggplot2::aes(xintercept=as.numeric(table$Value[3])), color = "#56B4E9", linetype = "dashed", size = 0.4) + 
+    ggplot2::geom_vline(ggplot2::aes(xintercept=as.numeric(table$Value[2])), color = "deeppink4", linetype = "dashed", size = 0.4) + 
+    ggplot2::geom_vline(ggplot2::aes(xintercept=as.numeric(table$Value[5])), color = "deeppink4", linetype = "dashed", size = 0.4)
+  
+  return(p)
+}
 
-
-
+plot_barplot_summary_plot <- function(seurat, analyzed_column = "orig.ident") {
+  
+  df <- data.frame(
+    n = seurat@meta.data[[analyzed_column]]
+  )
+  
+  df <- df %>% dplyr::count(n, name = "Count")
+  colnames(df)[1] <- analyzed_column
+  
+  df[[analyzed_column]] <- as.factor(df[[analyzed_column]])
+  
+  x_title <- paste0(analyzed_column)
+  p <- ggplot2::ggplot(df, ggplot2::aes(x = .data[[analyzed_column]], y = Count, color = .data[[analyzed_column]])) +
+    ggplot2::geom_bar(fill = "white", stat = "identity") + 
+    ggplot2::geom_text(ggplot2::aes(label = Count), vjust = -0.45, size = 2.5) + 
+    ggplot2::labs(x = x_title, y = "count", title = " ") +
+    ggplot2::theme(legend.position = "none", 
+                   axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+  
+  return(p)
+}
 
 
 

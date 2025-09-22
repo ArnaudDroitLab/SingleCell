@@ -41,6 +41,54 @@ get_clusters <- function(seurat, column) {
   return(seurat@meta.data[[feature]])
 }
 
+check_normalisation <- function(seurat, assay = "RNA") {
+  
+  check_assay(seurat, assay = assay)
+  
+  if (!"data" %in% slotNames(seurat[[assay]])) {
+    return(FALSE)
+  } else {
+    if (nrow(seurat[[assay]]@data) == 0 || ncol(seurat[[assay]]@data) == 0) {
+      return(FALSE)
+    } else {
+      
+      if ((sum(seurat[[assay]]@data[, 1:5])) %% 1 == 0) {
+        return(FALSE) # This means that all values were not normalized
+      } else {
+        return(TRUE)
+      } # This means are all values were normalized
+    }
+    }
+
+}
+
+check_scaling <- function(seurat, assay = "RNA") {
+  
+  check_assay(seurat, assay = assay)
+  
+  if (!"scale.data" %in% slotNames(seurat[[assay]])) {
+    return(FALSE)
+  } else {
+    if (nrow(seurat[[assay]]@scale.data) == 0 || ncol(seurat[[assay]]@scale.data) == 0) {
+      return(FALSE)
+    } else {
+      return(TRUE)
+    }
+  }
+
+}
+
+get_assay_head <- function(seurat, assay = "RNA") {
+  
+  check_assay(seurat, assay = assay)
+  
+  table <- Seurat::GetAssayData(seurat, assay = assay, slot = "counts")
+  
+  table <- as.data.frame(table[1:5, 1:5])
+  
+  return(table)
+}
+
 #' load Cellranger data for Seurat
 #'
 #' @param path_to_matrix The path to a cellranger matrix directory
