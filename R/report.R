@@ -258,7 +258,7 @@ make_diagnosis_report_qmd <- function(analysis,
   cat("### Normalization\n\n", file = report, sep = "", append = TRUE)
   combined_frame_normalization <- combined_frame %>% dplyr::filter(section == "Normalization")
   
-  if (combined_frame_normalization$names) {
+  if (combined_frame_normalization$value) {
     cat("This Seurat object was normalized.\n\n", file = report, sep = "", append = TRUE)
   } else {cat("This Seurat object was not normalized.\n\n", file = report, sep = "", append = TRUE)}
   
@@ -267,7 +267,7 @@ make_diagnosis_report_qmd <- function(analysis,
   cat("### Scaling\n\n", file = report, sep = "", append = TRUE)
   combined_frame_scaling <- combined_frame %>% dplyr::filter(section == "Scaling")
   
-  if (combined_frame_scaling$names) {
+  if (combined_frame_scaling$value) {
     cat("This Seurat object was scaled.\n\n", file = report, sep = "", append = TRUE)
   } else {cat("This Seurat object was not scaled.\n\n", file = report, sep = "", append = TRUE)}
   

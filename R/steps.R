@@ -514,21 +514,23 @@ metadata_features <- function(analysis, file_name = "analysis", results_dir = ""
       metadata_list[[column]] <- TRUE
       
     } else {
-      
-      data <- table(analysis@meta.data[[column]])
-      
-      table_name <- paste0(file_name, "_", column, "_summary.csv")
-      table_name <- file.path(results_dir, table_name)
-      write.csv(data, file = table_name)
-      
-      p <- plot_barplot_summary_plot(analysis, analyzed_column = column)
-      
-      ggplot2::ggsave(paste(file_name, column,  "summary.png", sep = "_"), plot = p,
-                      device = "png", path = plots_dir, dpi = 200, width = 900,
-                      height = 700, units = "px")
-      
-      metadata_list[[column]] <- TRUE
-      
+      if (length(unique(analysis@meta.data[[column]])) > 100) {
+        next()
+      } else {
+        data <- table(analysis@meta.data[[column]])
+        
+        table_name <- paste0(file_name, "_", column, "_summary.csv")
+        table_name <- file.path(results_dir, table_name)
+        write.csv(data, file = table_name)
+        
+        p <- plot_barplot_summary_plot(analysis, analyzed_column = column)
+        
+        ggplot2::ggsave(paste(file_name, column,  "summary.png", sep = "_"), plot = p,
+                        device = "png", path = plots_dir, dpi = 200, width = 900,
+                        height = 700, units = "px")
+        
+        metadata_list[[column]] <- TRUE
+      }
     }
 
   }
