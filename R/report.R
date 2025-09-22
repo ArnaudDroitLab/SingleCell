@@ -222,7 +222,7 @@ make_analysis_report_qmd <- function(analysis, sample, report_path, file_name, r
   quarto::quarto_render(report)
 }
 
-make_diagnosis_report_qmd <- function(analysis, file_name = "analysis", 
+make_diagnosis_report_qmd <- function(analysis, 
                                       report_path, file_name, report_steps, 
                                       plots_relative_path = "plots", data_relative_path = "results", force = FALSE) {
   
