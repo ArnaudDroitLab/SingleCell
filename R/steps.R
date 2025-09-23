@@ -595,10 +595,16 @@ assays_presence <- function(analysis, file_name = "analysis", table_dir = "") {
   
   for (assay in names(analysis@assays)) {
     
-    table <- get_assay_head(analysis, assay = assay)
-    table_name <- paste0(table_dir, "/", assay, "_", file_name, "_assay_check.csv")
+    if (assay %in% c("RNA", "integrated")) {
+      table <- get_assay_head(analysis, assay = assay)
+      table_name <- paste0(table_dir, "/", assay, "_", file_name, "_assay_check.csv")
+      
+      write.csv(table, table_name)
+      assay_presence[[assay]] <- TRUE
+    } else {
+      assay_presence[["Other_assays"]] <- TRUE
+    }
     
-    write.csv(table, table_name)
   }
  
   return(assay_presence) 

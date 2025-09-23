@@ -247,10 +247,17 @@ make_diagnosis_report_qmd <- function(analysis,
   cat("### Assay\n\n", file = report, sep = "", append = TRUE)
   combined_frame_assay <- report_steps %>% dplyr::filter(section == "Assay")
   
-  for (assay in combined_frame_assay$names) {
-    cat(paste0("#### ", assay,"\n\n"), file = report, sep = "", append = TRUE)
-    cat("```{r, warning=FALSE}\n\ntable <- read.csv('", data_relative_path, "/", assay, "_", file_name,"_assay_check.csv')\n\nDT::datatable(\n\ttable,\n\trownames = FALSE,\n\textensions = 'Buttons',\n\toptions = list(\n\t\tdom = 'Bfrtip',\n\t\tbuttons = list(\n\t\t\tlist(\n\t\t\t\textend = 'colvis'\n\t\t\t)\n\t\t)\n\t),\n\tcaption = htmltools::tags$caption(\n\t\tstyle = 'caption-side: top; text-align: center;', \n\t\thtmltools::tags$b('Table ", table_num, ":'), 'First fifth rows and columns of the assay", assay,".'\n\t)\n)\n\n```\n\n", file = report, sep = "", append = TRUE)
-    table_num <- table_num + 1
+  for (i in 1:nrow(combined_frame_assay)) {
+    assay <- combined_frame_assay$names[i]
+    truth <- combined_frame_assay$value[i]
+    
+    if (assay %in% c("RNA", "integrated") && truth) {
+      cat(paste0("#### ", assay,"\n\n"), file = report, sep = "", append = TRUE)
+      cat("```{r, warning=FALSE}\n\ntable <- read.csv('", data_relative_path, "/", assay, "_", file_name,"_assay_check.csv')\n\nDT::datatable(\n\ttable,\n\trownames = FALSE,\n\textensions = 'Buttons',\n\toptions = list(\n\t\tdom = 'Bfrtip',\n\t\tbuttons = list(\n\t\t\tlist(\n\t\t\t\textend = 'colvis'\n\t\t\t)\n\t\t)\n\t),\n\tcaption = htmltools::tags$caption(\n\t\tstyle = 'caption-side: top; text-align: center;', \n\t\thtmltools::tags$b('Table ", table_num, ":'), 'First fifth rows and columns of the assay", assay,".'\n\t)\n)\n\n```\n\n", file = report, sep = "", append = TRUE)
+      table_num <- table_num + 1
+    } else if (assay == "Other_assays" && truth) {
+      cat("Another assay is present in this Seurat object. But it would not be useful for upcoming analyses.\n\n", file = report, sep = "", append = TRUE)
+    }
   }
   
   ## Normalization part
@@ -279,18 +286,23 @@ make_diagnosis_report_qmd <- function(analysis,
   if (sum(combined_frame_reduction$value) == 0) {
     cat("This Seurat object does not have any reductions.\n\n", file = report, sep = "", append = TRUE)
   } else {
-    
     cat("::: panel-tabset\n\n", file = report, sep = "", append = TRUE)
     
-    for (reductions in combined_frame_reduction$names) {
+    for (i in 1:nrow(combined_frame_reduction)) {
+      reductions <- combined_frame_reduction$names[i]
+      truth <- combined_frame_reduction$value[i]
       
-      cat(paste0("## ", reductions,"\n\n"), file = report, sep = "", append = TRUE)
-      cat(paste0("![**Figure ", fig_num, "**: ", reductions, " for ", file_name, ".](", plots_relative_path, "/", reductions, "_", file_name,"_reduction_check.png)\n\n:::{.callout-note collapse='true'}\nYou can find the figure here : `", plots_relative_path, "/", reductions, "_", file_name, "_reduction_check.png`\n:::\n\n"), file = report, sep = "", append = TRUE)
-      fig_num <- fig_num + 1
+      if (reductions %in% c("pca", "umap") && truth) {
+        cat(paste0("## ", reductions,"\n\n"), file = report, sep = "", append = TRUE)
+        cat(paste0("![**Figure ", fig_num, "**: ", reductions, " for ", file_name, ".](", plots_relative_path, "/", reductions, "_", file_name,"_reduction_check.png)\n\n:::{.callout-note collapse='true'}\nYou can find the figure here : `", plots_relative_path, "/", reductions, "_", file_name, "_reduction_check.png`\n:::\n\n"), file = report, sep = "", append = TRUE)
+        fig_num <- fig_num + 1
+      } else if (reductions == "Other_reductions" && truth) {
+        cat("Another reduction is present in this Seurat object. But it would not be useful for upcoming analyses.\n\n", file = report, sep = "", append = TRUE)
+      }
+      
     }
-    
+      
     cat(":::\n\n", file = report, sep = "", append = TRUE)
-    
   }
   
   ## Metadata part

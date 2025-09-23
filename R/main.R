@@ -568,7 +568,7 @@ diagnosis <- function(analysis, save_path = ".", file_name = "analysis", organis
   combined_frame[["section"]][coordinated] <- "Scaling"
   coordinated <- coordinated + 1
   combined_frame[["section"]][coordinated:(coordinated + 2)] <- "Reductions"
-  coordinated <- coordinated + 2
+  coordinated <- coordinated + 3
   combined_frame[["section"]][coordinated:(coordinated + length(metadata_list))] <- "MetaData"
 
   # Make the diagnosis report
