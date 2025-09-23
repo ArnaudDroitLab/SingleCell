@@ -534,6 +534,7 @@ diagnosis <- function(analysis, save_path = ".", file_name = "analysis", organis
   print("Metadata")
   metadata_list <- metadata_features(analysis, file_name = file_name, results_dir = results_dir, plots_dir = plots_dir) 
   
+  print(metadata_list)
   # Checking reductions (embeddings)
   
   print("Reductions")
