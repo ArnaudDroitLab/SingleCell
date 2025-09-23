@@ -226,7 +226,7 @@ make_diagnosis_report_qmd <- function(analysis,
                                       report_path, file_name, report_steps, 
                                       plots_relative_path = "plots", data_relative_path = "results", force = FALSE) {
   
-  report_name <- paste0(file_name, "diagnosis.qmd")
+  report_name <- paste0(file_name, "_diagnosis.qmd")
   report <- file.path(report_path, report_name)
   
   initialize_report_qmd(report_name, report_path, force = force)

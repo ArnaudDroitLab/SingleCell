@@ -573,6 +573,7 @@ diagnosis <- function(analysis, save_path = ".", file_name = "analysis", organis
 
   # Make the diagnosis report
   
+  print(combined_frame)
   print("Report")
   make_diagnosis_report_qmd(analysis = analysis, report_path = save_path, file_name = file_name, report_steps = combined_frame, plots_relative_path = "plots", data_relative_path = "results", force = force_report)
 
