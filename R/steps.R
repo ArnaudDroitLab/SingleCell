@@ -558,7 +558,7 @@ reduction_presence <- function(analysis, file_name = "analysis", plots_dir = "")
       
       dimension <- length(analysis@reductions[[reduce]]@stdev)
       p <- plot_seurat_dim(analysis, reduction = reduce, colour_by = "orig.ident")
-      file_name_final <- paste0(reduce, "_", file_name, "_reduction_check_", dimension,".png")
+      file_name_final <- paste0(reduce, "_", file_name, "_reduction_check_.png")
       ggplot2::ggsave(file_name_final, plot = p, device = "png", path = plots_dir, dpi = 200, width = 1125,
                       height = 900, units = "px", limitsize = FALSE)
       reduction_presence[[reduce]] <- TRUE
