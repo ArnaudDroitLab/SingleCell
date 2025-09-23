@@ -534,7 +534,6 @@ diagnosis <- function(analysis, save_path = ".", file_name = "analysis", organis
   print("Metadata")
   metadata_list <- metadata_features(analysis, file_name = file_name, results_dir = results_dir, plots_dir = plots_dir) 
   
-  print(metadata_list)
   # Checking reductions (embeddings)
   
   print("Reductions")
@@ -574,7 +573,6 @@ diagnosis <- function(analysis, save_path = ".", file_name = "analysis", organis
 
   # Make the diagnosis report
   
-  print(combined_frame)
   print("Report")
   make_diagnosis_report_qmd(analysis = analysis, report_path = save_path, file_name = file_name, report_steps = combined_frame, plots_relative_path = "plots", data_relative_path = "results", force = force_report)
 
