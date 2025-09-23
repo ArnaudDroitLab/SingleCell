@@ -245,7 +245,7 @@ make_diagnosis_report_qmd <- function(analysis,
   ## Assay part
   
   cat("### Assay\n\n", file = report, sep = "", append = TRUE)
-  combined_frame_assay <- combined_frame %>% dplyr::filter(section == "Assay")
+  combined_frame_assay <- report_steps %>% dplyr::filter(section == "Assay")
   
   for (assay in combined_frame_assay$names) {
     cat(paste0("#### ", assay,"\n\n"), file = report, sep = "", append = TRUE)
@@ -256,7 +256,7 @@ make_diagnosis_report_qmd <- function(analysis,
   ## Normalization part
   
   cat("### Normalization\n\n", file = report, sep = "", append = TRUE)
-  combined_frame_normalization <- combined_frame %>% dplyr::filter(section == "Normalization")
+  combined_frame_normalization <- report_steps %>% dplyr::filter(section == "Normalization")
   
   if (combined_frame_normalization$value) {
     cat("This Seurat object was normalized.\n\n", file = report, sep = "", append = TRUE)
@@ -265,7 +265,7 @@ make_diagnosis_report_qmd <- function(analysis,
   ## Scaling part
   
   cat("### Scaling\n\n", file = report, sep = "", append = TRUE)
-  combined_frame_scaling <- combined_frame %>% dplyr::filter(section == "Scaling")
+  combined_frame_scaling <- report_steps %>% dplyr::filter(section == "Scaling")
   
   if (combined_frame_scaling$value) {
     cat("This Seurat object was scaled.\n\n", file = report, sep = "", append = TRUE)
@@ -274,7 +274,7 @@ make_diagnosis_report_qmd <- function(analysis,
   ## Reductions part
   
   cat("### Reductions\n\n", file = report, sep = "", append = TRUE)
-  combined_frame_reduction <- combined_frame %>% dplyr::filter(section == "Reductions")
+  combined_frame_reduction <- report_steps %>% dplyr::filter(section == "Reductions")
   
   if (sum(combined_frame_reduction$value) == 0) {
     cat("This Seurat object does not have any reductions.\n\n", file = report, sep = "", append = TRUE)
@@ -296,7 +296,7 @@ make_diagnosis_report_qmd <- function(analysis,
   ## Metadata part
   
   cat("### Meta.data\n\n", file = report, sep = "", append = TRUE)
-  combined_frame_metadata <- combined_frame %>% dplyr::filter(section == "MetaData")
+  combined_frame_metadata <- report_steps %>% dplyr::filter(section == "MetaData")
   
   if (sum(combined_frame_metadata$value) == 0) {
     cat("There is no meta.data??? Why?.\n\n", file = report, sep = "", append = TRUE)
