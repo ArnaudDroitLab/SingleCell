@@ -563,20 +563,21 @@ diagnosis <- function(analysis, save_path = ".", file_name = "analysis", organis
   coordinated <- length(assay_presence)
   combined_frame[["section"]][1:length(assay_presence)] <- "Assay"
   print(combined_frame)
-  print(coordinated)
   coordinated <- coordinated + 1
+  print(coordinated)
   combined_frame[["section"]][coordinated] <- "Normalization"
   print(combined_frame)
-  print(coordinated)
   coordinated <- coordinated + 1
+  print(coordinated)
   combined_frame[["section"]][coordinated] <- "Scaling"
   print(combined_frame)
-  print(coordinated)
+  
   coordinated <- coordinated + 1
+  print(coordinated)
   combined_frame[["section"]][coordinated:(coordinated + 2)] <- "Reductions"
   print(combined_frame)
-  print(coordinated)
   coordinated <- coordinated + 3
+  print(coordinated)
   combined_frame[["section"]][coordinated:(coordinated + length(metadata_list))] <- "MetaData"
 
   # Make the diagnosis report
